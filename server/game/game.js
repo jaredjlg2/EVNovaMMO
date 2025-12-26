@@ -1,4 +1,5 @@
 const { createPlayer } = require("./player");
+const { loadPilot, savePilot } = require("./storage");
 const {
   initialWorld,
   planetById,
@@ -12,13 +13,31 @@ const players = new Map();
 const getPlayer = (id) => players.get(id);
 
 const addPlayer = ({ id, name }) => {
-  const player = createPlayer({ id, name });
+  const savedState = loadPilot(name);
+  const player = createPlayer({ id, name, savedState });
   players.set(id, player);
   return player;
 };
 
 const removePlayer = (id) => {
   players.delete(id);
+};
+
+const getPlayerByName = (name) =>
+  Array.from(players.values()).find((player) => player.name === name);
+
+const persistPlayer = (player) => {
+  savePilot(player.name, {
+    name: player.name,
+    credits: player.credits,
+    systemId: player.systemId,
+    planetId: player.planetId,
+    ship: player.ship,
+    weapons: player.weapons,
+    outfits: player.outfits,
+    missions: player.missions,
+    log: player.log
+  });
 };
 
 const appendLog = (player, message) => {
@@ -158,6 +177,8 @@ module.exports = {
   addPlayer,
   removePlayer,
   getPlayer,
+  getPlayerByName,
+  persistPlayer,
   getPlayerState,
   getWorldState,
   getSystemStatus,
