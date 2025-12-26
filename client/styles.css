@@ -1,7 +1,7 @@
 :root {
   color-scheme: dark;
   font-family: "Inter", "Segoe UI", sans-serif;
-  background: #0a0f1f;
+  background: #05070f;
   color: #e4ecff;
 }
 
@@ -9,9 +9,15 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
+}
+
+body {
+  background: #05070f;
 }
 
 .overlay {
@@ -89,120 +95,104 @@ body {
   margin: 0;
 }
 
-header {
+.cockpit {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 32px;
-  background: #111933;
-  border-bottom: 1px solid #1e2a4d;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
-header h1 {
+#flightCanvas {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: radial-gradient(circle at top, #111a31, #02030a 70%);
+}
+
+.hud {
+  width: min(360px, 38vw);
+  min-width: 280px;
+  background: #131c38;
+  border-left: 1px solid #1e2a4d;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px 22px 30px;
+  overflow-y: auto;
+}
+
+.hud-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hud-header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
 }
 
-header p {
+.hud-header p {
   margin: 4px 0 0;
   color: #aab7e3;
 }
 
 .status {
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  gap: 6px;
   font-weight: 600;
+  font-size: 13px;
+  color: #c1cef4;
 }
 
-main {
-  display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  padding: 24px 32px 40px;
-}
-
-.panel-wide {
-  grid-column: 1 / -1;
-}
-
-.panel {
-  background: #131c38;
+.hud-section {
   border: 1px solid #1e2a4d;
   border-radius: 12px;
-  padding: 16px;
-  min-height: 220px;
+  padding: 14px;
+  background: #101830;
 }
 
-.panel h2 {
-  margin-top: 0;
+.hud-section h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
 }
 
-.map {
-  border: 1px solid #24335c;
-  border-radius: 12px;
-  height: 240px;
-  padding: 12px;
-  position: relative;
-  background: radial-gradient(circle at top, #1b2550, #0b1122 70%);
-  overflow: hidden;
+.hud-section.hidden {
+  display: none;
 }
 
-.flight {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(200px, 1fr);
-  gap: 16px;
-  align-items: center;
+.hud-subsection {
+  margin-top: 14px;
 }
 
-.flight canvas {
-  width: 100%;
-  height: 360px;
-  border: 1px solid #24335c;
-  border-radius: 12px;
-  background: radial-gradient(circle at top, #111c3d, #050812 70%);
-}
-
-.flight-hud {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.hud-subsection h3 {
+  margin: 0 0 8px;
   font-size: 14px;
-  color: #c3d2ff;
 }
 
-.flight-hud p {
-  margin: 0;
-}
-
-.system-dot {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #4aa5ff;
-  box-shadow: 0 0 12px #4aa5ff;
-  cursor: pointer;
-  transform: translate(-50%, -50%);
-}
-
-.system-dot.active {
-  background: #ffd166;
-  box-shadow: 0 0 14px #ffd166;
-}
-
-.system-label {
-  position: absolute;
+.hud-hint {
+  color: #94a6de;
   font-size: 12px;
-  color: #e4ecff;
-  transform: translate(-50%, 12px);
-  white-space: nowrap;
+  margin: 10px 0 0;
 }
 
-.map-line {
-  position: absolute;
-  background: rgba(148, 170, 255, 0.4);
-  transform-origin: 0 0;
-  height: 2px;
+.hud-emphasis {
+  color: #ffd37a;
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.hud-list {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.hud-list span {
+  display: block;
+  color: #c8d4f5;
 }
 
 .actions {
@@ -218,10 +208,16 @@ button {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 12px;
 }
 
 button:hover {
   background: #2d3f70;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .list {
@@ -235,26 +231,40 @@ button:hover {
   border-radius: 10px;
   background: #1a2446;
   border: 1px solid #263460;
+  font-size: 12px;
 }
 
 .list-item h4 {
   margin: 0 0 4px;
+  font-size: 13px;
 }
 
 .list-item button {
   margin-top: 8px;
 }
 
-.split {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 16px;
-}
-
 .log {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 14px;
+  font-size: 12px;
   color: #c3d2ff;
+}
+
+@media (max-width: 900px) {
+  .cockpit {
+    flex-direction: column;
+  }
+
+  .hud {
+    width: 100%;
+    min-width: 100%;
+    border-left: none;
+    border-top: 1px solid #1e2a4d;
+    height: 40vh;
+  }
+
+  #flightCanvas {
+    height: 60vh;
+  }
 }

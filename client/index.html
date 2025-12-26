@@ -20,68 +20,57 @@
         <div class="login-hint" id="loginHint"></div>
       </div>
     </div>
-    <header>
-      <div>
-        <h1>EVNova MMO</h1>
-        <p>Multiplayer prototype · Escape Velocity inspired</p>
-      </div>
-      <div class="status">
-        <span id="pilotNameDisplay"></span>
-        <span id="connection">Connecting…</span>
-        <span id="credits"></span>
-      </div>
-    </header>
-    <main>
-      <section class="panel panel-wide">
-        <h2>Flight Deck</h2>
-        <div class="flight">
-          <canvas id="flightCanvas" width="640" height="360"></canvas>
-          <div class="flight-hud">
-            <p id="flightStatus">Awaiting login…</p>
-            <p>WASD / Arrow keys to fly · Ship stays centered</p>
+    <div class="cockpit">
+      <canvas id="flightCanvas" width="640" height="360"></canvas>
+      <aside class="hud">
+        <div class="hud-header">
+          <div>
+            <h1>EVNova MMO</h1>
+            <p id="systemName">Awaiting login…</p>
+          </div>
+          <div class="status">
+            <span id="pilotNameDisplay"></span>
+            <span id="connection">Connecting…</span>
+            <span id="credits"></span>
           </div>
         </div>
-      </section>
-      <section class="panel">
-        <h2>Star Map</h2>
-        <div id="map" class="map"></div>
-        <div class="actions">
-          <button id="undockBtn">Undock</button>
-          <button id="completeBtn">Complete Missions</button>
-        </div>
-      </section>
-      <section class="panel">
-        <h2>Systems &amp; Planets</h2>
-        <div id="systemInfo"></div>
-        <div id="planetList" class="list"></div>
-      </section>
-      <section class="panel">
-        <h2>Ship &amp; Loadout</h2>
-        <div id="shipInfo"></div>
-        <div class="split">
-          <div>
-            <h3>Weapons</h3>
-            <div id="weaponList" class="list"></div>
+        <section class="hud-section">
+          <h2>Flight</h2>
+          <p id="flightStatus">Awaiting login…</p>
+          <p id="dockPrompt" class="hud-emphasis"></p>
+          <p id="weaponStatus" class="hud-emphasis"></p>
+          <p class="hud-hint">WASD / Arrows to fly · Space = primary fire · Shift = secondary fire · L to dock</p>
+        </section>
+        <section class="hud-section">
+          <h2>Ship Status</h2>
+          <div id="shipInfo" class="hud-list"></div>
+        </section>
+        <section class="hud-section hidden" id="dockedPanel">
+          <h2>Docked Services</h2>
+          <div id="dockedInfo" class="hud-list"></div>
+          <div class="actions">
+            <button id="undockBtn">Undock</button>
+            <button id="completeBtn">Complete Missions</button>
           </div>
-          <div>
-            <h3>Outfits</h3>
+          <div class="hud-subsection">
+            <h3>Mission BBS</h3>
+            <div id="missionBoard" class="list"></div>
+          </div>
+          <div class="hud-subsection">
+            <h3>Outfitter</h3>
             <div id="outfitList" class="list"></div>
           </div>
-        </div>
-      </section>
-      <section class="panel">
-        <h2>Mission Board</h2>
-        <div id="missionBoard" class="list"></div>
-      </section>
-      <section class="panel">
-        <h2>Sector Traffic</h2>
-        <div id="presence" class="list"></div>
-      </section>
-      <section class="panel">
-        <h2>Captain's Log</h2>
-        <div id="log" class="log"></div>
-      </section>
-    </main>
+          <div class="hud-subsection">
+            <h3>Shipyard / Weapons</h3>
+            <div id="weaponList" class="list"></div>
+          </div>
+        </section>
+        <section class="hud-section">
+          <h2>Captain's Log</h2>
+          <div id="log" class="log"></div>
+        </section>
+      </aside>
+    </div>
     <script src="app.js"></script>
   </body>
 </html>
