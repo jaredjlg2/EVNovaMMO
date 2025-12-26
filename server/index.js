@@ -5,9 +5,11 @@ const {
   addPlayer,
   removePlayer,
   getPlayer,
+  getPlayerByName,
   getPlayerState,
   getWorldState,
   getSystemStatus,
+  persistPlayer,
   jumpSystem,
   dockPlanet,
   undock,
@@ -86,6 +88,7 @@ const handleAction = (player, action, socket) => {
       break;
   }
 
+  persistPlayer(player);
   sendTo(socket, {
     type: "state",
     player: getPlayerState(player)
@@ -94,21 +97,45 @@ const handleAction = (player, action, socket) => {
 };
 
 wss.on("connection", (socket) => {
-  const id = Math.random().toString(36).slice(2, 9);
-  const name = `Pilot-${id}`;
-  const player = addPlayer({ id, name });
+  let playerId = null;
 
-  sendTo(socket, {
-    type: "init",
-    player: getPlayerState(player),
-    world: getWorldState(),
-    players: getSystemStatus()
-  });
+  sendTo(socket, { type: "loginRequired" });
 
   socket.on("message", (data) => {
     try {
       const action = JSON.parse(data.toString());
-      const activePlayer = getPlayer(id);
+      if (action.type === "login") {
+        const name = `${action.name || ""}`.trim();
+        if (!name) {
+          sendTo(socket, { type: "loginError", message: "Pilot name is required." });
+          return;
+        }
+        if (getPlayerByName(name)) {
+          sendTo(socket, {
+            type: "loginError",
+            message: "Pilot already logged in. Choose another call sign."
+          });
+          return;
+        }
+        playerId = Math.random().toString(36).slice(2, 9);
+        const player = addPlayer({ id: playerId, name });
+        persistPlayer(player);
+        sendTo(socket, {
+          type: "init",
+          player: getPlayerState(player),
+          world: getWorldState(),
+          players: getSystemStatus()
+        });
+        broadcast({ type: "presence", players: getSystemStatus() });
+        return;
+      }
+
+      if (!playerId) {
+        sendTo(socket, { type: "loginError", message: "Please log in first." });
+        return;
+      }
+
+      const activePlayer = getPlayer(playerId);
       if (!activePlayer) {
         return;
       }
@@ -119,7 +146,13 @@ wss.on("connection", (socket) => {
   });
 
   socket.on("close", () => {
-    removePlayer(id);
+    if (playerId) {
+      const existingPlayer = getPlayer(playerId);
+      if (existingPlayer) {
+        persistPlayer(existingPlayer);
+      }
+      removePlayer(playerId);
+    }
     broadcast({ type: "presence", players: getSystemStatus() });
   });
 });
