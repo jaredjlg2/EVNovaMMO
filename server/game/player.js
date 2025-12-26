@@ -8,7 +8,7 @@ const createPlayer = ({ id, name, savedState = null }) => {
     name,
     credits: 5000,
     systemId: "sol",
-    planetId: "earth",
+    planetId: null,
     ship: {
       id: starterShip.id,
       name: starterShip.name,

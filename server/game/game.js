@@ -4,7 +4,6 @@ const {
   initialWorld,
   planetById,
   canJump,
-  getPlanetsInSystem,
   getAvailableMissions
 } = require("./world");
 
@@ -50,8 +49,7 @@ const jumpSystem = (player, targetSystemId) => {
     return;
   }
   player.systemId = targetSystemId;
-  const destinationPlanets = getPlanetsInSystem(targetSystemId);
-  player.planetId = destinationPlanets[0]?.id ?? null;
+  player.planetId = null;
   appendLog(player, `Jumped to ${targetSystemId}.`);
 };
 

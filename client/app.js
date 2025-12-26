@@ -1,17 +1,18 @@
 const connectionEl = document.getElementById("connection");
 const creditsEl = document.getElementById("credits");
 const pilotNameDisplayEl = document.getElementById("pilotNameDisplay");
-const mapEl = document.getElementById("map");
-const systemInfoEl = document.getElementById("systemInfo");
-const planetListEl = document.getElementById("planetList");
+const systemNameEl = document.getElementById("systemName");
 const shipInfoEl = document.getElementById("shipInfo");
 const weaponListEl = document.getElementById("weaponList");
 const outfitListEl = document.getElementById("outfitList");
 const missionBoardEl = document.getElementById("missionBoard");
-const presenceEl = document.getElementById("presence");
+const dockedPanelEl = document.getElementById("dockedPanel");
+const dockedInfoEl = document.getElementById("dockedInfo");
 const logEl = document.getElementById("log");
 const flightCanvas = document.getElementById("flightCanvas");
 const flightStatusEl = document.getElementById("flightStatus");
+const dockPromptEl = document.getElementById("dockPrompt");
+const weaponStatusEl = document.getElementById("weaponStatus");
 
 const loginOverlayEl = document.getElementById("loginOverlay");
 const loginFormEl = document.getElementById("loginForm");
@@ -24,12 +25,15 @@ const completeBtn = document.getElementById("completeBtn");
 
 let world = null;
 let player = null;
-let presence = [];
 let socket = null;
 let isLoggedIn = false;
+let weaponStatusTimeout = null;
+let currentDockingTarget = null;
+let planetPositions = new Map();
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
+const dockingRange = 70;
 
 const flightState = {
   x: 0,
@@ -122,14 +126,44 @@ const resizeFlightCanvas = () => {
   }
 };
 
+const buildPlanetPositions = () => {
+  planetPositions = new Map();
+  if (!world) {
+    return;
+  }
+  world.systems.forEach((system) => {
+    const planets = world.planets.filter((planet) => planet.systemId === system.id);
+    if (planets.length === 0) {
+      return;
+    }
+    const step = (Math.PI * 2) / planets.length;
+    planets.forEach((planet, index) => {
+      const radius = 220 + (index % 2) * 90;
+      const angle = index * step - Math.PI / 2;
+      planetPositions.set(planet.id, {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
+        radius: 28,
+        glow: 8 + (index % 2) * 4
+      });
+    });
+  });
+};
+
+const getPlanetsInSystem = (systemId) =>
+  world?.planets.filter((planet) => planet.systemId === systemId) ?? [];
+
+const getCurrentPlanet = () =>
+  world?.planets.find((planet) => planet.id === player?.planetId) ?? null;
+
 const updateFlight = (deltaSeconds) => {
   if (!player || !isLoggedIn) {
     return;
   }
   const docked = Boolean(player.planetId);
-  const acceleration = docked ? 0 : 180;
+  const acceleration = docked ? 0 : 200;
   const drag = docked ? 0.8 : 0.92;
-  const maxSpeed = docked ? 0 : 260;
+  const maxSpeed = docked ? 0 : 280;
 
   let inputX = 0;
   let inputY = 0;
@@ -165,6 +199,38 @@ const updateFlight = (deltaSeconds) => {
   flightState.y += flightState.vy * deltaSeconds;
 };
 
+const updateDockingTarget = () => {
+  if (!player || !world || player.planetId) {
+    currentDockingTarget = null;
+    dockPromptEl.textContent = "";
+    return;
+  }
+  const planets = getPlanetsInSystem(player.systemId);
+  let closest = null;
+  planets.forEach((planet) => {
+    const position = planetPositions.get(planet.id);
+    if (!position) {
+      return;
+    }
+    const distance = Math.hypot(flightState.x - position.x, flightState.y - position.y);
+    if (!closest || distance < closest.distance) {
+      closest = { planet, distance };
+    }
+  });
+  currentDockingTarget = closest;
+  if (!closest) {
+    dockPromptEl.textContent = "";
+    return;
+  }
+  if (closest.distance <= dockingRange) {
+    dockPromptEl.textContent = `Press L to dock at ${closest.planet.name}.`;
+  } else {
+    dockPromptEl.textContent = `Nearest planet: ${closest.planet.name} · ${Math.round(
+      closest.distance
+    )} u`;
+  }
+};
+
 const renderFlight = (now) => {
   const ctx = flightCanvas.getContext("2d");
   resizeFlightCanvas();
@@ -174,7 +240,7 @@ const renderFlight = (now) => {
 
   const { width, height } = flightCanvas;
   ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "#070b18";
+  ctx.fillStyle = "#05070f";
   ctx.fillRect(0, 0, width, height);
 
   const centerX = width / 2;
@@ -198,6 +264,37 @@ const renderFlight = (now) => {
     ctx.fill();
   });
 
+  if (player && world) {
+    const planets = getPlanetsInSystem(player.systemId);
+    planets.forEach((planet) => {
+      const position = planetPositions.get(planet.id);
+      if (!position) {
+        return;
+      }
+      const x = centerX + (position.x - flightState.x);
+      const y = centerY + (position.y - flightState.y);
+      const distance = Math.hypot(flightState.x - position.x, flightState.y - position.y);
+      const highlight = !player.planetId && distance <= dockingRange;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = highlight ? "#ffd37a" : "#5fb3ff";
+      ctx.beginPath();
+      ctx.arc(0, 0, position.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, position.radius + position.glow, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.fillStyle = "rgba(230, 236, 255, 0.8)";
+      ctx.font = "12px Inter, sans-serif";
+      ctx.fillText(planet.name, x + position.radius + 10, y + 4);
+    });
+  }
+
   if (player && isLoggedIn) {
     ctx.save();
     ctx.translate(centerX, centerY);
@@ -214,132 +311,22 @@ const renderFlight = (now) => {
 
   if (!player || !isLoggedIn) {
     flightStatusEl.textContent = "Awaiting login…";
+    systemNameEl.textContent = "Awaiting login…";
   } else if (player.planetId) {
-    const planetName =
-      world?.planets.find((planet) => planet.id === player.planetId)?.name || "Unknown";
+    const planetName = getCurrentPlanet()?.name || "Unknown";
+    const systemName = world?.systems.find((system) => system.id === player.systemId)?.name;
+    systemNameEl.textContent = systemName ? `System: ${systemName}` : "";
     flightStatusEl.textContent = `Docked at ${planetName}. Engines offline.`;
+    dockPromptEl.textContent = "";
   } else {
     const speed = Math.hypot(flightState.vx, flightState.vy).toFixed(1);
-    const systemName =
-      world?.systems.find((system) => system.id === player.systemId)?.name || player.systemId;
-    flightStatusEl.textContent = `Cruising in ${systemName} · Velocity ${speed} u/s`;
+    const systemName = world?.systems.find((system) => system.id === player.systemId)?.name;
+    systemNameEl.textContent = systemName ? `System: ${systemName}` : "";
+    flightStatusEl.textContent = `Cruising · Velocity ${speed} u/s`;
+    updateDockingTarget();
   }
 
   requestAnimationFrame(renderFlight);
-};
-
-const renderMap = () => {
-  if (!world) {
-    return;
-  }
-  mapEl.innerHTML = "";
-  const minX = Math.min(...world.systems.map((system) => system.x));
-  const minY = Math.min(...world.systems.map((system) => system.y));
-  const maxX = Math.max(...world.systems.map((system) => system.x));
-  const maxY = Math.max(...world.systems.map((system) => system.y));
-
-  const padding = 40;
-  const width = mapEl.clientWidth - padding * 2;
-  const height = mapEl.clientHeight - padding * 2;
-
-  const normalize = (value, min, max, size) =>
-    ((value - min) / (max - min || 1)) * size + padding;
-
-  const positionCache = new Map();
-  world.systems.forEach((system) => {
-    const x = normalize(system.x, minX, maxX, width);
-    const y = normalize(system.y, minY, maxY, height);
-    positionCache.set(system.id, { x, y });
-  });
-
-  world.systems.forEach((system) => {
-    system.links.forEach((linkId) => {
-      const target = positionCache.get(linkId);
-      const source = positionCache.get(system.id);
-      if (!target || !source) {
-        return;
-      }
-      if (system.id > linkId) {
-        return;
-      }
-      const dx = target.x - source.x;
-      const dy = target.y - source.y;
-      const length = Math.sqrt(dx * dx + dy * dy);
-      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-      const line = document.createElement("div");
-      line.className = "map-line";
-      line.style.left = `${source.x}px`;
-      line.style.top = `${source.y}px`;
-      line.style.width = `${length}px`;
-      line.style.transform = `rotate(${angle}deg)`;
-      mapEl.appendChild(line);
-    });
-  });
-
-  world.systems.forEach((system) => {
-    const { x, y } = positionCache.get(system.id);
-    const dot = document.createElement("div");
-    dot.className = "system-dot";
-    if (player?.systemId === system.id) {
-      dot.classList.add("active");
-    }
-    dot.style.left = `${x}px`;
-    dot.style.top = `${y}px`;
-    dot.title = `Jump to ${system.name}`;
-    dot.addEventListener("click", () => {
-      if (player?.systemId === system.id) {
-        return;
-      }
-      sendAction({ type: "jump", systemId: system.id });
-    });
-    const label = document.createElement("div");
-    label.className = "system-label";
-    label.style.left = `${x}px`;
-    label.style.top = `${y}px`;
-    label.textContent = system.name;
-    mapEl.appendChild(dot);
-    mapEl.appendChild(label);
-  });
-};
-
-const renderSystemInfo = () => {
-  if (!player || !world) {
-    return;
-  }
-  const system = world.systems.find((item) => item.id === player.systemId);
-  const currentPlanet = world.planets.find((item) => item.id === player.planetId);
-  systemInfoEl.innerHTML = `
-    <div class="list-item">
-      <h4>${system?.name ?? "Unknown"}</h4>
-      <p>Location: ${player.planetId ? `Docked at ${currentPlanet?.name}` : "In open space"}</p>
-      <p>Links: ${(system?.links || []).map((id) => world.systems.find((s) => s.id === id)?.name).join(", ")}</p>
-    </div>
-  `;
-};
-
-const renderPlanets = () => {
-  if (!player || !world) {
-    return;
-  }
-  const planets = world.planets.filter((planet) => planet.systemId === player.systemId);
-  planetListEl.innerHTML = "";
-  planets.forEach((planet) => {
-    const card = document.createElement("div");
-    card.className = "list-item";
-    card.innerHTML = `
-      <h4>${planet.name}</h4>
-      <p>${planet.outfitter ? "Outfitter" : "No outfitter"} · ${planet.shipyard ? "Shipyard" : "No shipyard"}</p>
-      <p>${planet.missionBoard ? "Mission Board" : "No missions"}</p>
-    `;
-    const dockBtn = document.createElement("button");
-    dockBtn.textContent = player.planetId === planet.id ? "Docked" : "Dock";
-    dockBtn.disabled = player.planetId === planet.id;
-    dockBtn.addEventListener("click", () => {
-      sendAction({ type: "dock", planetId: planet.id });
-    });
-    card.appendChild(dockBtn);
-    planetListEl.appendChild(card);
-  });
 };
 
 const renderShip = () => {
@@ -348,12 +335,10 @@ const renderShip = () => {
   }
   const { ship } = player;
   shipInfoEl.innerHTML = `
-    <div class="list-item">
-      <h4>${ship.name}</h4>
-      <p>Hull: ${ship.hull} · Shield: ${ship.shield}</p>
-      <p>Cargo: ${ship.cargo} · Fuel: ${ship.fuel}</p>
-      <p>Hardpoints: ${player.weapons.length}/${ship.hardpoints}</p>
-    </div>
+    <span><strong>${ship.name}</strong></span>
+    <span>Hull: ${ship.hull} · Shield: ${ship.shield}</span>
+    <span>Cargo: ${ship.cargo} · Fuel: ${ship.fuel}</span>
+    <span>Hardpoints: ${player.weapons.length}/${ship.hardpoints}</span>
   `;
 };
 
@@ -431,22 +416,6 @@ const renderMissions = (missions) => {
   });
 };
 
-const renderPresence = () => {
-  presenceEl.innerHTML = "";
-  presence.forEach((pilot) => {
-    const card = document.createElement("div");
-    card.className = "list-item";
-    const systemName = world?.systems.find((system) => system.id === pilot.systemId)?.name ?? "Unknown";
-    const planetName = world?.planets.find((planet) => planet.id === pilot.planetId)?.name;
-    card.innerHTML = `
-      <h4>${pilot.name}</h4>
-      <p>${systemName}${planetName ? ` · Docked at ${planetName}` : ""}</p>
-      <p>${pilot.ship.name}</p>
-    `;
-    presenceEl.appendChild(card);
-  });
-};
-
 const renderLog = () => {
   if (!player) {
     return;
@@ -459,25 +428,78 @@ const renderLog = () => {
   });
 };
 
+const renderDockedInfo = () => {
+  if (!player || !world) {
+    return;
+  }
+  const planet = getCurrentPlanet();
+  if (!planet) {
+    dockedInfoEl.innerHTML = "";
+    return;
+  }
+  const services = ["Recharge", "Trade"];
+  if (planet.missionBoard) {
+    services.push("Mission BBS");
+  }
+  if (planet.outfitter) {
+    services.push("Outfitter");
+  }
+  if (planet.shipyard) {
+    services.push("Shipyard");
+  }
+  dockedInfoEl.innerHTML = `
+    <span><strong>${planet.name}</strong></span>
+    <span>Services: ${services.join(" · ")}</span>
+  `;
+};
+
 const refreshUi = () => {
   if (!player) {
     return;
   }
   pilotNameDisplayEl.textContent = player.name ? `Pilot: ${player.name}` : "";
   creditsEl.textContent = formatCredits(player.credits);
-  renderMap();
-  renderSystemInfo();
-  renderPlanets();
   renderShip();
-  renderWeapons();
-  renderOutfits();
-  renderPresence();
+  renderDockedInfo();
   renderLog();
-  if (player.planetId) {
-    sendAction({ type: "requestMissions" });
+
+  const docked = Boolean(player.planetId);
+  dockedPanelEl.classList.toggle("hidden", !docked);
+
+  if (docked) {
+    const planet = getCurrentPlanet();
+    if (planet?.missionBoard) {
+      sendAction({ type: "requestMissions" });
+    } else {
+      missionBoardEl.innerHTML = "<p>No mission board at this planet.</p>";
+    }
+
+    if (planet?.outfitter) {
+      renderOutfits();
+    } else {
+      outfitListEl.innerHTML = "<p>Outfitter unavailable here.</p>";
+    }
+
+    if (planet?.shipyard) {
+      renderWeapons();
+    } else {
+      weaponListEl.innerHTML = "<p>Shipyard access unavailable here.</p>";
+    }
   } else {
-    missionBoardEl.innerHTML = "<p>Dock to access mission boards.</p>";
+    missionBoardEl.innerHTML = "<p>Dock to access the mission board.</p>";
+    outfitListEl.innerHTML = "<p>Dock to access the outfitter.</p>";
+    weaponListEl.innerHTML = "<p>Dock to access the shipyard.</p>";
   }
+};
+
+const setWeaponStatus = (message) => {
+  weaponStatusEl.textContent = message;
+  if (weaponStatusTimeout) {
+    clearTimeout(weaponStatusTimeout);
+  }
+  weaponStatusTimeout = setTimeout(() => {
+    weaponStatusEl.textContent = "";
+  }, 800);
 };
 
 const connect = () => {
@@ -509,21 +531,16 @@ const connect = () => {
     if (payload.type === "init") {
       world = payload.world;
       player = payload.player;
-      presence = payload.players;
       isLoggedIn = true;
       saveStoredPilot(player.name);
       hideLoginOverlay();
+      buildPlanetPositions();
       refreshUi();
       return;
     }
     if (payload.type === "state") {
       player = payload.player;
       refreshUi();
-      return;
-    }
-    if (payload.type === "presence") {
-      presence = payload.players;
-      renderPresence();
       return;
     }
     if (payload.type === "missions") {
@@ -556,8 +573,29 @@ loginFormEl.addEventListener("submit", (event) => {
 });
 
 window.addEventListener("keydown", (event) => {
+  if (event.code === "Space") {
+    event.preventDefault();
+    if (!event.repeat) {
+      setWeaponStatus("Primary weapons fired.");
+    }
+    return;
+  }
+  if (event.key === "Shift") {
+    event.preventDefault();
+    if (!event.repeat) {
+      setWeaponStatus("Secondary weapons fired.");
+    }
+    return;
+  }
+  if (event.key === "l" || event.key === "L") {
+    if (!event.repeat && currentDockingTarget && currentDockingTarget.distance <= dockingRange) {
+      sendAction({ type: "dock", planetId: currentDockingTarget.planet.id });
+    }
+    return;
+  }
   if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(event.key)) {
     keysPressed.add(event.key);
+    event.preventDefault();
   }
 });
 
