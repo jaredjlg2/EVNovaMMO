@@ -1,0 +1,154 @@
+:root {
+  color-scheme: dark;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #0a0f1f;
+  color: #e4ecff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  background: #111933;
+  border-bottom: 1px solid #1e2a4d;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+header p {
+  margin: 4px 0 0;
+  color: #aab7e3;
+}
+
+.status {
+  display: flex;
+  gap: 16px;
+  font-weight: 600;
+}
+
+main {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  padding: 24px 32px 40px;
+}
+
+.panel {
+  background: #131c38;
+  border: 1px solid #1e2a4d;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 220px;
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.map {
+  border: 1px solid #24335c;
+  border-radius: 12px;
+  height: 240px;
+  padding: 12px;
+  position: relative;
+  background: radial-gradient(circle at top, #1b2550, #0b1122 70%);
+  overflow: hidden;
+}
+
+.system-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #4aa5ff;
+  box-shadow: 0 0 12px #4aa5ff;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.system-dot.active {
+  background: #ffd166;
+  box-shadow: 0 0 14px #ffd166;
+}
+
+.system-label {
+  position: absolute;
+  font-size: 12px;
+  color: #e4ecff;
+  transform: translate(-50%, 12px);
+  white-space: nowrap;
+}
+
+.map-line {
+  position: absolute;
+  background: rgba(148, 170, 255, 0.4);
+  transform-origin: 0 0;
+  height: 2px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+button {
+  background: #24335c;
+  border: 1px solid #2f406f;
+  color: #e4ecff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2d3f70;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-item {
+  padding: 10px;
+  border-radius: 10px;
+  background: #1a2446;
+  border: 1px solid #263460;
+}
+
+.list-item h4 {
+  margin: 0 0 4px;
+}
+
+.list-item button {
+  margin-top: 8px;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #c3d2ff;
+}

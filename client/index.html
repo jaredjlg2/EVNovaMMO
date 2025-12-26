@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EVNova MMO Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>EVNova MMO</h1>
+        <p>Multiplayer prototype · Escape Velocity inspired</p>
+      </div>
+      <div class="status">
+        <span id="connection">Connecting…</span>
+        <span id="credits"></span>
+      </div>
+    </header>
+    <main>
+      <section class="panel">
+        <h2>Star Map</h2>
+        <div id="map" class="map"></div>
+        <div class="actions">
+          <button id="undockBtn">Undock</button>
+          <button id="completeBtn">Complete Missions</button>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Systems &amp; Planets</h2>
+        <div id="systemInfo"></div>
+        <div id="planetList" class="list"></div>
+      </section>
+      <section class="panel">
+        <h2>Ship &amp; Loadout</h2>
+        <div id="shipInfo"></div>
+        <div class="split">
+          <div>
+            <h3>Weapons</h3>
+            <div id="weaponList" class="list"></div>
+          </div>
+          <div>
+            <h3>Outfits</h3>
+            <div id="outfitList" class="list"></div>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Mission Board</h2>
+        <div id="missionBoard" class="list"></div>
+      </section>
+      <section class="panel">
+        <h2>Sector Traffic</h2>
+        <div id="presence" class="list"></div>
+      </section>
+      <section class="panel">
+        <h2>Captain's Log</h2>
+        <div id="log" class="log"></div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
