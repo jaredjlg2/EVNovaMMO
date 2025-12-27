@@ -4,12 +4,15 @@ const pilotNameDisplayEl = document.getElementById("pilotNameDisplay");
 const systemNameEl = document.getElementById("systemName");
 const shipInfoEl = document.getElementById("shipInfo");
 const weaponListEl = document.getElementById("weaponList");
+const secondaryWeaponListEl = document.getElementById("secondaryWeaponList");
 const outfitListEl = document.getElementById("outfitList");
 const shipListEl = document.getElementById("shipList");
 const missionBoardEl = document.getElementById("missionBoard");
 const missionDetailEl = document.getElementById("missionDetail");
 const dockedPanelEl = document.getElementById("dockedPanel");
 const dockedInfoEl = document.getElementById("dockedInfo");
+const cargoSummaryEl = document.getElementById("cargoSummary");
+const tradeListEl = document.getElementById("tradeList");
 const logEl = document.getElementById("log");
 const flightCanvas = document.getElementById("flightCanvas");
 const flightStatusEl = document.getElementById("flightStatus");
@@ -45,6 +48,7 @@ const presenceSnapshots = new Map();
 let positionInterval = null;
 let availableMissions = [];
 let highlightedMissionId = null;
+let marketGoods = [];
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
@@ -78,7 +82,10 @@ const jumpState = {
 const weaponStyles = {
   pulse_laser: { color: "#ff7ad8", glow: "rgba(255, 170, 230, 0.9)", width: 2, length: 18 },
   ion_blaster: { color: "#7ad8ff", glow: "rgba(180, 240, 255, 0.9)", width: 2, length: 16 },
-  rail_cannon: { color: "#ffd37a", glow: "rgba(255, 231, 176, 0.95)", width: 3, length: 22 }
+  rail_cannon: { color: "#ffd37a", glow: "rgba(255, 231, 176, 0.95)", width: 3, length: 22 },
+  sting_missile: { color: "#ff8b5c", glow: "rgba(255, 160, 120, 0.95)", width: 3, length: 26 },
+  viper_rockets: { color: "#9cff8f", glow: "rgba(170, 255, 190, 0.9)", width: 3, length: 24 },
+  thunder_torpedo: { color: "#b39cff", glow: "rgba(190, 170, 255, 0.9)", width: 4, length: 28 }
 };
 
 const starField = {
@@ -112,6 +119,31 @@ const getShipTradeInValue = () => {
     return 0;
   }
   return Math.round(currentShip.price * 0.6);
+};
+
+const getCargoUsed = () => {
+  if (!player) {
+    return 0;
+  }
+  const cargoTotal = (player.cargo || []).reduce((sum, entry) => sum + entry.quantity, 0);
+  const missionCargo = (player.missions || [])
+    .filter((mission) => mission.status === "active")
+    .reduce((sum, mission) => sum + (mission.cargoSpace || 0), 0);
+  return cargoTotal + missionCargo;
+};
+
+const getCargoCapacity = () => player?.ship?.cargo ?? 0;
+
+const getCargoManifest = () => {
+  if (!player || !world) {
+    return [];
+  }
+  const goodsById = new Map(world.goods.map((good) => [good.id, good]));
+  return (player.cargo || []).map((entry) => ({
+    id: entry.goodId,
+    name: goodsById.get(entry.goodId)?.name ?? entry.goodId,
+    quantity: entry.quantity
+  }));
 };
 
 const loadStoredPilots = () => {
@@ -441,8 +473,18 @@ const handleMapClick = (event) => {
   }
 };
 
-const spawnProjectiles = (originX, originY, angle, weaponIds, ownerId = null) => {
-  const resolvedWeapons = weaponIds.length > 0 ? weaponIds : ["pulse_laser"];
+const spawnProjectiles = (
+  originX,
+  originY,
+  angle,
+  weaponIds,
+  ownerId = null,
+  { allowFallback = true } = {}
+) => {
+  const resolvedWeapons = weaponIds.length > 0 ? weaponIds : allowFallback ? ["pulse_laser"] : [];
+  if (resolvedWeapons.length === 0) {
+    return;
+  }
   const spacing = 8;
   const forwardOffset = 18;
   const lateralOffsets = resolvedWeapons.map(
@@ -486,7 +528,9 @@ const firePrimaryWeapons = () => {
     return;
   }
   const weaponIds = player.weapons.length > 0 ? player.weapons : ["pulse_laser"];
-  spawnProjectiles(flightState.x, flightState.y, flightState.angle, weaponIds, player.id);
+  spawnProjectiles(flightState.x, flightState.y, flightState.angle, weaponIds, player.id, {
+    allowFallback: true
+  });
   sendAction({
     type: "fire",
     x: flightState.x,
@@ -494,6 +538,28 @@ const firePrimaryWeapons = () => {
     angle: flightState.angle,
     systemId: player.systemId
   });
+};
+
+const fireSecondaryWeapons = () => {
+  if (!player || !isLoggedIn || player.planetId) {
+    return false;
+  }
+  if (!player.secondaryWeapons || player.secondaryWeapons.length === 0) {
+    setWeaponStatus("No secondary weapons installed.");
+    return false;
+  }
+  const weaponIds = player.secondaryWeapons;
+  spawnProjectiles(flightState.x, flightState.y, flightState.angle, weaponIds, player.id, {
+    allowFallback: false
+  });
+  sendAction({
+    type: "fireSecondary",
+    x: flightState.x,
+    y: flightState.y,
+    angle: flightState.angle,
+    systemId: player.systemId
+  });
+  return true;
 };
 
 const lerp = (start, end, t) => start + (end - start) * t;
@@ -971,11 +1037,14 @@ const renderShip = () => {
     return;
   }
   const { ship } = player;
+  const cargoUsed = getCargoUsed();
+  const cargoCapacity = getCargoCapacity();
   shipInfoEl.innerHTML = `
     <span><strong>${ship.name}</strong></span>
     <span>Hull: ${player.hull}/${ship.hull} · Shield: ${player.shield}/${ship.shield}</span>
-    <span>Cargo: ${ship.cargo} · Fuel: ${ship.fuel}</span>
+    <span>Cargo: ${cargoUsed}/${cargoCapacity} · Fuel: ${ship.fuel}</span>
     <span>Hardpoints: ${player.weapons.length}/${ship.hardpoints}</span>
+    <span>Secondary Racks: ${player.secondaryWeapons.length}/${ship.secondaryHardpoints}</span>
   `;
 };
 
@@ -984,14 +1053,19 @@ const renderWeapons = () => {
     return;
   }
   weaponListEl.innerHTML = "";
+  secondaryWeaponListEl.innerHTML = "";
   world.weapons.forEach((weapon) => {
+    const isSecondary = weapon.slotType === "secondary";
+    const installed = isSecondary
+      ? player.secondaryWeapons.filter((id) => id === weapon.id).length
+      : player.weapons.filter((id) => id === weapon.id).length;
     const card = document.createElement("div");
     card.className = "list-item";
     card.innerHTML = `
       <h4>${weapon.name}</h4>
       <p>Damage: ${weapon.damage} · Energy: ${weapon.energyCost}</p>
       <p>${formatCredits(weapon.price)}</p>
-      <p>Installed: ${player.weapons.filter((id) => id === weapon.id).length}</p>
+      <p>Installed: ${installed}</p>
     `;
     const buyBtn = document.createElement("button");
     buyBtn.textContent = "Buy";
@@ -999,7 +1073,11 @@ const renderWeapons = () => {
       sendAction({ type: "buyWeapon", weaponId: weapon.id });
     });
     card.appendChild(buyBtn);
-    weaponListEl.appendChild(card);
+    if (isSecondary) {
+      secondaryWeaponListEl.appendChild(card);
+    } else {
+      weaponListEl.appendChild(card);
+    }
   });
 };
 
@@ -1042,7 +1120,7 @@ const renderShipyard = () => {
     card.innerHTML = `
       <h4>${ship.name}</h4>
       <p>Hull: ${ship.hull} · Shield: ${ship.shield} · Cargo: ${ship.cargo}</p>
-      <p>Fuel: ${ship.fuel} · Hardpoints: ${ship.hardpoints}</p>
+      <p>Fuel: ${ship.fuel} · Hardpoints: ${ship.hardpoints} · Secondary: ${ship.secondaryHardpoints}</p>
       <p>Sticker: ${formatCredits(ship.price)} · Trade-in: ${formatCredits(tradeInValue)}</p>
       <p>Net cost: ${formatCredits(netCost)}</p>
       ${statusLine}
@@ -1055,6 +1133,67 @@ const renderShipyard = () => {
     });
     card.appendChild(buyBtn);
     shipListEl.appendChild(card);
+  });
+};
+
+const renderMarket = (market) => {
+  if (!player || !world) {
+    return;
+  }
+  marketGoods = market;
+  const cargoUsed = getCargoUsed();
+  const cargoCapacity = getCargoCapacity();
+  const manifest = getCargoManifest();
+  const manifestText =
+    manifest.length > 0
+      ? manifest.map((entry) => `${entry.name}: ${entry.quantity}`).join(" · ")
+      : "No cargo loaded.";
+  cargoSummaryEl.innerHTML = `
+    <span><strong>Cargo Hold</strong></span>
+    <span>Used: ${cargoUsed}/${cargoCapacity}</span>
+    <span>${manifestText}</span>
+  `;
+  tradeListEl.innerHTML = "";
+  market.forEach((good) => {
+    const owned = player.cargo.find((entry) => entry.goodId === good.id)?.quantity ?? 0;
+    const card = document.createElement("div");
+    card.className = "list-item";
+    card.innerHTML = `
+      <h4>${good.name}</h4>
+      <p>Market: ${good.level} · Price: ${formatCredits(good.price)}</p>
+      <p>In hold: ${owned}</p>
+    `;
+    const controls = document.createElement("div");
+    controls.className = "trade-controls";
+    const quantityInput = document.createElement("input");
+    quantityInput.type = "number";
+    quantityInput.min = "1";
+    quantityInput.max = "50";
+    quantityInput.value = "1";
+    quantityInput.className = "trade-qty";
+    const buyBtn = document.createElement("button");
+    buyBtn.textContent = "Buy";
+    buyBtn.addEventListener("click", () => {
+      sendAction({
+        type: "buyGoods",
+        goodId: good.id,
+        quantity: Number(quantityInput.value) || 1
+      });
+    });
+    const sellBtn = document.createElement("button");
+    sellBtn.textContent = "Sell";
+    sellBtn.addEventListener("click", () => {
+      sendAction({
+        type: "sellGoods",
+        goodId: good.id,
+        quantity: Number(quantityInput.value) || 1
+      });
+    });
+    controls.appendChild(quantityInput);
+    controls.appendChild(buyBtn);
+    controls.appendChild(sellBtn);
+    card.appendChild(controls);
+    tradeListEl.appendChild(card);
   });
 };
 
@@ -1082,6 +1221,7 @@ const renderMissions = (missions) => {
     const destinationSystem = getSystemById(to?.systemId);
     missionDetailEl.innerHTML = `
       <h4>${mission.title}</h4>
+      <p>Type: ${mission.type ?? "delivery"} · Cargo: ${mission.cargoSpace ?? 0}</p>
       <p>${mission.description}</p>
       <p>Route: ${from?.name ?? "Unknown"} → ${to?.name ?? "Unknown"}</p>
       <p>Destination system: ${destinationSystem?.name ?? "Unknown"}</p>
@@ -1105,6 +1245,7 @@ const renderMissions = (missions) => {
     const to = getPlanetById(mission.toPlanetId);
     card.innerHTML = `
       <h4>${mission.title}</h4>
+      <p>${mission.type ?? "delivery"} · Cargo: ${mission.cargoSpace ?? 0}</p>
       <p>${from?.name ?? "Unknown"} → ${to?.name ?? "Unknown"}</p>
     `;
     card.addEventListener("click", () => {
@@ -1190,12 +1331,15 @@ const refreshUi = () => {
       highlightedMissionId = null;
     }
 
+    sendAction({ type: "requestMarket" });
+
     if (planet?.outfitter) {
       renderOutfits();
       renderWeapons();
     } else {
       outfitListEl.innerHTML = "<p>Outfitter unavailable here.</p>";
       weaponListEl.innerHTML = "<p>Outfitter unavailable here.</p>";
+      secondaryWeaponListEl.innerHTML = "<p>Outfitter unavailable here.</p>";
     }
 
     if (planet?.shipyard) {
@@ -1210,7 +1354,10 @@ const refreshUi = () => {
     }
     outfitListEl.innerHTML = "<p>Dock to access the outfitter.</p>";
     weaponListEl.innerHTML = "<p>Dock to access the outfitter.</p>";
+    secondaryWeaponListEl.innerHTML = "<p>Dock to access the outfitter.</p>";
     shipListEl.innerHTML = "<p>Dock to access the shipyard.</p>";
+    cargoSummaryEl.innerHTML = "<p>Dock to access trading services.</p>";
+    tradeListEl.innerHTML = "<p>Dock to access trading services.</p>";
     availableMissions = [];
     highlightedMissionId = null;
   }
@@ -1296,9 +1443,9 @@ const connect = () => {
       if (Number.isNaN(originX) || Number.isNaN(originY) || Number.isNaN(angle)) {
         return;
       }
-      const weaponIds = Array.isArray(payload.weapons) ? payload.weapons : ["pulse_laser"];
+      const weaponIds = Array.isArray(payload.weapons) ? payload.weapons : [];
       const ownerId = payload.shooterId || null;
-      spawnProjectiles(originX, originY, angle, weaponIds, ownerId);
+      spawnProjectiles(originX, originY, angle, weaponIds, ownerId, { allowFallback: false });
     }
     if (payload.type === "destroyed") {
       if (payload.systemId && player?.systemId !== payload.systemId) {
@@ -1319,6 +1466,9 @@ const connect = () => {
     }
     if (payload.type === "missions") {
       renderMissions(payload.missions);
+    }
+    if (payload.type === "market") {
+      renderMarket(payload.market || []);
     }
   });
 };
@@ -1366,7 +1516,10 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Shift") {
     event.preventDefault();
     if (!event.repeat) {
-      setWeaponStatus("Secondary weapons fired.");
+      const fired = fireSecondaryWeapons();
+      if (fired) {
+        setWeaponStatus("Secondary weapons fired.");
+      }
     }
     return;
   }
