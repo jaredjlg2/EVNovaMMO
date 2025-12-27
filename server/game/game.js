@@ -227,9 +227,10 @@ const getWeaponDamage = (player) => {
 const fireWeapons = (player, payload) => {
   updatePosition(player, payload);
   const hits = [];
+  const destroyed = [];
   const damage = getWeaponDamage(player);
   if (damage <= 0) {
-    return hits;
+    return { hits, destroyed };
   }
   const originX = player.x;
   const originY = player.y;
@@ -262,17 +263,20 @@ const fireWeapons = (player, payload) => {
     appendLog(target, `${player.name} hit you for ${damage} damage.`);
     appendLog(player, `You hit ${target.name} for ${damage} damage.`);
     if (target.hull === 0) {
-      target.hull = target.ship.hull;
-      target.x = 0;
-      target.y = 0;
-      target.planetId = null;
-      appendLog(target, "Ship disabled! Emergency systems restored you at the system core.");
-      appendLog(player, `${target.name} was disabled and rebooted at the system core.`);
+      destroyed.push({
+        id: target.id,
+        name: target.name,
+        systemId: target.systemId,
+        x: target.x,
+        y: target.y
+      });
+      appendLog(target, "Ship destroyed! Rescue crews will tow you back once you relog.");
+      appendLog(player, `${target.name} was destroyed.`);
     }
     hits.push(target.id);
   });
 
-  return hits;
+  return { hits, destroyed };
 };
 
 module.exports = {
