@@ -517,7 +517,7 @@ const updatePresencePlayers = (players) => {
     const prevY = previous ? previous.currY : entry.y ?? 0;
     const prevAngle =
       previous?.currAngle ?? (typeof entry.angle === "number" ? entry.angle : 0);
-    const interval = previous ? Math.min(Math.max(now - previous.updatedAt, 30), 120) : 60;
+    const interval = previous ? Math.min(Math.max(now - previous.updatedAt, 20), 90) : 45;
     presenceSnapshots.set(entry.id, {
       data: entry,
       prevX,
@@ -1422,4 +1422,4 @@ positionInterval = setInterval(() => {
     y: flightState.y,
     angle: flightState.angle
   });
-}, 50);
+}, 33);
