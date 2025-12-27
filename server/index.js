@@ -18,6 +18,7 @@ const {
   undock,
   buyWeapon,
   buyOutfit,
+  buyShip,
   acceptMission,
   completeMissions,
   getAvailableMissions
@@ -87,6 +88,9 @@ const handleAction = (player, action, socket) => {
       break;
     case "buyOutfit":
       buyOutfit(player, action.outfitId);
+      break;
+    case "buyShip":
+      buyShip(player, action.shipId);
       break;
     case "acceptMission":
       acceptMission(player, action.missionId);
