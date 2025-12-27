@@ -40,6 +40,7 @@ const flightState = {
   y: 0,
   vx: 0,
   vy: 0,
+  angle: -Math.PI / 2,
   lastFrame: performance.now()
 };
 
@@ -161,27 +162,24 @@ const updateFlight = (deltaSeconds) => {
     return;
   }
   const docked = Boolean(player.planetId);
-  const acceleration = docked ? 0 : 200;
-  const drag = docked ? 0.8 : 0.92;
+  const acceleration = docked ? 0 : 220;
   const maxSpeed = docked ? 0 : 280;
+  const turnRate = docked ? 0 : 2.6;
 
-  let inputX = 0;
-  let inputY = 0;
   if (!docked) {
-    if (keysPressed.has("ArrowUp") || keysPressed.has("w")) inputY -= 1;
-    if (keysPressed.has("ArrowDown") || keysPressed.has("s")) inputY += 1;
-    if (keysPressed.has("ArrowLeft") || keysPressed.has("a")) inputX -= 1;
-    if (keysPressed.has("ArrowRight") || keysPressed.has("d")) inputX += 1;
-  }
+    const turningLeft = keysPressed.has("ArrowLeft") || keysPressed.has("a");
+    const turningRight = keysPressed.has("ArrowRight") || keysPressed.has("d");
+    const turnDirection = Number(turningRight) - Number(turningLeft);
+    if (turnDirection !== 0) {
+      flightState.angle += turnDirection * turnRate * deltaSeconds;
+    }
 
-  if (inputX !== 0 || inputY !== 0) {
-    const length = Math.hypot(inputX, inputY) || 1;
-    flightState.vx += (inputX / length) * acceleration * deltaSeconds;
-    flightState.vy += (inputY / length) * acceleration * deltaSeconds;
+    const boosting = keysPressed.has("ArrowUp") || keysPressed.has("w");
+    if (boosting) {
+      flightState.vx += Math.cos(flightState.angle) * acceleration * deltaSeconds;
+      flightState.vy += Math.sin(flightState.angle) * acceleration * deltaSeconds;
+    }
   }
-
-  flightState.vx *= drag;
-  flightState.vy *= drag;
 
   const speed = Math.hypot(flightState.vx, flightState.vy);
   if (speed > maxSpeed && maxSpeed > 0) {
@@ -298,6 +296,7 @@ const renderFlight = (now) => {
   if (player && isLoggedIn) {
     ctx.save();
     ctx.translate(centerX, centerY);
+    ctx.rotate(flightState.angle + Math.PI / 2);
     ctx.fillStyle = "#8bd4ff";
     ctx.beginPath();
     ctx.moveTo(0, -14);
