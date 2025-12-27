@@ -1,4 +1,4 @@
-const { systems, planets, ships } = require("./data");
+const { systems, planets, ships, factions } = require("./data");
 
 const aiShips = new Map();
 const shipById = new Map(ships.map((ship) => [ship.id, ship]));
@@ -50,13 +50,82 @@ const shipRoles = {
   frigate: ["frigate"]
 };
 
-const systemShipMix = {
-  sol: { shuttle: 3, courier: 4, freighter: 4, escort: 3, fighter: 2, frigate: 1 },
-  alpha: { courier: 3, freighter: 2, shuttle: 2, scout: 2, escort: 1 },
-  vega: { freighter: 4, courier: 3, shuttle: 2, escort: 2, scout: 1 },
-  draco: { fighter: 3, escort: 2, courier: 1, freighter: 1 },
-  sirius: { courier: 3, scout: 2, escort: 1, freighter: 1 },
-  orion: { freighter: 5, escort: 3, courier: 2, frigate: 1 }
+const factionById = new Map(factions.map((faction) => [faction.id, faction]));
+
+const factionShipMix = {
+  free_traders: {
+    shuttle: 3,
+    courier: 4,
+    freighter: 6,
+    escort: 1,
+    fighter: 0,
+    scout: 2,
+    frigate: 0
+  },
+  sol_defense: {
+    shuttle: 1,
+    courier: 3,
+    freighter: 2,
+    escort: 4,
+    fighter: 3,
+    scout: 1,
+    frigate: 2
+  },
+  vega_combine: {
+    shuttle: 2,
+    courier: 4,
+    freighter: 5,
+    escort: 2,
+    fighter: 1,
+    scout: 1,
+    frigate: 1
+  },
+  orion_regency: {
+    shuttle: 1,
+    courier: 3,
+    freighter: 2,
+    escort: 3,
+    fighter: 3,
+    scout: 1,
+    frigate: 2
+  },
+  draco_syndicate: {
+    shuttle: 0,
+    courier: 2,
+    freighter: 1,
+    escort: 3,
+    fighter: 4,
+    scout: 2,
+    frigate: 1
+  },
+  sirius_concord: {
+    shuttle: 1,
+    courier: 3,
+    freighter: 2,
+    escort: 3,
+    fighter: 2,
+    scout: 2,
+    frigate: 1
+  },
+  outer_rim_compact: {
+    shuttle: 2,
+    courier: 2,
+    freighter: 4,
+    escort: 1,
+    fighter: 1,
+    scout: 3,
+    frigate: 0
+  }
+};
+
+const roleCombatProfile = {
+  shuttle: { damage: 4, range: 120 },
+  courier: { damage: 6, range: 150 },
+  freighter: { damage: 5, range: 140 },
+  fighter: { damage: 16, range: 220 },
+  escort: { damage: 14, range: 210 },
+  scout: { damage: 10, range: 180 },
+  frigate: { damage: 24, range: 240 }
 };
 
 const systemTrafficTargets = new Map();
@@ -76,8 +145,22 @@ const pickWeighted = (weights) => {
   return entries[0]?.[0] ?? "courier";
 };
 
-const pickShipForSystem = (systemId) => {
-  const mix = systemShipMix[systemId] || systemShipMix.sol;
+const pickShipForSystem = (system, factionId) => {
+  const baseMix = factionShipMix[factionId] || factionShipMix.free_traders;
+  const mix = { ...baseMix };
+  if (system.status === "border") {
+    mix.fighter = (mix.fighter ?? 0) + 1;
+    mix.escort = (mix.escort ?? 0) + 1;
+  }
+  if (system.status === "frontier") {
+    mix.scout = (mix.scout ?? 0) + 1;
+    mix.freighter = (mix.freighter ?? 0) + 1;
+  }
+  if (system.disputedWith && system.disputedWith.length > 0) {
+    mix.fighter = (mix.fighter ?? 0) + 2;
+    mix.escort = (mix.escort ?? 0) + 2;
+    mix.frigate = (mix.frigate ?? 0) + 1;
+  }
   const role = pickWeighted(mix);
   const pool = shipRoles[role] || shipRoles.courier;
   const shipId = pool[Math.floor(Math.random() * pool.length)];
@@ -92,11 +175,12 @@ const pickPlanetInSystem = (systemId) => {
   return candidates[Math.floor(Math.random() * candidates.length)];
 };
 
-const createShipName = (ship, role) => {
+const createShipName = (ship, role, factionId) => {
   const tag = role.slice(0, 3).toUpperCase();
   const serial = Math.floor(randomRange(100, 999));
   const callsign = ship?.name?.split(" ")[0] ?? "Traffic";
-  return `${callsign} ${tag}-${serial}`;
+  const factionCode = factionById.get(factionId)?.code ?? "CIV";
+  return `${callsign} ${factionCode}-${tag}-${serial}`;
 };
 
 const getShipSpeed = (ship) => {
@@ -173,10 +257,29 @@ const beginExit = (ship, now) => {
   ship.ai.stateUntil = now + randomRange(8000, 14000);
 };
 
+const getSystemFactionWeights = (system) => {
+  const weights = {};
+  if (system.factionId) {
+    weights[system.factionId] = system.status === "core" ? 6 : 4;
+  }
+  (system.disputedWith || []).forEach((factionId) => {
+    weights[factionId] = (weights[factionId] ?? 0) + 3;
+  });
+  weights.free_traders = system.status === "border" ? 3 : 4;
+  return weights;
+};
+
+const pickFactionForSystem = (system) => pickWeighted(getSystemFactionWeights(system));
+
 const spawnAiShip = (systemId) => {
+  const system = systems.find((entry) => entry.id === systemId);
+  if (!system) {
+    return null;
+  }
   const planet = pickPlanetInSystem(systemId);
   const planetPosition = planet ? planetPositions.get(planet.id) : { x: 0, y: 0 };
-  const { ship, role } = pickShipForSystem(systemId);
+  const factionId = pickFactionForSystem(system);
+  const { ship, role } = pickShipForSystem(system, factionId);
   if (!ship) {
     return null;
   }
@@ -196,13 +299,16 @@ const spawnAiShip = (systemId) => {
     ship,
     hull: ship.hull,
     shield: ship.shield,
+    factionId,
     ai: {
       state: "approach",
+      role,
       targetPlanetId: planet?.id ?? null,
       targetX: planetPosition?.x ?? 0,
       targetY: planetPosition?.y ?? 0,
       stateUntil: 0,
-      nextWaypointAt: 0
+      nextWaypointAt: 0,
+      lastAttackAt: 0
     }
   };
   aiShips.set(shipId, newShip);
@@ -215,7 +321,7 @@ const updateTrafficTargets = (now) => {
     if (record && record.nextRefreshAt > now) {
       return;
     }
-    const level = trafficLevels[systemTraffic[system.id] || "light"];
+    const level = trafficLevels[system.traffic || "light"];
     const targetCount = Math.floor(randomRange(level.min, level.max + 1));
     systemTrafficTargets.set(system.id, {
       targetCount,
@@ -226,6 +332,46 @@ const updateTrafficTargets = (now) => {
 
 const getSystemTarget = (systemId) =>
   systemTrafficTargets.get(systemId)?.targetCount ?? trafficLevels.light.min;
+
+const applyDamage = (ship, damage) => {
+  const shieldDamage = Math.min(ship.shield, damage);
+  ship.shield = Math.max(0, ship.shield - shieldDamage);
+  const remaining = damage - shieldDamage;
+  if (remaining > 0) {
+    ship.hull = Math.max(0, ship.hull - remaining);
+  }
+};
+
+const isHostile = (system, ship, other) => {
+  if (!ship.factionId || !other.factionId) {
+    return false;
+  }
+  if (ship.factionId === "free_traders" || other.factionId === "free_traders") {
+    return false;
+  }
+  if (ship.factionId === other.factionId) {
+    return false;
+  }
+  const contested = new Set([system.factionId, ...(system.disputedWith || [])]);
+  return contested.has(ship.factionId) && contested.has(other.factionId);
+};
+
+const findHostileTarget = (system, ship, candidates) => {
+  const roleProfile = roleCombatProfile[ship.ai.role] || roleCombatProfile.courier;
+  let closest = null;
+  let closestDistance = Infinity;
+  candidates.forEach((other) => {
+    if (other.id === ship.id || !isHostile(system, ship, other)) {
+      return;
+    }
+    const distance = Math.hypot(ship.x - other.x, ship.y - other.y);
+    if (distance <= roleProfile.range && distance < closestDistance) {
+      closest = other;
+      closestDistance = distance;
+    }
+  });
+  return closest;
+};
 
 const tickAiShips = (deltaSeconds) => {
   const now = Date.now();
@@ -289,12 +435,59 @@ const tickAiShips = (deltaSeconds) => {
       return;
     }
 
+    if (ship.ai.state === "engage") {
+      const distance = steerShip(ship, ship.ai.targetX, ship.ai.targetY, deltaSeconds);
+      if (distance < 40 || now >= ship.ai.stateUntil) {
+        ship.ai.state = "loiter";
+        ship.ai.stateUntil = now + randomRange(8000, 16000);
+        setLoiterTarget(ship, now);
+      }
+      return;
+    }
+
     if (ship.ai.state === "exit") {
       const distance = steerShip(ship, ship.ai.targetX, ship.ai.targetY, deltaSeconds);
       if (distance < 32 || now >= ship.ai.stateUntil) {
         aiShips.delete(ship.id);
       }
     }
+  });
+
+  const shipsBySystem = new Map();
+  Array.from(aiShips.values()).forEach((ship) => {
+    if (!shipsBySystem.has(ship.systemId)) {
+      shipsBySystem.set(ship.systemId, []);
+    }
+    shipsBySystem.get(ship.systemId).push(ship);
+  });
+
+  shipsBySystem.forEach((shipsInSystem, systemId) => {
+    const system = systems.find((entry) => entry.id === systemId);
+    if (!system || !system.disputedWith || system.disputedWith.length === 0) {
+      return;
+    }
+    shipsInSystem.forEach((ship) => {
+      if (now - ship.ai.lastAttackAt < 1200) {
+        return;
+      }
+      const target = findHostileTarget(system, ship, shipsInSystem);
+      if (!target) {
+        return;
+      }
+      const roleProfile = roleCombatProfile[ship.ai.role] || roleCombatProfile.courier;
+      const damage = Math.round(
+        roleProfile.damage * (0.7 + Math.random() * 0.6)
+      );
+      applyDamage(target, damage);
+      ship.ai.lastAttackAt = now;
+      ship.ai.state = "engage";
+      ship.ai.stateUntil = now + randomRange(3000, 6000);
+      ship.ai.targetX = target.x;
+      ship.ai.targetY = target.y;
+      if (target.hull <= 0) {
+        aiShips.delete(target.id);
+      }
+    });
   });
 };
 
@@ -309,7 +502,8 @@ const getAiShipStatus = () =>
     y: ship.y,
     angle: ship.angle,
     hull: ship.hull,
-    shield: ship.shield
+    shield: ship.shield,
+    factionId: ship.factionId
   }));
 
 module.exports = {
