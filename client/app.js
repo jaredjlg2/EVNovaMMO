@@ -13,6 +13,12 @@ const flightCanvas = document.getElementById("flightCanvas");
 const flightStatusEl = document.getElementById("flightStatus");
 const dockPromptEl = document.getElementById("dockPrompt");
 const weaponStatusEl = document.getElementById("weaponStatus");
+const mapOverlayEl = document.getElementById("mapOverlay");
+const mapCanvas = document.getElementById("mapCanvas");
+const mapRouteEl = document.getElementById("mapRoute");
+const mapHintEl = document.getElementById("mapHint");
+const closeMapBtn = document.getElementById("closeMapBtn");
+const clearRouteBtn = document.getElementById("clearRouteBtn");
 
 const loginOverlayEl = document.getElementById("loginOverlay");
 const loginFormEl = document.getElementById("loginForm");
@@ -30,10 +36,18 @@ let isLoggedIn = false;
 let weaponStatusTimeout = null;
 let currentDockingTarget = null;
 let planetPositions = new Map();
+let mapOpen = false;
+let routePlan = [];
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
 const dockingRange = 70;
+const jumpMinimumDistance = 240;
+const jumpDurations = {
+  spool: 0.6,
+  flash: 0.25,
+  cooldown: 0.35
+};
 
 const flightState = {
   x: 0,
@@ -45,6 +59,19 @@ const flightState = {
 };
 
 const keysPressed = new Set();
+const projectiles = [];
+const jumpState = {
+  active: false,
+  phase: "idle",
+  startedAt: 0,
+  targetSystemId: null
+};
+
+const weaponStyles = {
+  pulse_laser: { color: "#ff7ad8", glow: "rgba(255, 170, 230, 0.9)", width: 2, length: 18 },
+  ion_blaster: { color: "#7ad8ff", glow: "rgba(180, 240, 255, 0.9)", width: 2, length: 16 },
+  rail_cannon: { color: "#ffd37a", glow: "rgba(255, 231, 176, 0.95)", width: 3, length: 22 }
+};
 
 const starField = {
   width: 1600,
@@ -157,16 +184,330 @@ const getPlanetsInSystem = (systemId) =>
 const getCurrentPlanet = () =>
   world?.planets.find((planet) => planet.id === player?.planetId) ?? null;
 
+const getSystemById = (systemId) => world?.systems.find((system) => system.id === systemId) ?? null;
+
+const getCurrentSystem = () => (player ? getSystemById(player.systemId) : null);
+
+const getDistanceFromCenter = () => Math.hypot(flightState.x, flightState.y);
+
+const setMapOpen = (nextState) => {
+  if (!world) {
+    return;
+  }
+  mapOpen = typeof nextState === "boolean" ? nextState : !mapOpen;
+  mapOverlayEl.classList.toggle("hidden", !mapOpen);
+  if (mapOpen) {
+    renderMap();
+  }
+};
+
+const updateRoutePlan = (systemId) => {
+  if (!systemId) {
+    return;
+  }
+  const existingIndex = routePlan.indexOf(systemId);
+  if (existingIndex >= 0) {
+    routePlan = routePlan.slice(0, existingIndex + 1);
+  } else {
+    routePlan = [...routePlan, systemId];
+  }
+  updateMapRoute();
+  renderMap();
+};
+
+const updateMapRoute = () => {
+  mapRouteEl.innerHTML = "";
+  if (!world || routePlan.length === 0) {
+    mapRouteEl.innerHTML = "<li>No route plotted.</li>";
+    mapHintEl.textContent = "Click systems to add waypoints.";
+    return;
+  }
+  routePlan.forEach((systemId, index) => {
+    const system = getSystemById(systemId);
+    const item = document.createElement("li");
+    item.textContent = system ? system.name : systemId;
+    if (index === 0) {
+      item.textContent = `${item.textContent} (next)`;
+    }
+    mapRouteEl.appendChild(item);
+  });
+  mapHintEl.textContent = "Press J when you're far enough from the core to jump.";
+};
+
+const computeMapLayout = () => {
+  if (!world) {
+    return null;
+  }
+  const padding = 60;
+  const xs = world.systems.map((system) => system.x);
+  const ys = world.systems.map((system) => system.y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  const width = mapCanvas.width - padding * 2;
+  const height = mapCanvas.height - padding * 2;
+  const spanX = Math.max(maxX - minX, 1);
+  const spanY = Math.max(maxY - minY, 1);
+  const scale = Math.min(width / spanX, height / spanY);
+  return {
+    padding,
+    scale,
+    offsetX: padding - minX * scale,
+    offsetY: padding - minY * scale
+  };
+};
+
+const systemToMap = (system, layout) => ({
+  x: system.x * layout.scale + layout.offsetX,
+  y: system.y * layout.scale + layout.offsetY
+});
+
+const renderMap = () => {
+  if (!mapOpen || !world) {
+    return;
+  }
+  const ctx = mapCanvas.getContext("2d");
+  const { clientWidth, clientHeight } = mapCanvas;
+  if (mapCanvas.width !== clientWidth || mapCanvas.height !== clientHeight) {
+    mapCanvas.width = clientWidth;
+    mapCanvas.height = clientHeight;
+  }
+  ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+  ctx.fillStyle = "#05070f";
+  ctx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+
+  const layout = computeMapLayout();
+  if (!layout) {
+    return;
+  }
+  const linkSet = new Set();
+  world.systems.forEach((system) => {
+    system.links.forEach((linkedId) => {
+      const key = [system.id, linkedId].sort().join("-");
+      if (linkSet.has(key)) {
+        return;
+      }
+      linkSet.add(key);
+      const linkedSystem = getSystemById(linkedId);
+      if (!linkedSystem) {
+        return;
+      }
+      const start = systemToMap(system, layout);
+      const end = systemToMap(linkedSystem, layout);
+      ctx.strokeStyle = "rgba(120, 160, 255, 0.35)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+    });
+  });
+
+  const currentSystem = getCurrentSystem();
+  if (currentSystem) {
+    const routePoints = [currentSystem.id, ...routePlan].filter((id, index, arr) => {
+      if (index === 0) {
+        return true;
+      }
+      return id !== arr[index - 1];
+    });
+    ctx.strokeStyle = "rgba(255, 211, 122, 0.8)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    routePoints.forEach((systemId, index) => {
+      const system = getSystemById(systemId);
+      if (!system) {
+        return;
+      }
+      const point = systemToMap(system, layout);
+      if (index === 0) {
+        ctx.moveTo(point.x, point.y);
+      } else {
+        ctx.lineTo(point.x, point.y);
+      }
+    });
+    ctx.stroke();
+  }
+
+  world.systems.forEach((system) => {
+    const point = systemToMap(system, layout);
+    const isCurrent = currentSystem && system.id === currentSystem.id;
+    const isInRoute = routePlan.includes(system.id);
+    ctx.fillStyle = isCurrent ? "#ffd37a" : isInRoute ? "#8bd4ff" : "#5a7ad8";
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, isCurrent ? 8 : 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(230, 236, 255, 0.85)";
+    ctx.font = "12px Inter, sans-serif";
+    ctx.fillText(system.name, point.x + 10, point.y - 8);
+  });
+};
+
+const handleMapClick = (event) => {
+  if (!mapOpen || !world) {
+    return;
+  }
+  const rect = mapCanvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+  const layout = computeMapLayout();
+  if (!layout) {
+    return;
+  }
+  const hitRadius = 12;
+  const hitSystem = world.systems.find((system) => {
+    const point = systemToMap(system, layout);
+    return Math.hypot(point.x - clickX, point.y - clickY) <= hitRadius;
+  });
+  if (hitSystem) {
+    updateRoutePlan(hitSystem.id);
+  }
+};
+
+const firePrimaryWeapons = () => {
+  if (!player || !isLoggedIn || player.planetId) {
+    return;
+  }
+  const weaponIds = player.weapons.length > 0 ? player.weapons : ["pulse_laser"];
+  const spacing = 8;
+  const forwardOffset = 18;
+  const lateralOffsets = weaponIds.map((_, index) => (index - (weaponIds.length - 1) / 2) * spacing);
+  const angle = flightState.angle;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  weaponIds.forEach((weaponId, index) => {
+    const style = weaponStyles[weaponId] || weaponStyles.pulse_laser;
+    const lateral = lateralOffsets[index];
+    const spawnX = flightState.x + cos * forwardOffset - sin * lateral;
+    const spawnY = flightState.y + sin * forwardOffset + cos * lateral;
+    projectiles.push({
+      x: spawnX,
+      y: spawnY,
+      vx: cos * 520,
+      vy: sin * 520,
+      life: 0.8,
+      angle,
+      style
+    });
+  });
+};
+
+const updateProjectiles = (deltaSeconds) => {
+  for (let i = projectiles.length - 1; i >= 0; i -= 1) {
+    const projectile = projectiles[i];
+    projectile.x += projectile.vx * deltaSeconds;
+    projectile.y += projectile.vy * deltaSeconds;
+    projectile.life -= deltaSeconds;
+    if (projectile.life <= 0) {
+      projectiles.splice(i, 1);
+    }
+  }
+};
+
+const renderProjectiles = (ctx, centerX, centerY) => {
+  projectiles.forEach((projectile) => {
+    const screenX = centerX + (projectile.x - flightState.x);
+    const screenY = centerY + (projectile.y - flightState.y);
+    ctx.save();
+    ctx.translate(screenX, screenY);
+    ctx.rotate(projectile.angle);
+    ctx.strokeStyle = projectile.style.color;
+    ctx.shadowColor = projectile.style.glow;
+    ctx.shadowBlur = 8;
+    ctx.lineWidth = projectile.style.width;
+    ctx.beginPath();
+    ctx.moveTo(-projectile.style.length, 0);
+    ctx.lineTo(0, 0);
+    ctx.stroke();
+    ctx.restore();
+  });
+};
+
+const startJumpSequence = (targetSystemId) => {
+  jumpState.active = true;
+  jumpState.phase = "spool";
+  jumpState.startedAt = performance.now();
+  jumpState.targetSystemId = targetSystemId;
+  setWeaponStatus("Hyperjump charging...");
+};
+
+const updateJumpSequence = (now) => {
+  if (!jumpState.active) {
+    return;
+  }
+  const elapsed = (now - jumpState.startedAt) / 1000;
+  if (jumpState.phase === "spool" && elapsed >= jumpDurations.spool) {
+    jumpState.phase = "flash";
+    jumpState.startedAt = now;
+    if (jumpState.targetSystemId) {
+      sendAction({ type: "jump", systemId: jumpState.targetSystemId });
+    }
+    if (routePlan[0] === jumpState.targetSystemId) {
+      routePlan = routePlan.slice(1);
+    }
+    updateMapRoute();
+    flightState.x = 0;
+    flightState.y = 0;
+    flightState.vx = 0;
+    flightState.vy = 0;
+  } else if (jumpState.phase === "flash" && elapsed >= jumpDurations.flash) {
+    jumpState.phase = "cooldown";
+    jumpState.startedAt = now;
+  } else if (jumpState.phase === "cooldown" && elapsed >= jumpDurations.cooldown) {
+    jumpState.active = false;
+    jumpState.phase = "idle";
+    jumpState.targetSystemId = null;
+  }
+};
+
+const attemptJump = () => {
+  if (!player || !isLoggedIn) {
+    return;
+  }
+  if (player.planetId) {
+    setWeaponStatus("Undock before attempting a jump.");
+    return;
+  }
+  if (jumpState.active) {
+    return;
+  }
+  if (routePlan.length === 0) {
+    setWeaponStatus("No route plotted. Open the starmap (M).");
+    return;
+  }
+  if (routePlan[0] === player.systemId) {
+    routePlan = routePlan.slice(1);
+  }
+  const nextSystemId = routePlan[0];
+  if (!nextSystemId) {
+    updateMapRoute();
+    setWeaponStatus("Route complete. Plot a new jump.");
+    return;
+  }
+  const currentSystem = getCurrentSystem();
+  if (!currentSystem?.links.includes(nextSystemId)) {
+    setWeaponStatus("Jump target not in range. Adjust your route.");
+    return;
+  }
+  if (getDistanceFromCenter() < jumpMinimumDistance) {
+    setWeaponStatus("Move farther from the system center to jump.");
+    return;
+  }
+  startJumpSequence(nextSystemId);
+};
+
 const updateFlight = (deltaSeconds) => {
   if (!player || !isLoggedIn) {
     return;
   }
   const docked = Boolean(player.planetId);
-  const acceleration = docked ? 0 : 220;
+  const isJumping = jumpState.active && jumpState.phase !== "cooldown";
+  const acceleration = docked || isJumping ? 0 : 220;
   const maxSpeed = docked ? 0 : 280;
-  const turnRate = docked ? 0 : 2.6;
+  const turnRate = docked || isJumping ? 0 : 2.6;
 
-  if (!docked) {
+  if (!docked && !isJumping) {
     const turningLeft = keysPressed.has("ArrowLeft") || keysPressed.has("a");
     const turningRight = keysPressed.has("ArrowRight") || keysPressed.has("d");
     const turnDirection = Number(turningRight) - Number(turningLeft);
@@ -235,6 +576,8 @@ const renderFlight = (now) => {
   const deltaSeconds = Math.min((now - flightState.lastFrame) / 1000, 0.05);
   flightState.lastFrame = now;
   updateFlight(deltaSeconds);
+  updateProjectiles(deltaSeconds);
+  updateJumpSequence(now);
 
   const { width, height } = flightCanvas;
   ctx.clearRect(0, 0, width, height);
@@ -261,6 +604,27 @@ const renderFlight = (now) => {
     ctx.arc(x, y, star.size, 0, Math.PI * 2);
     ctx.fill();
   });
+
+  if (jumpState.active) {
+    const elapsed = (now - jumpState.startedAt) / 1000;
+    const spoolIntensity =
+      jumpState.phase === "spool" ? Math.min(elapsed / jumpDurations.spool, 1) : 1;
+    ctx.strokeStyle = `rgba(210, 230, 255, ${0.5 * spoolIntensity})`;
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 40; i += 1) {
+      const angle = (Math.PI * 2 * i) / 40;
+      const length = 40 + 120 * spoolIntensity;
+      ctx.beginPath();
+      ctx.moveTo(centerX + Math.cos(angle) * 10, centerY + Math.sin(angle) * 10);
+      ctx.lineTo(centerX + Math.cos(angle) * length, centerY + Math.sin(angle) * length);
+      ctx.stroke();
+    }
+    if (jumpState.phase === "flash") {
+      const flashAlpha = 1 - Math.min(elapsed / jumpDurations.flash, 1);
+      ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha})`;
+      ctx.fillRect(0, 0, width, height);
+    }
+  }
 
   if (player && world) {
     const planets = getPlanetsInSystem(player.systemId);
@@ -308,6 +672,10 @@ const renderFlight = (now) => {
     ctx.restore();
   }
 
+  if (player && isLoggedIn) {
+    renderProjectiles(ctx, centerX, centerY);
+  }
+
   if (!player || !isLoggedIn) {
     flightStatusEl.textContent = "Awaiting login…";
     systemNameEl.textContent = "Awaiting login…";
@@ -321,8 +689,16 @@ const renderFlight = (now) => {
     const speed = Math.hypot(flightState.vx, flightState.vy).toFixed(1);
     const systemName = world?.systems.find((system) => system.id === player.systemId)?.name;
     systemNameEl.textContent = systemName ? `System: ${systemName}` : "";
-    flightStatusEl.textContent = `Cruising · Velocity ${speed} u/s`;
+    if (jumpState.active) {
+      flightStatusEl.textContent = "Hyperjump sequence active…";
+    } else {
+      flightStatusEl.textContent = `Cruising · Velocity ${speed} u/s`;
+    }
     updateDockingTarget();
+  }
+
+  if (mapOpen) {
+    renderMap();
   }
 
   requestAnimationFrame(renderFlight);
@@ -461,6 +837,7 @@ const refreshUi = () => {
   renderShip();
   renderDockedInfo();
   renderLog();
+  updateMapRoute();
 
   const docked = Boolean(player.planetId);
   dockedPanelEl.classList.toggle("hidden", !docked);
@@ -572,9 +949,18 @@ loginFormEl.addEventListener("submit", (event) => {
 });
 
 window.addEventListener("keydown", (event) => {
+  if (event.key === "m" || event.key === "M") {
+    event.preventDefault();
+    setMapOpen();
+    return;
+  }
+  if (mapOpen) {
+    return;
+  }
   if (event.code === "Space") {
     event.preventDefault();
     if (!event.repeat) {
+      firePrimaryWeapons();
       setWeaponStatus("Primary weapons fired.");
     }
     return;
@@ -583,6 +969,13 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     if (!event.repeat) {
       setWeaponStatus("Secondary weapons fired.");
+    }
+    return;
+  }
+  if (event.key === "j" || event.key === "J") {
+    event.preventDefault();
+    if (!event.repeat) {
+      attemptJump();
     }
     return;
   }
@@ -604,6 +997,17 @@ window.addEventListener("keyup", (event) => {
 
 window.addEventListener("resize", () => {
   resizeFlightCanvas();
+  if (mapOpen) {
+    renderMap();
+  }
+});
+
+mapCanvas.addEventListener("click", handleMapClick);
+closeMapBtn.addEventListener("click", () => setMapOpen(false));
+clearRouteBtn.addEventListener("click", () => {
+  routePlan = [];
+  updateMapRoute();
+  renderMap();
 });
 
 connect();

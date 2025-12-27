@@ -39,7 +39,10 @@
           <p id="flightStatus">Awaiting login…</p>
           <p id="dockPrompt" class="hud-emphasis"></p>
           <p id="weaponStatus" class="hud-emphasis"></p>
-          <p class="hud-hint">W/↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · L to dock</p>
+          <p class="hud-hint">
+            W/↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · L to dock · M
+            for map · J to jump
+          </p>
         </section>
         <section class="hud-section">
           <h2>Ship Status</h2>
@@ -70,6 +73,28 @@
           <div id="log" class="log"></div>
         </section>
       </aside>
+    </div>
+    <div id="mapOverlay" class="overlay hidden map-overlay">
+      <div class="map-card">
+        <div class="map-header">
+          <div>
+            <h2>Starmap</h2>
+            <p>Plot a route through connected systems, then press J once you're clear of the core.</p>
+          </div>
+          <button id="closeMapBtn" type="button">Close (M)</button>
+        </div>
+        <canvas id="mapCanvas" width="720" height="520"></canvas>
+        <div class="map-footer">
+          <div>
+            <h3>Route</h3>
+            <ol id="mapRoute" class="map-route"></ol>
+          </div>
+          <div class="map-actions">
+            <p id="mapHint" class="hud-hint">Click systems to add waypoints.</p>
+            <button id="clearRouteBtn" type="button">Clear Route</button>
+          </div>
+        </div>
+      </div>
     </div>
     <script src="app.js"></script>
   </body>
