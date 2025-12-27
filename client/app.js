@@ -6,6 +6,7 @@ const shipInfoEl = document.getElementById("shipInfo");
 const weaponListEl = document.getElementById("weaponList");
 const outfitListEl = document.getElementById("outfitList");
 const missionBoardEl = document.getElementById("missionBoard");
+const missionDetailEl = document.getElementById("missionDetail");
 const dockedPanelEl = document.getElementById("dockedPanel");
 const dockedInfoEl = document.getElementById("dockedInfo");
 const logEl = document.getElementById("log");
@@ -40,6 +41,8 @@ let mapOpen = false;
 let routePlan = [];
 let presencePlayers = [];
 let positionInterval = null;
+let availableMissions = [];
+let highlightedMissionId = null;
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
@@ -192,6 +195,32 @@ const getCurrentPlanet = () =>
 const getSystemById = (systemId) => world?.systems.find((system) => system.id === systemId) ?? null;
 
 const getCurrentSystem = () => (player ? getSystemById(player.systemId) : null);
+
+const getPlanetById = (planetId) => world?.planets.find((planet) => planet.id === planetId) ?? null;
+
+const getMissionDestinationSystemId = (mission) => {
+  if (!mission || !world) {
+    return null;
+  }
+  const planet = getPlanetById(mission.toPlanetId);
+  return planet?.systemId ?? null;
+};
+
+const getActiveMissionDestinationSystemId = () => {
+  if (!player || !world) {
+    return null;
+  }
+  const active = player.missions.find((mission) => mission.status === "active");
+  return active ? getMissionDestinationSystemId(active) : null;
+};
+
+const getHighlightedMissionDestinationSystemId = () => {
+  if (!highlightedMissionId) {
+    return null;
+  }
+  const mission = availableMissions.find((item) => item.id === highlightedMissionId);
+  return mission ? getMissionDestinationSystemId(mission) : null;
+};
 
 const getDistanceFromCenter = () => Math.hypot(flightState.x, flightState.y);
 
@@ -347,6 +376,35 @@ const renderMap = () => {
     ctx.font = "12px Inter, sans-serif";
     ctx.fillText(system.name, point.x + 10, point.y - 8);
   });
+
+  const drawIndicator = (point, color, offset = -16) => {
+    const size = 10;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(point.x, point.y + offset);
+    ctx.lineTo(point.x - size / 2, point.y + offset - size);
+    ctx.lineTo(point.x + size / 2, point.y + offset - size);
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  const activeMissionSystemId = getActiveMissionDestinationSystemId();
+  if (activeMissionSystemId) {
+    const system = getSystemById(activeMissionSystemId);
+    if (system) {
+      const point = systemToMap(system, layout);
+      drawIndicator(point, "#ff9a3d");
+    }
+  }
+
+  const highlightedSystemId = getHighlightedMissionDestinationSystemId();
+  if (highlightedSystemId) {
+    const system = getSystemById(highlightedSystemId);
+    if (system) {
+      const point = systemToMap(system, layout);
+      drawIndicator(point, "#6be36b", -28);
+    }
+  }
 };
 
 const handleMapClick = (event) => {
@@ -909,15 +967,28 @@ const renderMissions = (missions) => {
     return;
   }
   missionBoardEl.innerHTML = "";
-  missions.forEach((mission) => {
-    const card = document.createElement("div");
-    card.className = "list-item";
-    const from = world.planets.find((planet) => planet.id === mission.fromPlanetId);
-    const to = world.planets.find((planet) => planet.id === mission.toPlanetId);
-    card.innerHTML = `
+  availableMissions = missions;
+  if (!availableMissions.find((mission) => mission.id === highlightedMissionId)) {
+    highlightedMissionId = availableMissions[0]?.id ?? null;
+  }
+
+  const renderMissionDetail = () => {
+    if (!missionDetailEl) {
+      return;
+    }
+    const mission = availableMissions.find((item) => item.id === highlightedMissionId);
+    if (!mission) {
+      missionDetailEl.innerHTML = "<p>Select a mission to review details.</p>";
+      return;
+    }
+    const from = getPlanetById(mission.fromPlanetId);
+    const to = getPlanetById(mission.toPlanetId);
+    const destinationSystem = getSystemById(to?.systemId);
+    missionDetailEl.innerHTML = `
       <h4>${mission.title}</h4>
       <p>${mission.description}</p>
-      <p>${from?.name ?? "Unknown"} → ${to?.name ?? "Unknown"}</p>
+      <p>Route: ${from?.name ?? "Unknown"} → ${to?.name ?? "Unknown"}</p>
+      <p>Destination system: ${destinationSystem?.name ?? "Unknown"}</p>
       <p>Reward: ${formatCredits(mission.reward)}</p>
     `;
     const acceptBtn = document.createElement("button");
@@ -925,9 +996,35 @@ const renderMissions = (missions) => {
     acceptBtn.addEventListener("click", () => {
       sendAction({ type: "acceptMission", missionId: mission.id });
     });
-    card.appendChild(acceptBtn);
+    missionDetailEl.appendChild(acceptBtn);
+  };
+
+  missions.forEach((mission) => {
+    const card = document.createElement("div");
+    card.className = "list-item mission-item";
+    if (mission.id === highlightedMissionId) {
+      card.classList.add("selected");
+    }
+    const from = getPlanetById(mission.fromPlanetId);
+    const to = getPlanetById(mission.toPlanetId);
+    card.innerHTML = `
+      <h4>${mission.title}</h4>
+      <p>${from?.name ?? "Unknown"} → ${to?.name ?? "Unknown"}</p>
+    `;
+    card.addEventListener("click", () => {
+      highlightedMissionId = mission.id;
+      renderMissions(availableMissions);
+      if (mapOpen) {
+        renderMap();
+      }
+    });
     missionBoardEl.appendChild(card);
   });
+
+  renderMissionDetail();
+  if (mapOpen) {
+    renderMap();
+  }
 };
 
 const renderLog = () => {
@@ -977,6 +1074,9 @@ const refreshUi = () => {
   renderDockedInfo();
   renderLog();
   updateMapRoute();
+  if (mapOpen) {
+    renderMap();
+  }
 
   const docked = Boolean(player.planetId);
   dockedPanelEl.classList.toggle("hidden", !docked);
@@ -987,6 +1087,11 @@ const refreshUi = () => {
       sendAction({ type: "requestMissions" });
     } else {
       missionBoardEl.innerHTML = "<p>No mission board at this planet.</p>";
+      if (missionDetailEl) {
+        missionDetailEl.innerHTML = "<p>Mission board unavailable.</p>";
+      }
+      availableMissions = [];
+      highlightedMissionId = null;
     }
 
     if (planet?.outfitter) {
@@ -1002,8 +1107,13 @@ const refreshUi = () => {
     }
   } else {
     missionBoardEl.innerHTML = "<p>Dock to access the mission board.</p>";
+    if (missionDetailEl) {
+      missionDetailEl.innerHTML = "<p>Dock to access the mission board.</p>";
+    }
     outfitListEl.innerHTML = "<p>Dock to access the outfitter.</p>";
     weaponListEl.innerHTML = "<p>Dock to access the shipyard.</p>";
+    availableMissions = [];
+    highlightedMissionId = null;
   }
 };
 
