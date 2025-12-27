@@ -107,7 +107,7 @@ const ships = [
   },
   {
     id: "courier",
-    name: "Courier",
+    name: "Wayfarer Courier",
     hull: 140,
     shield: 60,
     cargo: 22,
@@ -124,6 +124,126 @@ const ships = [
     fuel: 200,
     hardpoints: 4,
     price: 30000
+  },
+  {
+    id: "sparrow_mk1",
+    name: "Sparrow Mk I (Light Fighter)",
+    hull: 110,
+    shield: 40,
+    cargo: 6,
+    fuel: 140,
+    hardpoints: 2,
+    price: 9000
+  },
+  {
+    id: "sparrow_mk2",
+    name: "Sparrow Mk II (Medium Fighter)",
+    hull: 150,
+    shield: 70,
+    cargo: 8,
+    fuel: 160,
+    hardpoints: 3,
+    price: 16000
+  },
+  {
+    id: "vanguard",
+    name: "Vanguard Talon (Heavy Fighter)",
+    hull: 200,
+    shield: 110,
+    cargo: 10,
+    fuel: 180,
+    hardpoints: 4,
+    price: 26000
+  },
+  {
+    id: "wisp_runner",
+    name: "Wisp Runner (Light Escort)",
+    hull: 170,
+    shield: 90,
+    cargo: 12,
+    fuel: 200,
+    hardpoints: 4,
+    price: 22000
+  },
+  {
+    id: "bastion_guard",
+    name: "Bastion Guard (Medium Escort)",
+    hull: 260,
+    shield: 150,
+    cargo: 18,
+    fuel: 220,
+    hardpoints: 5,
+    price: 38000
+  },
+  {
+    id: "ironclad",
+    name: "Ironclad Ward (Heavy Escort)",
+    hull: 340,
+    shield: 210,
+    cargo: 22,
+    fuel: 240,
+    hardpoints: 6,
+    price: 52000
+  },
+  {
+    id: "pioneer_hauler",
+    name: "Pioneer Hauler (Small Freighter)",
+    hull: 200,
+    shield: 80,
+    cargo: 45,
+    fuel: 200,
+    hardpoints: 2,
+    price: 24000
+  },
+  {
+    id: "atlas_bulk",
+    name: "Atlas Bulk (Medium Freighter)",
+    hull: 280,
+    shield: 120,
+    cargo: 80,
+    fuel: 240,
+    hardpoints: 3,
+    price: 42000
+  },
+  {
+    id: "caravel_super",
+    name: "Caravel Super (Heavy Freighter)",
+    hull: 360,
+    shield: 160,
+    cargo: 120,
+    fuel: 260,
+    hardpoints: 4,
+    price: 65000
+  },
+  {
+    id: "nomad_liner",
+    name: "Nomad Liner (Passenger Freighter)",
+    hull: 240,
+    shield: 130,
+    cargo: 50,
+    fuel: 260,
+    hardpoints: 3,
+    price: 36000
+  },
+  {
+    id: "ember_skiff",
+    name: "Ember Skiff (Scout)",
+    hull: 120,
+    shield: 50,
+    cargo: 10,
+    fuel: 240,
+    hardpoints: 2,
+    price: 14000
+  },
+  {
+    id: "aurora_clipper",
+    name: "Aurora Clipper (Fast Trader)",
+    hull: 190,
+    shield: 90,
+    cargo: 32,
+    fuel: 260,
+    hardpoints: 3,
+    price: 28000
   }
 ];
 
