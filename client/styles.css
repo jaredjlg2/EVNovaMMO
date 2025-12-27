@@ -229,11 +229,14 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(520px, 90vw);
+  width: min(620px, 92vw);
   max-height: 70vh;
   overflow-y: auto;
   z-index: 6;
-  box-shadow: 0 24px 60px rgba(4, 8, 20, 0.6);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(58, 48, 40, 0.95), rgba(20, 18, 22, 0.98));
+  border: 1px solid #3b2c22;
+  box-shadow: 0 26px 60px rgba(2, 1, 1, 0.6);
 }
 
 .hud-section h2 {
@@ -284,17 +287,18 @@ body {
 }
 
 button {
-  background: #24335c;
-  border: 1px solid #2f406f;
+  background: linear-gradient(180deg, #7a1c1c, #4b0f11);
+  border: 1px solid #2f0a0b;
   color: #e4ecff;
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 button:hover {
-  background: #2d3f70;
+  background: linear-gradient(180deg, #8b2323, #5d1516);
 }
 
 button:disabled {
@@ -311,8 +315,8 @@ button:disabled {
 .list-item {
   padding: 10px;
   border-radius: 10px;
-  background: #1a2446;
-  border: 1px solid #263460;
+  background: rgba(14, 16, 20, 0.85);
+  border: 1px solid rgba(120, 110, 100, 0.45);
   font-size: 12px;
 }
 
@@ -323,6 +327,49 @@ button:disabled {
 
 .list-item button {
   margin-top: 8px;
+}
+
+.mission-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 12px;
+}
+
+.mission-list .mission-item {
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mission-list .mission-item.selected {
+  border-color: #e5b35a;
+  box-shadow: 0 0 0 1px rgba(229, 179, 90, 0.5);
+}
+
+.mission-detail {
+  border-radius: 10px;
+  border: 1px solid rgba(120, 110, 100, 0.5);
+  background: rgba(9, 9, 12, 0.88);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: #d9d2c8;
+}
+
+.mission-detail h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #f0e2c6;
+}
+
+.mission-detail p {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .mission-board {
+    grid-template-columns: 1fr;
+  }
 }
 
 .log {
