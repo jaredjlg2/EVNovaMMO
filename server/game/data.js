@@ -4,42 +4,454 @@ const systems = [
     name: "Sol",
     x: 0,
     y: 0,
-    links: ["alpha", "vega"]
+    links: ["deneb", "altair", "arcadia"],
+    factionId: "sol_defense",
+    status: "core",
+    traffic: "heavy"
   },
   {
-    id: "alpha",
-    name: "Alpha Centauri",
+    id: "deneb",
+    name: "Deneb",
     x: 140,
-    y: -60,
-    links: ["sol", "draco", "sirius"]
+    y: -40,
+    links: ["sol", "helios", "riftwatch"],
+    factionId: "sol_defense",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "altair",
+    name: "Altair",
+    x: -120,
+    y: -40,
+    links: ["sol", "new_eden", "redoubt"],
+    factionId: "sol_defense",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "arcadia",
+    name: "Arcadia",
+    x: 80,
+    y: 120,
+    links: ["sol", "helios", "borealis_gate"],
+    factionId: "sol_defense",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "helios",
+    name: "Helios",
+    x: 200,
+    y: 60,
+    links: ["deneb", "arcadia", "lancer"],
+    factionId: "sol_defense",
+    status: "core",
+    traffic: "heavy"
+  },
+  {
+    id: "new_eden",
+    name: "New Eden",
+    x: -140,
+    y: 120,
+    links: ["altair", "cinder", "borealis_gate"],
+    factionId: "sol_defense",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "borealis_gate",
+    name: "Borealis Gate",
+    x: 0,
+    y: 220,
+    links: ["arcadia", "new_eden", "borealis", "windfall"],
+    factionId: "sol_defense",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["outer_rim_compact"]
+  },
+  {
+    id: "cinder",
+    name: "Cinder",
+    x: -220,
+    y: 140,
+    links: ["new_eden", "vega", "bastion"],
+    factionId: "sol_defense",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["vega_combine"]
+  },
+  {
+    id: "lancer",
+    name: "Lancer",
+    x: 220,
+    y: 200,
+    links: ["helios", "aurora", "arkady"],
+    factionId: "sol_defense",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["orion_regency"]
+  },
+  {
+    id: "redoubt",
+    name: "Redoubt",
+    x: -20,
+    y: -200,
+    links: ["altair", "sirius", "scar"],
+    factionId: "sol_defense",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["sirius_concord"]
+  },
+  {
+    id: "riftwatch",
+    name: "Riftwatch",
+    x: 200,
+    y: -200,
+    links: ["deneb", "crown", "duskfall"],
+    factionId: "sol_defense",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["orion_regency", "sirius_concord"]
+  },
+  {
+    id: "scar",
+    name: "Scar",
+    x: -160,
+    y: -140,
+    links: ["redoubt", "draco", "ember"],
+    factionId: "sol_defense",
+    status: "border",
+    traffic: "light",
+    disputedWith: ["draco_syndicate", "sirius_concord"]
   },
   {
     id: "vega",
     name: "Vega",
-    x: -160,
-    y: 90,
-    links: ["sol", "draco"]
+    x: -360,
+    y: 120,
+    links: ["cinder", "auriga", "windfall", "lyra"],
+    factionId: "vega_combine",
+    status: "core",
+    traffic: "heavy"
+  },
+  {
+    id: "auriga",
+    name: "Auriga",
+    x: -420,
+    y: 0,
+    links: ["vega", "cygnus", "ember"],
+    factionId: "vega_combine",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "lyra",
+    name: "Lyra",
+    x: -480,
+    y: 200,
+    links: ["vega", "polaris", "cygnus"],
+    factionId: "vega_combine",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "cygnus",
+    name: "Cygnus",
+    x: -520,
+    y: 80,
+    links: ["auriga", "lyra", "polaris"],
+    factionId: "vega_combine",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "polaris",
+    name: "Polaris",
+    x: -560,
+    y: 260,
+    links: ["lyra", "cygnus", "tundra"],
+    factionId: "vega_combine",
+    status: "frontier",
+    traffic: "light"
+  },
+  {
+    id: "windfall",
+    name: "Windfall",
+    x: -340,
+    y: 260,
+    links: ["vega", "zenith", "borealis_gate"],
+    factionId: "vega_combine",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["outer_rim_compact"]
+  },
+  {
+    id: "ember",
+    name: "Ember",
+    x: -320,
+    y: -80,
+    links: ["auriga", "draco", "scar"],
+    factionId: "vega_combine",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["draco_syndicate", "sol_defense"]
   },
   {
     id: "draco",
     name: "Draco",
-    x: 260,
-    y: 70,
-    links: ["alpha", "vega", "orion"]
+    x: -260,
+    y: -200,
+    links: ["scar", "ember", "bastion", "obsidian"],
+    factionId: "draco_syndicate",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "bastion",
+    name: "Bastion",
+    x: -340,
+    y: -140,
+    links: ["draco", "fenrir", "cinder"],
+    factionId: "draco_syndicate",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["vega_combine", "sol_defense"]
+  },
+  {
+    id: "fenrir",
+    name: "Fenrir",
+    x: -380,
+    y: -260,
+    links: ["bastion", "azrael"],
+    factionId: "draco_syndicate",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "azrael",
+    name: "Azrael",
+    x: -220,
+    y: -320,
+    links: ["fenrir", "obsidian", "numen"],
+    factionId: "draco_syndicate",
+    status: "frontier",
+    traffic: "light"
+  },
+  {
+    id: "obsidian",
+    name: "Obsidian",
+    x: -120,
+    y: -280,
+    links: ["draco", "azrael", "helene"],
+    factionId: "draco_syndicate",
+    status: "core",
+    traffic: "medium"
   },
   {
     id: "sirius",
     name: "Sirius",
-    x: 40,
-    y: -200,
-    links: ["alpha", "orion"]
+    x: 20,
+    y: -360,
+    links: ["redoubt", "helene", "valkyr"],
+    factionId: "sirius_concord",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "helene",
+    name: "Helene",
+    x: -120,
+    y: -420,
+    links: ["sirius", "obsidian", "numen"],
+    factionId: "sirius_concord",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "valkyr",
+    name: "Valkyr",
+    x: 200,
+    y: -360,
+    links: ["sirius", "mirage", "duskfall"],
+    factionId: "sirius_concord",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "mirage",
+    name: "Mirage",
+    x: 120,
+    y: -420,
+    links: ["valkyr", "numen", "miranda"],
+    factionId: "sirius_concord",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "numen",
+    name: "Numen",
+    x: 0,
+    y: -480,
+    links: ["helene", "mirage", "azrael"],
+    factionId: "sirius_concord",
+    status: "frontier",
+    traffic: "light"
+  },
+  {
+    id: "duskfall",
+    name: "Duskfall",
+    x: 140,
+    y: -280,
+    links: ["valkyr", "riftwatch", "crown"],
+    factionId: "sirius_concord",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["orion_regency", "sol_defense"]
   },
   {
     id: "orion",
     name: "Orion",
+    x: 360,
+    y: -80,
+    links: ["aurora", "castor", "crown"],
+    factionId: "orion_regency",
+    status: "core",
+    traffic: "heavy"
+  },
+  {
+    id: "castor",
+    name: "Castor",
+    x: 420,
+    y: 40,
+    links: ["orion", "palatine", "aurora"],
+    factionId: "orion_regency",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "palatine",
+    name: "Palatine",
+    x: 520,
+    y: -20,
+    links: ["castor", "eridani", "drifts"],
+    factionId: "orion_regency",
+    status: "core",
+    traffic: "medium"
+  },
+  {
+    id: "eridani",
+    name: "Eridani",
+    x: 480,
+    y: -140,
+    links: ["palatine", "miranda"],
+    factionId: "orion_regency",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "miranda",
+    name: "Miranda",
+    x: 440,
+    y: -260,
+    links: ["eridani", "mirage", "crown"],
+    factionId: "orion_regency",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["sirius_concord"]
+  },
+  {
+    id: "aurora",
+    name: "Aurora",
     x: 300,
-    y: -160,
-    links: ["draco", "sirius"]
+    y: 40,
+    links: ["orion", "castor", "lancer"],
+    factionId: "orion_regency",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["sol_defense"]
+  },
+  {
+    id: "crown",
+    name: "Crown",
+    x: 300,
+    y: -200,
+    links: ["orion", "riftwatch", "miranda", "duskfall"],
+    factionId: "orion_regency",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["sirius_concord", "sol_defense"]
+  },
+  {
+    id: "borealis",
+    name: "Borealis",
+    x: 0,
+    y: 360,
+    links: ["borealis_gate", "kepler", "zenith"],
+    factionId: "outer_rim_compact",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "kepler",
+    name: "Kepler",
+    x: 120,
+    y: 420,
+    links: ["borealis", "arkady", "drifts"],
+    factionId: "outer_rim_compact",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "luyten",
+    name: "Luyten",
+    x: -80,
+    y: 460,
+    links: ["zenith", "tundra"],
+    factionId: "outer_rim_compact",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "arkady",
+    name: "Arkady",
+    x: 200,
+    y: 340,
+    links: ["kepler", "lancer", "drifts"],
+    factionId: "outer_rim_compact",
+    status: "border",
+    traffic: "medium",
+    disputedWith: ["orion_regency", "sol_defense"]
+  },
+  {
+    id: "zenith",
+    name: "Zenith",
+    x: -200,
+    y: 360,
+    links: ["borealis", "windfall", "luyten", "tundra"],
+    factionId: "outer_rim_compact",
+    status: "core",
+    traffic: "light"
+  },
+  {
+    id: "drifts",
+    name: "Drifts",
+    x: 260,
+    y: 440,
+    links: ["kepler", "arkady", "palatine"],
+    factionId: "outer_rim_compact",
+    status: "frontier",
+    traffic: "light"
+  },
+  {
+    id: "tundra",
+    name: "Tundra",
+    x: -260,
+    y: 420,
+    links: ["zenith", "polaris", "luyten"],
+    factionId: "outer_rim_compact",
+    status: "frontier",
+    traffic: "light"
   }
 ];
 
@@ -61,10 +473,90 @@ const planets = [
     missionBoard: true
   },
   {
-    id: "new_turin",
-    systemId: "alpha",
-    name: "New Turin",
+    id: "deneb_prime",
+    systemId: "deneb",
+    name: "Deneb Prime",
     outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "altair_station",
+    systemId: "altair",
+    name: "Altair Station",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "arcadia_haven",
+    systemId: "arcadia",
+    name: "Arcadia Haven",
+    outfitter: false,
+    shipyard: true,
+    missionBoard: true
+  },
+  {
+    id: "helios_gate",
+    systemId: "helios",
+    name: "Helios Gate",
+    outfitter: true,
+    shipyard: true,
+    missionBoard: true
+  },
+  {
+    id: "new_eden",
+    systemId: "new_eden",
+    name: "New Eden",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "borealis_outpost",
+    systemId: "borealis_gate",
+    name: "Borealis Outpost",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "cinder_market",
+    systemId: "cinder",
+    name: "Cinder Market",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "lancer_hold",
+    systemId: "lancer",
+    name: "Lancer Hold",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "redoubt_station",
+    systemId: "redoubt",
+    name: "Redoubt Station",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "riftwatch_ring",
+    systemId: "riftwatch",
+    name: "Riftwatch Ring",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "scar_relay",
+    systemId: "scar",
+    name: "Scar Relay",
+    outfitter: false,
     shipyard: false,
     missionBoard: true
   },
@@ -74,7 +566,95 @@ const planets = [
     name: "Vega Prime",
     outfitter: true,
     shipyard: true,
+    missionBoard: true
+  },
+  {
+    id: "auriga_foundry",
+    systemId: "auriga",
+    name: "Auriga Foundry",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "lyra_port",
+    systemId: "lyra",
+    name: "Lyra Port",
+    outfitter: false,
+    shipyard: true,
+    missionBoard: true
+  },
+  {
+    id: "cygnus_spire",
+    systemId: "cygnus",
+    name: "Cygnus Spire",
+    outfitter: true,
+    shipyard: false,
     missionBoard: false
+  },
+  {
+    id: "polaris_crown",
+    systemId: "polaris",
+    name: "Polaris Crown",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "windfall_crossing",
+    systemId: "windfall",
+    name: "Windfall Crossing",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "ember_yards",
+    systemId: "ember",
+    name: "Ember Yards",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "draco_den",
+    systemId: "draco",
+    name: "Draco Den",
+    outfitter: true,
+    shipyard: true,
+    missionBoard: true
+  },
+  {
+    id: "bastion_ring",
+    systemId: "bastion",
+    name: "Bastion Ring",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "fenrir_keep",
+    systemId: "fenrir",
+    name: "Fenrir Keep",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "azrael_deep",
+    systemId: "azrael",
+    name: "Azrael Deep",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "obsidian_forge",
+    systemId: "obsidian",
+    name: "Obsidian Forge",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
   },
   {
     id: "sirius_port",
@@ -85,11 +665,155 @@ const planets = [
     missionBoard: true
   },
   {
+    id: "helene_gardens",
+    systemId: "helene",
+    name: "Helene Gardens",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "valkyr_point",
+    systemId: "valkyr",
+    name: "Valkyr Point",
+    outfitter: false,
+    shipyard: true,
+    missionBoard: true
+  },
+  {
+    id: "mirage_atrium",
+    systemId: "mirage",
+    name: "Mirage Atrium",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "numen_station",
+    systemId: "numen",
+    name: "Numen Station",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "duskfall_gate",
+    systemId: "duskfall",
+    name: "Duskfall Gate",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
     id: "orion_tradehub",
     systemId: "orion",
     name: "Orion Tradehub",
     outfitter: true,
     shipyard: true,
+    missionBoard: true
+  },
+  {
+    id: "castor_highport",
+    systemId: "castor",
+    name: "Castor Highport",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "palatine_court",
+    systemId: "palatine",
+    name: "Palatine Court",
+    outfitter: false,
+    shipyard: true,
+    missionBoard: true
+  },
+  {
+    id: "eridani_colony",
+    systemId: "eridani",
+    name: "Eridani Colony",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "miranda_quay",
+    systemId: "miranda",
+    name: "Miranda Quay",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "aurora_enclave",
+    systemId: "aurora",
+    name: "Aurora Enclave",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "crown_bastion",
+    systemId: "crown",
+    name: "Crown Bastion",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "borealis_haven",
+    systemId: "borealis",
+    name: "Borealis Haven",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "kepler_dock",
+    systemId: "kepler",
+    name: "Kepler Dock",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "luyten_refuge",
+    systemId: "luyten",
+    name: "Luyten Refuge",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "arkady_port",
+    systemId: "arkady",
+    name: "Arkady Port",
+    outfitter: true,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "zenith_hub",
+    systemId: "zenith",
+    name: "Zenith Hub",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "drifts_outpost",
+    systemId: "drifts",
+    name: "Drifts Outpost",
+    outfitter: false,
+    shipyard: false,
+    missionBoard: true
+  },
+  {
+    id: "tundra_keep",
+    systemId: "tundra",
+    name: "Tundra Keep",
+    outfitter: false,
+    shipyard: false,
     missionBoard: true
   }
 ];
@@ -457,7 +1181,27 @@ const markets = {
     luxury_goods: "high",
     refined_fuel: "low"
   },
-  new_turin: {
+  deneb_prime: {
+    foodstuffs: "medium",
+    textiles: "medium",
+    industrial_ore: "medium",
+    machinery: "high",
+    electronics: "high",
+    medical_supplies: "medium",
+    luxury_goods: "high",
+    refined_fuel: "medium"
+  },
+  helios_gate: {
+    foodstuffs: "medium",
+    textiles: "low",
+    industrial_ore: "medium",
+    machinery: "high",
+    electronics: "high",
+    medical_supplies: "medium",
+    luxury_goods: "medium",
+    refined_fuel: "high"
+  },
+  new_eden: {
     foodstuffs: "medium",
     textiles: "medium",
     industrial_ore: "high",
@@ -477,6 +1221,56 @@ const markets = {
     luxury_goods: "medium",
     refined_fuel: "medium"
   },
+  auriga_foundry: {
+    foodstuffs: "medium",
+    textiles: "low",
+    industrial_ore: "high",
+    machinery: "high",
+    electronics: "medium",
+    medical_supplies: "low",
+    luxury_goods: "low",
+    refined_fuel: "medium"
+  },
+  windfall_crossing: {
+    foodstuffs: "high",
+    textiles: "medium",
+    industrial_ore: "medium",
+    machinery: "low",
+    electronics: "medium",
+    medical_supplies: "medium",
+    luxury_goods: "high",
+    refined_fuel: "high"
+  },
+  ember_yards: {
+    foodstuffs: "medium",
+    textiles: "low",
+    industrial_ore: "high",
+    machinery: "high",
+    electronics: "low",
+    medical_supplies: "low",
+    luxury_goods: "medium",
+    refined_fuel: "high"
+  },
+  draco_den: {
+    foodstuffs: "low",
+    textiles: "low",
+    industrial_ore: "high",
+    machinery: "high",
+    electronics: "medium",
+    medical_supplies: "low",
+    luxury_goods: "high",
+    refined_fuel: "high"
+  },
+  obsidian_forge: {
+    foodstuffs: "low",
+    textiles: "low",
+    industrial_ore: "high",
+    machinery: "high",
+    electronics: "medium",
+    medical_supplies: "low",
+    luxury_goods: "medium",
+    refined_fuel: "high"
+  },
   sirius_port: {
     foodstuffs: "medium",
     textiles: "low",
@@ -487,6 +1281,26 @@ const markets = {
     luxury_goods: "medium",
     refined_fuel: "high"
   },
+  helene_gardens: {
+    foodstuffs: "high",
+    textiles: "medium",
+    industrial_ore: "low",
+    machinery: "low",
+    electronics: "medium",
+    medical_supplies: "high",
+    luxury_goods: "high",
+    refined_fuel: "low"
+  },
+  valkyr_point: {
+    foodstuffs: "medium",
+    textiles: "medium",
+    industrial_ore: "medium",
+    machinery: "high",
+    electronics: "high",
+    medical_supplies: "medium",
+    luxury_goods: "medium",
+    refined_fuel: "medium"
+  },
   orion_tradehub: {
     foodstuffs: "high",
     textiles: "medium",
@@ -496,17 +1310,105 @@ const markets = {
     medical_supplies: "medium",
     luxury_goods: "medium",
     refined_fuel: "high"
+  },
+  palatine_court: {
+    foodstuffs: "medium",
+    textiles: "high",
+    industrial_ore: "low",
+    machinery: "medium",
+    electronics: "high",
+    medical_supplies: "medium",
+    luxury_goods: "high",
+    refined_fuel: "medium"
+  },
+  miranda_quay: {
+    foodstuffs: "medium",
+    textiles: "medium",
+    industrial_ore: "medium",
+    machinery: "low",
+    electronics: "high",
+    medical_supplies: "medium",
+    luxury_goods: "high",
+    refined_fuel: "medium"
+  },
+  crown_bastion: {
+    foodstuffs: "low",
+    textiles: "low",
+    industrial_ore: "high",
+    machinery: "high",
+    electronics: "medium",
+    medical_supplies: "low",
+    luxury_goods: "medium",
+    refined_fuel: "high"
+  },
+  borealis_haven: {
+    foodstuffs: "high",
+    textiles: "medium",
+    industrial_ore: "low",
+    machinery: "low",
+    electronics: "medium",
+    medical_supplies: "high",
+    luxury_goods: "high",
+    refined_fuel: "low"
   }
 };
 
 const factions = [
   {
     id: "free_traders",
-    name: "Free Traders Guild"
+    name: "Free Traders Guild",
+    code: "FTG",
+    description:
+      "Independent merchants and couriers who keep the trade lanes flowing regardless of politics.",
+    homeSystemId: "sol"
   },
   {
     id: "sol_defense",
-    name: "Sol Defense Union"
+    name: "Sol Defense Union",
+    code: "SDU",
+    description:
+      "An old military compact holding the Sol core, focused on stability and disciplined patrols.",
+    homeSystemId: "sol"
+  },
+  {
+    id: "vega_combine",
+    name: "Vega Combine",
+    code: "VGC",
+    description:
+      "Industrial trade houses clustered around Vega, leveraging cargo fleets and corporate security.",
+    homeSystemId: "vega"
+  },
+  {
+    id: "orion_regency",
+    name: "Orion Regency",
+    code: "ORG",
+    description:
+      "An aristocratic regime with elite escort wings guarding the eastern corridors.",
+    homeSystemId: "orion"
+  },
+  {
+    id: "draco_syndicate",
+    name: "Draco Syndicate",
+    code: "DRS",
+    description:
+      "A shadow network of raiders and salvagers, thriving in volatile border zones.",
+    homeSystemId: "draco"
+  },
+  {
+    id: "sirius_concord",
+    name: "Sirius Concord",
+    code: "SRC",
+    description:
+      "A coalition of sanctuary systems known for fast response fleets and humanitarian convoys.",
+    homeSystemId: "sirius"
+  },
+  {
+    id: "outer_rim_compact",
+    name: "Outer Rim Compact",
+    code: "ORC",
+    description:
+      "Frontier cooperatives that barter passage and defense across the far northern rim.",
+    homeSystemId: "borealis"
   }
 ];
 
