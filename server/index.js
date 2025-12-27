@@ -44,9 +44,9 @@ const server = app.listen(port, () => {
 
 const wss = new WebSocketServer({ server });
 const connections = new Map();
-const aiTickIntervalMs = 200;
+const aiTickIntervalMs = 50;
 let lastAiTick = Date.now();
-const presenceBroadcastIntervalMs = 200;
+const presenceBroadcastIntervalMs = 50;
 let lastPresenceBroadcast = 0;
 
 const broadcast = (payload) => {
