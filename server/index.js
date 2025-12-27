@@ -21,7 +21,10 @@ const {
   buyShip,
   acceptMission,
   completeMissions,
-  getAvailableMissions
+  getAvailableMissions,
+  getMarketForPlanet,
+  buyGoods,
+  sellGoods
 } = require("./game/game");
 
 const app = express();
@@ -118,10 +121,22 @@ const handleAction = (player, action, socket) => {
     case "completeMissions":
       completeMissions(player);
       break;
+    case "buyGoods":
+      buyGoods(player, action.goodId, action.quantity);
+      break;
+    case "sellGoods":
+      sellGoods(player, action.goodId, action.quantity);
+      break;
     case "requestMissions":
       sendTo(socket, {
         type: "missions",
         missions: getAvailableMissions(player.planetId)
+      });
+      return;
+    case "requestMarket":
+      sendTo(socket, {
+        type: "market",
+        market: getMarketForPlanet(player.planetId)
       });
       return;
     case "position":
@@ -130,7 +145,13 @@ const handleAction = (player, action, socket) => {
       shouldBroadcast = false;
       break;
     case "fire":
-      hitReport = fireWeapons(player, action);
+      hitReport = fireWeapons(player, action, player.weapons, { allowFallback: true });
+      shouldPersist = hitReport.hits.length > 0;
+      break;
+    case "fireSecondary":
+      hitReport = fireWeapons(player, action, player.secondaryWeapons, {
+        allowFallback: false
+      });
       shouldPersist = hitReport.hits.length > 0;
       break;
     default:
@@ -146,7 +167,7 @@ const handleAction = (player, action, socket) => {
     player: getPlayerState(player)
   });
 
-  if (action.type === "fire") {
+  if (action.type === "fire" || action.type === "fireSecondary") {
     broadcast({
       type: "fire",
       shooterId: player.id,
@@ -154,7 +175,7 @@ const handleAction = (player, action, socket) => {
       x: player.x,
       y: player.y,
       angle: player.angle,
-      weapons: player.weapons
+      weapons: hitReport.weaponsFired
     });
   }
 

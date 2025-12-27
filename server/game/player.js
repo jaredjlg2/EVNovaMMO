@@ -19,13 +19,16 @@ const createPlayer = ({ id, name, savedState = null }) => {
       shield: starterShip.shield,
       cargo: starterShip.cargo,
       fuel: starterShip.fuel,
-      hardpoints: starterShip.hardpoints
+      hardpoints: starterShip.hardpoints,
+      secondaryHardpoints: starterShip.secondaryHardpoints
     },
     hull: starterShip.hull,
     shield: starterShip.shield,
     weapons: ["pulse_laser"],
+    secondaryWeapons: [],
     outfits: [],
     missions: [],
+    cargo: [],
     log: ["Welcome to the frontier, Captain."]
   };
 
@@ -43,7 +46,12 @@ const createPlayer = ({ id, name, savedState = null }) => {
       ...(savedState.ship || {})
     },
     hull: savedState.hull ?? basePlayer.hull,
-    shield: savedState.shield ?? basePlayer.shield
+    shield: savedState.shield ?? basePlayer.shield,
+    weapons: savedState.weapons ?? basePlayer.weapons,
+    secondaryWeapons: savedState.secondaryWeapons ?? basePlayer.secondaryWeapons,
+    outfits: savedState.outfits ?? basePlayer.outfits,
+    missions: savedState.missions ?? basePlayer.missions,
+    cargo: savedState.cargo ?? basePlayer.cargo
   };
 };
 

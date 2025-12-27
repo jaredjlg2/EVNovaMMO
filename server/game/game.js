@@ -5,12 +5,14 @@ const {
   initialWorld,
   planetById,
   canJump,
-  getAvailableMissions
+  getAvailableMissions,
+  getMarketForPlanet
 } = require("./world");
 
 const players = new Map();
 const weaponById = new Map(initialWorld.weapons.map((weapon) => [weapon.id, weapon]));
 const shipById = new Map(initialWorld.ships.map((ship) => [ship.id, ship]));
+const goodsById = new Map(initialWorld.goods.map((good) => [good.id, good]));
 const tradeInRate = 0.6;
 
 const getPlayer = (id) => players.get(id);
@@ -42,8 +44,10 @@ const persistPlayer = (player) => {
     hull: player.hull,
     shield: player.shield,
     weapons: player.weapons,
+    secondaryWeapons: player.secondaryWeapons,
     outfits: player.outfits,
     missions: player.missions,
+    cargo: player.cargo,
     log: player.log
   });
 };
@@ -112,6 +116,16 @@ const buyWeapon = (player, weaponId) => {
     appendLog(player, "Insufficient credits.");
     return;
   }
+  if (weapon.slotType === "secondary") {
+    if (player.secondaryWeapons.length >= player.ship.secondaryHardpoints) {
+      appendLog(player, "No available secondary racks.");
+      return;
+    }
+    player.credits -= weapon.price;
+    player.secondaryWeapons.push(weaponId);
+    appendLog(player, `Purchased secondary ${weapon.name}.`);
+    return;
+  }
   if (player.weapons.length >= player.ship.hardpoints) {
     appendLog(player, "No available hardpoints.");
     return;
@@ -169,13 +183,18 @@ const buyShip = (player, shipId) => {
     shield: ship.shield,
     cargo: ship.cargo,
     fuel: ship.fuel,
-    hardpoints: ship.hardpoints
+    hardpoints: ship.hardpoints,
+    secondaryHardpoints: ship.secondaryHardpoints
   };
   player.hull = ship.hull;
   player.shield = ship.shield;
   if (player.weapons.length > ship.hardpoints) {
     player.weapons = player.weapons.slice(0, ship.hardpoints);
     appendLog(player, "Hardpoints limited: some weapons were removed.");
+  }
+  if (player.secondaryWeapons.length > ship.secondaryHardpoints) {
+    player.secondaryWeapons = player.secondaryWeapons.slice(0, ship.secondaryHardpoints);
+    appendLog(player, "Secondary racks limited: some weapons were removed.");
   }
   appendLog(
     player,
@@ -184,7 +203,8 @@ const buyShip = (player, shipId) => {
 };
 
 const acceptMission = (player, missionId) => {
-  const mission = initialWorld.missions.find((item) => item.id === missionId);
+  const missions = getAvailableMissions(player.planetId);
+  const mission = missions.find((item) => item.id === missionId);
   if (!mission) {
     appendLog(player, "Mission unavailable.");
     return;
@@ -193,9 +213,17 @@ const acceptMission = (player, missionId) => {
     appendLog(player, "Mission already accepted.");
     return;
   }
+  const cargoUsed = getCargoUsed(player);
+  if (cargoUsed + mission.cargoSpace > player.ship.cargo) {
+    appendLog(player, "Insufficient cargo space for this mission.");
+    return;
+  }
   player.missions.push({
     id: mission.id,
     title: mission.title,
+    type: mission.type,
+    cargo: mission.cargo,
+    cargoSpace: mission.cargoSpace,
     fromPlanetId: mission.fromPlanetId,
     toPlanetId: mission.toPlanetId,
     reward: mission.reward,
@@ -237,8 +265,10 @@ const getPlayerState = (player) => ({
   hull: player.hull,
   shield: player.shield,
   weapons: player.weapons,
+  secondaryWeapons: player.secondaryWeapons,
   outfits: player.outfits,
   missions: player.missions,
+  cargo: player.cargo,
   log: player.log
 });
 
@@ -284,21 +314,107 @@ const normalizeAngle = (angle) => {
   return adjusted;
 };
 
-const getWeaponDamage = (player) => {
-  const weaponIds = player.weapons.length > 0 ? player.weapons : ["pulse_laser"];
-  return weaponIds.reduce((total, weaponId) => {
+const getCargoUsed = (player) => {
+  const cargoTotal = player.cargo.reduce((sum, entry) => sum + entry.quantity, 0);
+  const missionCargo = player.missions
+    .filter((mission) => mission.status === "active")
+    .reduce((sum, mission) => sum + (mission.cargoSpace || 0), 0);
+  return cargoTotal + missionCargo;
+};
+
+const upsertCargo = (player, goodId, quantity) => {
+  const existing = player.cargo.find((entry) => entry.goodId === goodId);
+  if (existing) {
+    existing.quantity = Math.max(0, existing.quantity + quantity);
+    if (existing.quantity === 0) {
+      player.cargo = player.cargo.filter((entry) => entry.goodId !== goodId);
+    }
+  } else if (quantity > 0) {
+    player.cargo.push({ goodId, quantity });
+  }
+};
+
+const buyGoods = (player, goodId, quantity = 1) => {
+  if (!player.planetId) {
+    appendLog(player, "Dock at a planet to trade goods.");
+    return;
+  }
+  const good = goodsById.get(goodId);
+  if (!good) {
+    appendLog(player, "Unknown commodity.");
+    return;
+  }
+  const amount = Math.max(1, Math.min(50, Math.floor(quantity)));
+  const cargoUsed = getCargoUsed(player);
+  if (cargoUsed + amount > player.ship.cargo) {
+    appendLog(player, "Insufficient cargo space.");
+    return;
+  }
+  const market = getMarketForPlanet(player.planetId).find((entry) => entry.id === goodId);
+  if (!market) {
+    appendLog(player, "Market unavailable.");
+    return;
+  }
+  const totalPrice = market.price * amount;
+  if (player.credits < totalPrice) {
+    appendLog(player, "Insufficient credits.");
+    return;
+  }
+  player.credits -= totalPrice;
+  upsertCargo(player, goodId, amount);
+  appendLog(player, `Purchased ${amount} × ${good.name}.`);
+};
+
+const sellGoods = (player, goodId, quantity = 1) => {
+  if (!player.planetId) {
+    appendLog(player, "Dock at a planet to trade goods.");
+    return;
+  }
+  const good = goodsById.get(goodId);
+  if (!good) {
+    appendLog(player, "Unknown commodity.");
+    return;
+  }
+  const amount = Math.max(1, Math.min(50, Math.floor(quantity)));
+  const existing = player.cargo.find((entry) => entry.goodId === goodId);
+  if (!existing || existing.quantity < amount) {
+    appendLog(player, "Insufficient cargo to sell.");
+    return;
+  }
+  const market = getMarketForPlanet(player.planetId).find((entry) => entry.id === goodId);
+  if (!market) {
+    appendLog(player, "Market unavailable.");
+    return;
+  }
+  const totalPrice = market.price * amount;
+  upsertCargo(player, goodId, -amount);
+  player.credits += totalPrice;
+  appendLog(player, `Sold ${amount} × ${good.name}.`);
+};
+
+const getWeaponDamage = (weaponIds) => {
+  const resolvedIds = weaponIds.length > 0 ? weaponIds : ["pulse_laser"];
+  return resolvedIds.reduce((total, weaponId) => {
     const weapon = weaponById.get(weaponId);
     return total + (weapon ? weapon.damage : 0);
   }, 0);
 };
 
-const fireWeapons = (player, payload) => {
+const resolveWeaponIds = (weaponIds, { allowFallback }) => {
+  if (weaponIds.length > 0) {
+    return weaponIds;
+  }
+  return allowFallback ? ["pulse_laser"] : [];
+};
+
+const fireWeapons = (player, payload, weaponIds, { allowFallback = true } = {}) => {
   updatePosition(player, payload);
   const hits = [];
   const destroyed = [];
-  const damage = getWeaponDamage(player);
+  const resolvedWeaponIds = resolveWeaponIds(weaponIds, { allowFallback });
+  const damage = getWeaponDamage(resolvedWeaponIds);
   if (damage <= 0) {
-    return { hits, destroyed };
+    return { hits, destroyed, weaponsFired: [] };
   }
   const originX = player.x;
   const originY = player.y;
@@ -344,7 +460,7 @@ const fireWeapons = (player, payload) => {
     hits.push(target.id);
   });
 
-  return { hits, destroyed };
+  return { hits, destroyed, weaponsFired: resolvedWeaponIds };
 };
 
 module.exports = {
@@ -367,5 +483,9 @@ module.exports = {
   buyShip,
   acceptMission,
   completeMissions,
-  getAvailableMissions
+  getAvailableMissions,
+  getMarketForPlanet,
+  buyGoods,
+  sellGoods,
+  getCargoUsed
 };

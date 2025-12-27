@@ -103,6 +103,7 @@ const ships = [
     cargo: 12,
     fuel: 120,
     hardpoints: 2,
+    secondaryHardpoints: 1,
     price: 0
   },
   {
@@ -113,6 +114,7 @@ const ships = [
     cargo: 22,
     fuel: 180,
     hardpoints: 3,
+    secondaryHardpoints: 1,
     price: 12000
   },
   {
@@ -123,6 +125,7 @@ const ships = [
     cargo: 30,
     fuel: 200,
     hardpoints: 4,
+    secondaryHardpoints: 2,
     price: 30000
   },
   {
@@ -133,6 +136,7 @@ const ships = [
     cargo: 6,
     fuel: 140,
     hardpoints: 2,
+    secondaryHardpoints: 1,
     price: 9000
   },
   {
@@ -143,6 +147,7 @@ const ships = [
     cargo: 8,
     fuel: 160,
     hardpoints: 3,
+    secondaryHardpoints: 1,
     price: 16000
   },
   {
@@ -153,6 +158,7 @@ const ships = [
     cargo: 10,
     fuel: 180,
     hardpoints: 4,
+    secondaryHardpoints: 2,
     price: 26000
   },
   {
@@ -163,6 +169,7 @@ const ships = [
     cargo: 12,
     fuel: 200,
     hardpoints: 4,
+    secondaryHardpoints: 2,
     price: 22000
   },
   {
@@ -173,6 +180,7 @@ const ships = [
     cargo: 18,
     fuel: 220,
     hardpoints: 5,
+    secondaryHardpoints: 2,
     price: 38000
   },
   {
@@ -183,6 +191,7 @@ const ships = [
     cargo: 22,
     fuel: 240,
     hardpoints: 6,
+    secondaryHardpoints: 3,
     price: 52000
   },
   {
@@ -193,6 +202,7 @@ const ships = [
     cargo: 45,
     fuel: 200,
     hardpoints: 2,
+    secondaryHardpoints: 1,
     price: 24000
   },
   {
@@ -203,6 +213,7 @@ const ships = [
     cargo: 80,
     fuel: 240,
     hardpoints: 3,
+    secondaryHardpoints: 1,
     price: 42000
   },
   {
@@ -213,6 +224,7 @@ const ships = [
     cargo: 120,
     fuel: 260,
     hardpoints: 4,
+    secondaryHardpoints: 2,
     price: 65000
   },
   {
@@ -223,6 +235,7 @@ const ships = [
     cargo: 50,
     fuel: 260,
     hardpoints: 3,
+    secondaryHardpoints: 1,
     price: 36000
   },
   {
@@ -233,6 +246,7 @@ const ships = [
     cargo: 10,
     fuel: 240,
     hardpoints: 2,
+    secondaryHardpoints: 1,
     price: 14000
   },
   {
@@ -243,6 +257,7 @@ const ships = [
     cargo: 32,
     fuel: 260,
     hardpoints: 3,
+    secondaryHardpoints: 1,
     price: 28000
   }
 ];
@@ -253,6 +268,7 @@ const weapons = [
     name: "Pulse Laser",
     damage: 12,
     energyCost: 5,
+    slotType: "primary",
     price: 800
   },
   {
@@ -260,6 +276,7 @@ const weapons = [
     name: "Rail Cannon",
     damage: 28,
     energyCost: 12,
+    slotType: "primary",
     price: 2200
   },
   {
@@ -267,7 +284,32 @@ const weapons = [
     name: "Ion Blaster",
     damage: 20,
     energyCost: 8,
+    slotType: "primary",
     price: 1500
+  },
+  {
+    id: "sting_missile",
+    name: "Sting Missile Rack",
+    damage: 40,
+    energyCost: 18,
+    slotType: "secondary",
+    price: 3200
+  },
+  {
+    id: "viper_rockets",
+    name: "Viper Rocket Pod",
+    damage: 55,
+    energyCost: 24,
+    slotType: "secondary",
+    price: 4600
+  },
+  {
+    id: "thunder_torpedo",
+    name: "Thunder Torpedo Tube",
+    damage: 80,
+    energyCost: 34,
+    slotType: "secondary",
+    price: 6800
   }
 ];
 
@@ -319,6 +361,144 @@ const missions = [
   }
 ];
 
+const missionTemplates = [
+  {
+    id: "relief",
+    type: "relief",
+    title: "Relief Convoy",
+    cargo: "relief supplies",
+    baseReward: 900,
+    rewardPerJump: 360,
+    cargoSpace: 6,
+    description:
+      "Relief coordinators need {cargo} delivered to {destination}. Keep the timeline tight."
+  },
+  {
+    id: "courier",
+    type: "courier",
+    title: "Priority Dispatch",
+    cargo: "encrypted dispatches",
+    baseReward: 650,
+    rewardPerJump: 280,
+    cargoSpace: 2,
+    description: "Carry {cargo} from {origin} to {destination} without delays."
+  },
+  {
+    id: "charter",
+    type: "passenger",
+    title: "Passenger Charter",
+    cargo: "passenger accommodations",
+    baseReward: 1200,
+    rewardPerJump: 420,
+    cargoSpace: 8,
+    description: "Escort {cargo} from {origin} to {destination}. Discretion required."
+  },
+  {
+    id: "survey",
+    type: "survey",
+    title: "Survey Drop",
+    cargo: "survey drones",
+    baseReward: 800,
+    rewardPerJump: 320,
+    cargoSpace: 4,
+    description: "Deliver {cargo} to {destination} for a scheduled deployment."
+  },
+  {
+    id: "salvage",
+    type: "salvage",
+    title: "Salvage Pickup",
+    cargo: "salvage crates",
+    baseReward: 1100,
+    rewardPerJump: 380,
+    cargoSpace: 10,
+    description: "Retrieve {cargo} at {destination} for onward transfer."
+  },
+  {
+    id: "security",
+    type: "security",
+    title: "Security Transfer",
+    cargo: "security equipment",
+    baseReward: 1000,
+    rewardPerJump: 400,
+    cargoSpace: 5,
+    description: "Move {cargo} from {origin} to {destination}. Remain vigilant."
+  }
+];
+
+const goods = [
+  { id: "foodstuffs", name: "Foodstuffs", basePrice: 40 },
+  { id: "textiles", name: "Textiles", basePrice: 55 },
+  { id: "industrial_ore", name: "Industrial Ore", basePrice: 70 },
+  { id: "machinery", name: "Machinery", basePrice: 120 },
+  { id: "electronics", name: "Electronics", basePrice: 160 },
+  { id: "medical_supplies", name: "Medical Supplies", basePrice: 150 },
+  { id: "luxury_goods", name: "Luxury Goods", basePrice: 220 },
+  { id: "refined_fuel", name: "Refined Fuel", basePrice: 90 }
+];
+
+const markets = {
+  earth: {
+    foodstuffs: "low",
+    textiles: "low",
+    industrial_ore: "medium",
+    machinery: "high",
+    electronics: "high",
+    medical_supplies: "medium",
+    luxury_goods: "high",
+    refined_fuel: "medium"
+  },
+  luna: {
+    foodstuffs: "high",
+    textiles: "medium",
+    industrial_ore: "medium",
+    machinery: "medium",
+    electronics: "medium",
+    medical_supplies: "high",
+    luxury_goods: "high",
+    refined_fuel: "low"
+  },
+  new_turin: {
+    foodstuffs: "medium",
+    textiles: "medium",
+    industrial_ore: "high",
+    machinery: "low",
+    electronics: "medium",
+    medical_supplies: "medium",
+    luxury_goods: "high",
+    refined_fuel: "medium"
+  },
+  vega_prime: {
+    foodstuffs: "medium",
+    textiles: "high",
+    industrial_ore: "low",
+    machinery: "medium",
+    electronics: "low",
+    medical_supplies: "high",
+    luxury_goods: "medium",
+    refined_fuel: "medium"
+  },
+  sirius_port: {
+    foodstuffs: "medium",
+    textiles: "low",
+    industrial_ore: "high",
+    machinery: "medium",
+    electronics: "medium",
+    medical_supplies: "low",
+    luxury_goods: "medium",
+    refined_fuel: "high"
+  },
+  orion_tradehub: {
+    foodstuffs: "high",
+    textiles: "medium",
+    industrial_ore: "low",
+    machinery: "low",
+    electronics: "high",
+    medical_supplies: "medium",
+    luxury_goods: "medium",
+    refined_fuel: "high"
+  }
+};
+
 const factions = [
   {
     id: "free_traders",
@@ -337,5 +517,8 @@ module.exports = {
   weapons,
   outfits,
   missions,
+  missionTemplates,
+  goods,
+  markets,
   factions
 };

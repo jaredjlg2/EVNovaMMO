@@ -329,6 +329,24 @@ button:disabled {
   margin-top: 8px;
 }
 
+.trade-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.trade-qty {
+  width: 64px;
+  background: #0f1730;
+  border: 1px solid #2a3b66;
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: #e4ecff;
+  font-size: 12px;
+}
+
 .mission-board {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
