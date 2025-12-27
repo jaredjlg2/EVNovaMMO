@@ -46,6 +46,8 @@ const wss = new WebSocketServer({ server });
 const connections = new Map();
 const aiTickIntervalMs = 200;
 let lastAiTick = Date.now();
+const presenceBroadcastIntervalMs = 200;
+let lastPresenceBroadcast = 0;
 
 const broadcast = (payload) => {
   const message = JSON.stringify(payload);
@@ -62,6 +64,17 @@ const sendTo = (socket, payload) => {
   }
 };
 
+const broadcastPresence = (force = false) => {
+  const now = Date.now();
+  if (!force && now - lastPresenceBroadcast < presenceBroadcastIntervalMs) {
+    return;
+  }
+  lastPresenceBroadcast = now;
+  if (wss.clients.size > 0) {
+    broadcast({ type: "presence", players: getSystemStatus() });
+  }
+};
+
 setInterval(() => {
   const now = Date.now();
   let deltaSeconds = (now - lastAiTick) / 1000;
@@ -72,9 +85,7 @@ setInterval(() => {
   }
   lastAiTick = now;
   tickAiShips(deltaSeconds);
-  if (wss.clients.size > 0) {
-    broadcast({ type: "presence", players: getSystemStatus() });
-  }
+  broadcastPresence(true);
 }, aiTickIntervalMs);
 
 const handleAction = (player, action, socket) => {
@@ -116,6 +127,7 @@ const handleAction = (player, action, socket) => {
     case "position":
       updatePosition(player, action);
       shouldPersist = false;
+      shouldBroadcast = false;
       break;
     case "fire":
       hitReport = fireWeapons(player, action);
@@ -172,7 +184,7 @@ const handleAction = (player, action, socket) => {
   }
 
   if (shouldBroadcast) {
-    broadcast({ type: "presence", players: getSystemStatus() });
+    broadcastPresence();
   }
 
   if (hitReport.hits.length > 0) {
@@ -222,7 +234,7 @@ wss.on("connection", (socket) => {
           world: getWorldState(),
           players: getSystemStatus()
         });
-        broadcast({ type: "presence", players: getSystemStatus() });
+        broadcastPresence(true);
         return;
       }
 
@@ -250,6 +262,6 @@ wss.on("connection", (socket) => {
       removePlayer(playerId);
       connections.delete(playerId);
     }
-    broadcast({ type: "presence", players: getSystemStatus() });
+    broadcastPresence(true);
   });
 });
