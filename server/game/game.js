@@ -8,6 +8,7 @@ const {
 } = require("./world");
 
 const players = new Map();
+const weaponById = new Map(initialWorld.weapons.map((weapon) => [weapon.id, weapon]));
 
 const getPlayer = (id) => players.get(id);
 
@@ -31,7 +32,12 @@ const persistPlayer = (player) => {
     credits: player.credits,
     systemId: player.systemId,
     planetId: player.planetId,
+    x: player.x,
+    y: player.y,
+    angle: player.angle,
     ship: player.ship,
+    hull: player.hull,
+    shield: player.shield,
     weapons: player.weapons,
     outfits: player.outfits,
     missions: player.missions,
@@ -50,6 +56,8 @@ const jumpSystem = (player, targetSystemId) => {
   }
   player.systemId = targetSystemId;
   player.planetId = null;
+  player.x = 0;
+  player.y = 0;
   appendLog(player, `Jumped to ${targetSystemId}.`);
 };
 
@@ -60,6 +68,8 @@ const dockPlanet = (player, planetId) => {
     return;
   }
   player.planetId = planetId;
+  player.x = 0;
+  player.y = 0;
   appendLog(player, `Docked at ${planet.name}.`);
 };
 
@@ -69,6 +79,8 @@ const undock = (player) => {
     return;
   }
   player.planetId = null;
+  player.x = 0;
+  player.y = 0;
   appendLog(player, "Launched into space.");
 };
 
@@ -153,7 +165,12 @@ const getPlayerState = (player) => ({
   credits: player.credits,
   systemId: player.systemId,
   planetId: player.planetId,
+  x: player.x,
+  y: player.y,
+  angle: player.angle,
   ship: player.ship,
+  hull: player.hull,
+  shield: player.shield,
   weapons: player.weapons,
   outfits: player.outfits,
   missions: player.missions,
@@ -168,8 +185,95 @@ const getSystemStatus = () =>
     name: player.name,
     systemId: player.systemId,
     planetId: player.planetId,
-    ship: player.ship
+    ship: player.ship,
+    x: player.x,
+    y: player.y,
+    angle: player.angle,
+    hull: player.hull,
+    shield: player.shield
   }));
+
+const updatePosition = (player, { x, y, angle }) => {
+  if (typeof x === "number") {
+    player.x = x;
+  }
+  if (typeof y === "number") {
+    player.y = y;
+  }
+  if (typeof angle === "number") {
+    player.angle = angle;
+  }
+};
+
+const normalizeAngle = (angle) => {
+  let adjusted = angle;
+  while (adjusted > Math.PI) {
+    adjusted -= Math.PI * 2;
+  }
+  while (adjusted < -Math.PI) {
+    adjusted += Math.PI * 2;
+  }
+  return adjusted;
+};
+
+const getWeaponDamage = (player) => {
+  const weaponIds = player.weapons.length > 0 ? player.weapons : ["pulse_laser"];
+  return weaponIds.reduce((total, weaponId) => {
+    const weapon = weaponById.get(weaponId);
+    return total + (weapon ? weapon.damage : 0);
+  }, 0);
+};
+
+const fireWeapons = (player, payload) => {
+  updatePosition(player, payload);
+  const hits = [];
+  const damage = getWeaponDamage(player);
+  if (damage <= 0) {
+    return hits;
+  }
+  const originX = player.x;
+  const originY = player.y;
+  const angle = player.angle;
+  const maxRange = 320;
+  const maxAngleDiff = 0.35;
+
+  Array.from(players.values()).forEach((target) => {
+    if (target.id === player.id) {
+      return;
+    }
+    if (target.systemId !== player.systemId || target.planetId) {
+      return;
+    }
+    if (typeof target.x !== "number" || typeof target.y !== "number") {
+      return;
+    }
+    const dx = target.x - originX;
+    const dy = target.y - originY;
+    const distance = Math.hypot(dx, dy);
+    if (distance > maxRange) {
+      return;
+    }
+    const targetAngle = Math.atan2(dy, dx);
+    const angleDiff = Math.abs(normalizeAngle(targetAngle - angle));
+    if (angleDiff > maxAngleDiff) {
+      return;
+    }
+    target.hull = Math.max(0, target.hull - damage);
+    appendLog(target, `${player.name} hit you for ${damage} damage.`);
+    appendLog(player, `You hit ${target.name} for ${damage} damage.`);
+    if (target.hull === 0) {
+      target.hull = target.ship.hull;
+      target.x = 0;
+      target.y = 0;
+      target.planetId = null;
+      appendLog(target, "Ship disabled! Emergency systems restored you at the system core.");
+      appendLog(player, `${target.name} was disabled and rebooted at the system core.`);
+    }
+    hits.push(target.id);
+  });
+
+  return hits;
+};
 
 module.exports = {
   addPlayer,
@@ -180,6 +284,8 @@ module.exports = {
   getPlayerState,
   getWorldState,
   getSystemStatus,
+  updatePosition,
+  fireWeapons,
   jumpSystem,
   dockPlanet,
   undock,

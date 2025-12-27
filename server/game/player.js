@@ -9,6 +9,9 @@ const createPlayer = ({ id, name, savedState = null }) => {
     credits: 5000,
     systemId: "sol",
     planetId: null,
+    x: 0,
+    y: 0,
+    angle: -Math.PI / 2,
     ship: {
       id: starterShip.id,
       name: starterShip.name,
@@ -18,6 +21,8 @@ const createPlayer = ({ id, name, savedState = null }) => {
       fuel: starterShip.fuel,
       hardpoints: starterShip.hardpoints
     },
+    hull: starterShip.hull,
+    shield: starterShip.shield,
     weapons: ["pulse_laser"],
     outfits: [],
     missions: [],
@@ -36,7 +41,9 @@ const createPlayer = ({ id, name, savedState = null }) => {
     ship: {
       ...basePlayer.ship,
       ...(savedState.ship || {})
-    }
+    },
+    hull: savedState.hull ?? basePlayer.hull,
+    shield: savedState.shield ?? basePlayer.shield
   };
 };
 

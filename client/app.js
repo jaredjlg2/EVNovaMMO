@@ -38,6 +38,8 @@ let currentDockingTarget = null;
 let planetPositions = new Map();
 let mapOpen = false;
 let routePlan = [];
+let presencePlayers = [];
+let positionInterval = null;
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
@@ -365,22 +367,20 @@ const handleMapClick = (event) => {
   }
 };
 
-const firePrimaryWeapons = () => {
-  if (!player || !isLoggedIn || player.planetId) {
-    return;
-  }
-  const weaponIds = player.weapons.length > 0 ? player.weapons : ["pulse_laser"];
+const spawnProjectiles = (originX, originY, angle, weaponIds) => {
+  const resolvedWeapons = weaponIds.length > 0 ? weaponIds : ["pulse_laser"];
   const spacing = 8;
   const forwardOffset = 18;
-  const lateralOffsets = weaponIds.map((_, index) => (index - (weaponIds.length - 1) / 2) * spacing);
-  const angle = flightState.angle;
+  const lateralOffsets = resolvedWeapons.map(
+    (_, index) => (index - (resolvedWeapons.length - 1) / 2) * spacing
+  );
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
-  weaponIds.forEach((weaponId, index) => {
+  resolvedWeapons.forEach((weaponId, index) => {
     const style = weaponStyles[weaponId] || weaponStyles.pulse_laser;
     const lateral = lateralOffsets[index];
-    const spawnX = flightState.x + cos * forwardOffset - sin * lateral;
-    const spawnY = flightState.y + sin * forwardOffset + cos * lateral;
+    const spawnX = originX + cos * forwardOffset - sin * lateral;
+    const spawnY = originY + sin * forwardOffset + cos * lateral;
     projectiles.push({
       x: spawnX,
       y: spawnY,
@@ -391,6 +391,35 @@ const firePrimaryWeapons = () => {
       style
     });
   });
+};
+
+const firePrimaryWeapons = () => {
+  if (!player || !isLoggedIn || player.planetId) {
+    return;
+  }
+  const weaponIds = player.weapons.length > 0 ? player.weapons : ["pulse_laser"];
+  spawnProjectiles(flightState.x, flightState.y, flightState.angle, weaponIds);
+  sendAction({
+    type: "fire",
+    x: flightState.x,
+    y: flightState.y,
+    angle: flightState.angle,
+    systemId: player.systemId
+  });
+};
+
+const getVisiblePlayers = () => {
+  if (!player) {
+    return [];
+  }
+  return presencePlayers.filter(
+    (other) =>
+      other.id !== player.id &&
+      other.systemId === player.systemId &&
+      !other.planetId &&
+      typeof other.x === "number" &&
+      typeof other.y === "number"
+  );
 };
 
 const updateProjectiles = (deltaSeconds) => {
@@ -658,6 +687,30 @@ const renderFlight = (now) => {
   }
 
   if (player && isLoggedIn) {
+    getVisiblePlayers().forEach((other) => {
+      const screenX = centerX + (other.x - flightState.x);
+      const screenY = centerY + (other.y - flightState.y);
+      if (screenX < -40 || screenX > width + 40 || screenY < -40 || screenY > height + 40) {
+        return;
+      }
+      ctx.save();
+      ctx.translate(screenX, screenY);
+      ctx.rotate((other.angle ?? 0) + Math.PI / 2);
+      ctx.fillStyle = "#ff7a7a";
+      ctx.beginPath();
+      ctx.moveTo(0, -12);
+      ctx.lineTo(9, 9);
+      ctx.lineTo(0, 5);
+      ctx.lineTo(-9, 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      ctx.fillStyle = "rgba(255, 210, 210, 0.9)";
+      ctx.font = "12px Inter, sans-serif";
+      ctx.fillText(other.name, screenX + 12, screenY - 10);
+    });
+
     ctx.save();
     ctx.translate(centerX, centerY);
     ctx.rotate(flightState.angle + Math.PI / 2);
@@ -711,7 +764,7 @@ const renderShip = () => {
   const { ship } = player;
   shipInfoEl.innerHTML = `
     <span><strong>${ship.name}</strong></span>
-    <span>Hull: ${ship.hull} · Shield: ${ship.shield}</span>
+    <span>Hull: ${player.hull}/${ship.hull} · Shield: ${player.shield}/${ship.shield}</span>
     <span>Cargo: ${ship.cargo} · Fuel: ${ship.fuel}</span>
     <span>Hardpoints: ${player.weapons.length}/${ship.hardpoints}</span>
   `;
@@ -890,6 +943,7 @@ const connect = () => {
     connectionEl.textContent = "Disconnected";
     isLoggedIn = false;
     player = null;
+    presencePlayers = [];
     pilotNameDisplayEl.textContent = "";
     showLoginOverlay("Connection lost. Please reconnect.");
   });
@@ -907,6 +961,7 @@ const connect = () => {
     if (payload.type === "init") {
       world = payload.world;
       player = payload.player;
+      presencePlayers = payload.players || [];
       isLoggedIn = true;
       saveStoredPilot(player.name);
       hideLoginOverlay();
@@ -918,6 +973,29 @@ const connect = () => {
       player = payload.player;
       refreshUi();
       return;
+    }
+    if (payload.type === "presence") {
+      presencePlayers = payload.players || [];
+      return;
+    }
+    if (payload.type === "fire") {
+      if (!player || !isLoggedIn) {
+        return;
+      }
+      if (payload.shooterId === player.id) {
+        return;
+      }
+      if (payload.systemId !== player.systemId || player.planetId) {
+        return;
+      }
+      const originX = Number(payload.x);
+      const originY = Number(payload.y);
+      const angle = Number(payload.angle);
+      if (Number.isNaN(originX) || Number.isNaN(originY) || Number.isNaN(angle)) {
+        return;
+      }
+      const weaponIds = Array.isArray(payload.weapons) ? payload.weapons : ["pulse_laser"];
+      spawnProjectiles(originX, originY, angle, weaponIds);
     }
     if (payload.type === "missions") {
       renderMissions(payload.missions);
@@ -1013,3 +1091,15 @@ clearRouteBtn.addEventListener("click", () => {
 connect();
 renderPilotHints();
 requestAnimationFrame(renderFlight);
+
+positionInterval = setInterval(() => {
+  if (!player || !isLoggedIn || player.planetId) {
+    return;
+  }
+  sendAction({
+    type: "position",
+    x: flightState.x,
+    y: flightState.y,
+    angle: flightState.angle
+  });
+}, 120);
