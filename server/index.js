@@ -45,6 +45,7 @@ const server = app.listen(port, () => {
 const wss = new WebSocketServer({ server });
 const connections = new Map();
 const aiTickIntervalMs = 200;
+let lastAiTick = Date.now();
 
 const broadcast = (payload) => {
   const message = JSON.stringify(payload);
@@ -62,7 +63,15 @@ const sendTo = (socket, payload) => {
 };
 
 setInterval(() => {
-  tickAiShips(aiTickIntervalMs / 1000);
+  const now = Date.now();
+  let deltaSeconds = (now - lastAiTick) / 1000;
+  if (!Number.isFinite(deltaSeconds) || deltaSeconds <= 0) {
+    deltaSeconds = aiTickIntervalMs / 1000;
+  } else if (deltaSeconds > 0.5) {
+    deltaSeconds = 0.5;
+  }
+  lastAiTick = now;
+  tickAiShips(deltaSeconds);
   if (wss.clients.size > 0) {
     broadcast({ type: "presence", players: getSystemStatus() });
   }
