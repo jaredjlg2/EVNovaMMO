@@ -1,6 +1,12 @@
 const { createPlayer } = require("./player");
 const { loadPilot, savePilot } = require("./storage");
-const { getAiShipStatus, tickAiShips } = require("./ai");
+const {
+  getAiShipStatus,
+  tickAiShips,
+  getAiShips,
+  markShipHostileToPlayer,
+  getRoleCombatProfile
+} = require("./ai");
 const {
   initialWorld,
   planetById,
@@ -14,6 +20,8 @@ const weaponById = new Map(initialWorld.weapons.map((weapon) => [weapon.id, weap
 const shipById = new Map(initialWorld.ships.map((ship) => [ship.id, ship]));
 const goodsById = new Map(initialWorld.goods.map((good) => [good.id, good]));
 const tradeInRate = 0.6;
+const shieldRegenRate = 0.08;
+const armorRegenRate = 0.04;
 
 const getPlayer = (id) => players.get(id);
 
@@ -54,6 +62,16 @@ const persistPlayer = (player) => {
 
 const appendLog = (player, message) => {
   player.log = [message, ...player.log].slice(0, 8);
+};
+
+const applyDamageToTarget = (target, damage) => {
+  const shieldDamage = Math.min(target.shield, damage);
+  target.shield = Math.max(0, target.shield - shieldDamage);
+  const remaining = damage - shieldDamage;
+  if (remaining > 0) {
+    target.hull = Math.max(0, target.hull - remaining);
+  }
+  return target.hull === 0;
 };
 
 const jumpSystem = (player, targetSystemId) => {
@@ -303,6 +321,87 @@ const updatePosition = (player, { x, y, angle }) => {
   }
 };
 
+const tickWorld = (deltaSeconds) => {
+  tickAiShips(deltaSeconds);
+  const now = Date.now();
+  const hitPlayers = [];
+  const destroyedPlayers = [];
+  const aiShots = [];
+
+  players.forEach((current) => {
+    if (current.shield < current.ship.shield) {
+      const shieldGain = current.ship.shield * shieldRegenRate * deltaSeconds;
+      current.shield = Math.min(current.ship.shield, current.shield + shieldGain);
+    }
+    if (current.planetId && current.hull < current.ship.hull) {
+      const armorGain = current.ship.hull * armorRegenRate * deltaSeconds;
+      current.hull = Math.min(current.ship.hull, current.hull + armorGain);
+    }
+  });
+
+  getAiShips().forEach((ship) => {
+    const hostileTo = ship.ai.hostileTo || new Set();
+    if (hostileTo.size === 0) {
+      return;
+    }
+    const roleProfile = getRoleCombatProfile(ship.ai.role);
+    let closestTarget = null;
+    let closestDistance = Infinity;
+    players.forEach((target) => {
+      if (!hostileTo.has(target.id)) {
+        return;
+      }
+      if (target.systemId !== ship.systemId || target.planetId) {
+        return;
+      }
+      const distance = Math.hypot(ship.x - target.x, ship.y - target.y);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestTarget = target;
+      }
+    });
+    if (!closestTarget) {
+      return;
+    }
+    ship.ai.state = "engage";
+    ship.ai.stateUntil = now + 5000;
+    ship.ai.targetX = closestTarget.x;
+    ship.ai.targetY = closestTarget.y;
+
+    if (closestDistance > roleProfile.range) {
+      return;
+    }
+    if (now - ship.ai.lastAttackAt < 1200) {
+      return;
+    }
+    const damage = Math.round(roleProfile.damage * (0.7 + Math.random() * 0.6));
+    const isDestroyed = applyDamageToTarget(closestTarget, damage);
+    appendLog(closestTarget, `${ship.name} hit you for ${damage} damage.`);
+    hitPlayers.push(closestTarget.id);
+    ship.ai.lastAttackAt = now;
+    aiShots.push({
+      shooterId: ship.id,
+      systemId: ship.systemId,
+      x: ship.x,
+      y: ship.y,
+      angle: ship.angle,
+      weapons: ["pulse_laser"]
+    });
+    if (isDestroyed) {
+      destroyedPlayers.push({
+        id: closestTarget.id,
+        name: closestTarget.name,
+        systemId: closestTarget.systemId,
+        x: closestTarget.x,
+        y: closestTarget.y
+      });
+      appendLog(closestTarget, "Ship destroyed! Rescue crews will tow you back once you relog.");
+    }
+  });
+
+  return { hitPlayers, destroyedPlayers, aiShots };
+};
+
 const normalizeAngle = (angle) => {
   let adjusted = angle;
   while (adjusted > Math.PI) {
@@ -443,10 +542,10 @@ const fireWeapons = (player, payload, weaponIds, { allowFallback = true } = {}) 
     if (angleDiff > maxAngleDiff) {
       return;
     }
-    target.hull = Math.max(0, target.hull - damage);
+    const isDestroyed = applyDamageToTarget(target, damage);
     appendLog(target, `${player.name} hit you for ${damage} damage.`);
     appendLog(player, `You hit ${target.name} for ${damage} damage.`);
-    if (target.hull === 0) {
+    if (isDestroyed) {
       destroyed.push({
         id: target.id,
         name: target.name,
@@ -458,6 +557,41 @@ const fireWeapons = (player, payload, weaponIds, { allowFallback = true } = {}) 
       appendLog(player, `${target.name} was destroyed.`);
     }
     hits.push(target.id);
+  });
+
+  getAiShips().forEach((target) => {
+    if (target.systemId !== player.systemId || target.planetId) {
+      return;
+    }
+    if (typeof target.x !== "number" || typeof target.y !== "number") {
+      return;
+    }
+    const dx = target.x - originX;
+    const dy = target.y - originY;
+    const distance = Math.hypot(dx, dy);
+    if (distance > maxRange) {
+      return;
+    }
+    const targetAngle = Math.atan2(dy, dx);
+    const angleDiff = Math.abs(normalizeAngle(targetAngle - angle));
+    if (angleDiff > maxAngleDiff) {
+      return;
+    }
+    const isDestroyed = applyDamageToTarget(target, damage);
+    markShipHostileToPlayer(target.id, player.id);
+    appendLog(player, `You hit ${target.name} for ${damage} damage.`);
+    hits.push(target.id);
+    if (isDestroyed) {
+      destroyed.push({
+        id: target.id,
+        name: target.name,
+        systemId: target.systemId,
+        x: target.x,
+        y: target.y,
+        isAi: true
+      });
+      appendLog(player, `${target.name} was destroyed.`);
+    }
   });
 
   return { hits, destroyed, weaponsFired: resolvedWeaponIds };
@@ -473,6 +607,7 @@ module.exports = {
   getWorldState,
   getSystemStatus,
   tickAiShips,
+  tickWorld,
   updatePosition,
   fireWeapons,
   jumpSystem,

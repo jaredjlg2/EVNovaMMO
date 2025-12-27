@@ -594,6 +594,14 @@ const updatePresencePlayers = (players) => {
     if (!entry?.id) {
       return;
     }
+    if (player && entry.id === player.id) {
+      if (typeof entry.hull === "number") {
+        player.hull = entry.hull;
+      }
+      if (typeof entry.shield === "number") {
+        player.shield = entry.shield;
+      }
+    }
     seen.add(entry.id);
     const previous = presenceSnapshots.get(entry.id);
     const prevX = previous ? previous.currX : entry.x ?? 0;
@@ -987,7 +995,10 @@ const renderFlight = (now) => {
       ctx.save();
       ctx.translate(screenX, screenY);
       ctx.rotate((other.angle ?? 0) + Math.PI / 2);
-      ctx.fillStyle = "#ff7a7a";
+      const isHostile = other.isAi
+        ? (other.hostileTo || []).includes(player.id)
+        : true;
+      ctx.fillStyle = isHostile ? "#ff7a7a" : "#7ad2ff";
       ctx.beginPath();
       ctx.moveTo(0, -12);
       ctx.lineTo(9, 9);
@@ -997,7 +1008,7 @@ const renderFlight = (now) => {
       ctx.fill();
       ctx.restore();
 
-      ctx.fillStyle = "rgba(255, 210, 210, 0.9)";
+      ctx.fillStyle = isHostile ? "rgba(255, 210, 210, 0.9)" : "rgba(190, 230, 255, 0.9)";
       ctx.font = "12px Inter, sans-serif";
       ctx.fillText(other.name, screenX + 12, screenY - 10);
     });
@@ -1056,9 +1067,34 @@ const renderShip = () => {
   const { ship } = player;
   const cargoUsed = getCargoUsed();
   const cargoCapacity = getCargoCapacity();
+  const shieldMax = ship.shield || 0;
+  const hullMax = ship.hull || 0;
+  const shieldValue = Math.max(0, player.shield || 0);
+  const hullValue = Math.max(0, player.hull || 0);
+  const shieldPercent = shieldMax > 0 ? Math.min(100, (shieldValue / shieldMax) * 100) : 0;
+  const hullPercent = hullMax > 0 ? Math.min(100, (hullValue / hullMax) * 100) : 0;
   shipInfoEl.innerHTML = `
     <span><strong>${ship.name}</strong></span>
-    <span>Hull: ${player.hull}/${ship.hull} · Shield: ${player.shield}/${ship.shield}</span>
+    <div class="ship-bars">
+      <div class="ship-bar">
+        <div class="ship-bar-header">
+          <span>Shields</span>
+          <span>${Math.round(shieldValue)}/${shieldMax}</span>
+        </div>
+        <div class="ship-bar-track">
+          <div class="ship-bar-fill ship-bar-fill--shield" style="width: ${shieldPercent}%;"></div>
+        </div>
+      </div>
+      <div class="ship-bar">
+        <div class="ship-bar-header">
+          <span>Armor</span>
+          <span>${Math.round(hullValue)}/${hullMax}</span>
+        </div>
+        <div class="ship-bar-track">
+          <div class="ship-bar-fill ship-bar-fill--armor" style="width: ${hullPercent}%;"></div>
+        </div>
+      </div>
+    </div>
     <span>Cargo: ${cargoUsed}/${cargoCapacity} · Fuel: ${ship.fuel}</span>
     <span>Hardpoints: ${player.weapons.length}/${ship.hardpoints}</span>
     <span>Secondary Racks: ${player.secondaryWeapons.length}/${ship.secondaryHardpoints}</span>

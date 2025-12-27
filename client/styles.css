@@ -325,6 +325,48 @@ body {
   color: #c8d4f5;
 }
 
+.ship-bars {
+  display: grid;
+  gap: 10px;
+  margin: 6px 0 4px;
+}
+
+.ship-bar {
+  display: grid;
+  gap: 6px;
+}
+
+.ship-bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #c8d4f5;
+}
+
+.ship-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(14, 24, 48, 0.9);
+  border: 1px solid rgba(71, 92, 140, 0.6);
+  overflow: hidden;
+}
+
+.ship-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+
+.ship-bar-fill--shield {
+  background: linear-gradient(90deg, #58c4ff, #9be8ff);
+  box-shadow: 0 0 10px rgba(101, 199, 255, 0.6);
+}
+
+.ship-bar-fill--armor {
+  background: linear-gradient(90deg, #ffa94f, #ffd37a);
+  box-shadow: 0 0 10px rgba(255, 187, 90, 0.5);
+}
+
 .actions {
   display: flex;
   gap: 8px;

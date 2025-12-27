@@ -12,7 +12,7 @@ const {
   persistPlayer,
   updatePosition,
   fireWeapons,
-  tickAiShips,
+  tickWorld,
   jumpSystem,
   dockPlanet,
   undock,
@@ -26,6 +26,7 @@ const {
   buyGoods,
   sellGoods
 } = require("./game/game");
+const { removeAiShip } = require("./game/ai");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -78,6 +79,36 @@ const broadcastPresence = (force = false) => {
   }
 };
 
+const handleDestroyedEntities = (destroyedList) => {
+  destroyedList.forEach((destroyed) => {
+    if (destroyed.isAi) {
+      removeAiShip(destroyed.id);
+      broadcast({ type: "destroyed", ...destroyed });
+      return;
+    }
+    const destroyedPlayer = getPlayer(destroyed.id);
+    if (destroyedPlayer) {
+      destroyedPlayer.hull = destroyedPlayer.ship.hull;
+      destroyedPlayer.shield = destroyedPlayer.ship.shield;
+      destroyedPlayer.x = 0;
+      destroyedPlayer.y = 0;
+      destroyedPlayer.planetId = null;
+      persistPlayer(destroyedPlayer);
+    }
+    const destroyedSocket = connections.get(destroyed.id);
+    if (destroyedSocket) {
+      sendTo(destroyedSocket, { type: "destroyed", ...destroyed });
+      sendTo(destroyedSocket, {
+        type: "loginRequired",
+        message: "Ship destroyed. Re-login to respawn."
+      });
+    }
+    removePlayer(destroyed.id);
+    connections.delete(destroyed.id);
+    broadcast({ type: "destroyed", ...destroyed });
+  });
+};
+
 setInterval(() => {
   const now = Date.now();
   let deltaSeconds = (now - lastAiTick) / 1000;
@@ -87,7 +118,25 @@ setInterval(() => {
     deltaSeconds = 0.5;
   }
   lastAiTick = now;
-  tickAiShips(deltaSeconds);
+  const tickReport = tickWorld(deltaSeconds);
+  if (tickReport?.aiShots?.length) {
+    tickReport.aiShots.forEach((shot) => {
+      broadcast({ type: "fire", ...shot });
+    });
+  }
+  if (tickReport?.destroyedPlayers?.length) {
+    handleDestroyedEntities(tickReport.destroyedPlayers);
+  }
+  if (tickReport?.hitPlayers?.length) {
+    tickReport.hitPlayers.forEach((hitId) => {
+      const hitPlayer = getPlayer(hitId);
+      const hitSocket = connections.get(hitId);
+      if (hitPlayer && hitSocket) {
+        persistPlayer(hitPlayer);
+        sendTo(hitSocket, { type: "state", player: getPlayerState(hitPlayer) });
+      }
+    });
+  }
   broadcastPresence(true);
 }, aiTickIntervalMs);
 
@@ -180,28 +229,7 @@ const handleAction = (player, action, socket) => {
   }
 
   if (hitReport.destroyed.length > 0) {
-    hitReport.destroyed.forEach((destroyed) => {
-      const destroyedPlayer = getPlayer(destroyed.id);
-      if (destroyedPlayer) {
-        destroyedPlayer.hull = destroyedPlayer.ship.hull;
-        destroyedPlayer.shield = destroyedPlayer.ship.shield;
-        destroyedPlayer.x = 0;
-        destroyedPlayer.y = 0;
-        destroyedPlayer.planetId = null;
-        persistPlayer(destroyedPlayer);
-      }
-      const destroyedSocket = connections.get(destroyed.id);
-      if (destroyedSocket) {
-        sendTo(destroyedSocket, { type: "destroyed", ...destroyed });
-        sendTo(destroyedSocket, {
-          type: "loginRequired",
-          message: "Ship destroyed. Re-login to respawn."
-        });
-      }
-      removePlayer(destroyed.id);
-      connections.delete(destroyed.id);
-      broadcast({ type: "destroyed", ...destroyed });
-    });
+    handleDestroyedEntities(hitReport.destroyed);
   }
 
   if (shouldBroadcast) {
