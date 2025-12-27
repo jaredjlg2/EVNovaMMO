@@ -10,6 +10,8 @@ const {
 
 const players = new Map();
 const weaponById = new Map(initialWorld.weapons.map((weapon) => [weapon.id, weapon]));
+const shipById = new Map(initialWorld.ships.map((ship) => [ship.id, ship]));
+const tradeInRate = 0.6;
 
 const getPlayer = (id) => players.get(id);
 
@@ -85,7 +87,22 @@ const undock = (player) => {
   appendLog(player, "Launched into space.");
 };
 
+const getDockedPlanetService = (player, service) => {
+  if (!player.planetId) {
+    return null;
+  }
+  const planet = planetById.get(player.planetId);
+  if (!planet || !planet[service]) {
+    return null;
+  }
+  return planet;
+};
+
 const buyWeapon = (player, weaponId) => {
+  if (!getDockedPlanetService(player, "outfitter")) {
+    appendLog(player, "Outfitter service unavailable here.");
+    return;
+  }
   const weapon = initialWorld.weapons.find((item) => item.id === weaponId);
   if (!weapon) {
     appendLog(player, "Weapon unavailable.");
@@ -105,6 +122,10 @@ const buyWeapon = (player, weaponId) => {
 };
 
 const buyOutfit = (player, outfitId) => {
+  if (!getDockedPlanetService(player, "outfitter")) {
+    appendLog(player, "Outfitter service unavailable here.");
+    return;
+  }
   const outfit = initialWorld.outfits.find((item) => item.id === outfitId);
   if (!outfit) {
     appendLog(player, "Outfit unavailable.");
@@ -117,6 +138,49 @@ const buyOutfit = (player, outfitId) => {
   player.credits -= outfit.price;
   player.outfits.push(outfitId);
   appendLog(player, `Installed ${outfit.name}.`);
+};
+
+const buyShip = (player, shipId) => {
+  if (!getDockedPlanetService(player, "shipyard")) {
+    appendLog(player, "Shipyard service unavailable here.");
+    return;
+  }
+  const ship = shipById.get(shipId);
+  if (!ship) {
+    appendLog(player, "Ship unavailable.");
+    return;
+  }
+  if (player.ship.id === shipId) {
+    appendLog(player, "Already piloting this ship.");
+    return;
+  }
+  const currentShip = shipById.get(player.ship.id);
+  const tradeInValue = currentShip ? Math.round(currentShip.price * tradeInRate) : 0;
+  const netCost = Math.max(0, ship.price - tradeInValue);
+  if (player.credits < netCost) {
+    appendLog(player, "Insufficient credits.");
+    return;
+  }
+  player.credits -= netCost;
+  player.ship = {
+    id: ship.id,
+    name: ship.name,
+    hull: ship.hull,
+    shield: ship.shield,
+    cargo: ship.cargo,
+    fuel: ship.fuel,
+    hardpoints: ship.hardpoints
+  };
+  player.hull = ship.hull;
+  player.shield = ship.shield;
+  if (player.weapons.length > ship.hardpoints) {
+    player.weapons = player.weapons.slice(0, ship.hardpoints);
+    appendLog(player, "Hardpoints limited: some weapons were removed.");
+  }
+  appendLog(
+    player,
+    `Purchased ${ship.name}. Trade-in value: ${tradeInValue} credits.`
+  );
 };
 
 const acceptMission = (player, missionId) => {
@@ -300,6 +364,7 @@ module.exports = {
   undock,
   buyWeapon,
   buyOutfit,
+  buyShip,
   acceptMission,
   completeMissions,
   getAvailableMissions

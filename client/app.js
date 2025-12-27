@@ -5,6 +5,7 @@ const systemNameEl = document.getElementById("systemName");
 const shipInfoEl = document.getElementById("shipInfo");
 const weaponListEl = document.getElementById("weaponList");
 const outfitListEl = document.getElementById("outfitList");
+const shipListEl = document.getElementById("shipList");
 const missionBoardEl = document.getElementById("missionBoard");
 const missionDetailEl = document.getElementById("missionDetail");
 const dockedPanelEl = document.getElementById("dockedPanel");
@@ -100,6 +101,17 @@ const sendAction = (payload) => {
 };
 
 const formatCredits = (value) => `${value.toLocaleString()} cr`;
+
+const getShipTradeInValue = () => {
+  if (!player || !world) {
+    return 0;
+  }
+  const currentShip = world.ships.find((ship) => ship.id === player.ship.id);
+  if (!currentShip) {
+    return 0;
+  }
+  return Math.round(currentShip.price * 0.6);
+};
 
 const loadStoredPilots = () => {
   try {
@@ -962,6 +974,37 @@ const renderOutfits = () => {
   });
 };
 
+const renderShipyard = () => {
+  if (!player || !world) {
+    return;
+  }
+  shipListEl.innerHTML = "";
+  const tradeInValue = getShipTradeInValue();
+  world.ships.forEach((ship) => {
+    const card = document.createElement("div");
+    card.className = "list-item";
+    const isCurrent = ship.id === player.ship.id;
+    const netCost = Math.max(0, ship.price - tradeInValue);
+    const statusLine = isCurrent ? "<p>Current ship.</p>" : "";
+    card.innerHTML = `
+      <h4>${ship.name}</h4>
+      <p>Hull: ${ship.hull} · Shield: ${ship.shield} · Cargo: ${ship.cargo}</p>
+      <p>Fuel: ${ship.fuel} · Hardpoints: ${ship.hardpoints}</p>
+      <p>Sticker: ${formatCredits(ship.price)} · Trade-in: ${formatCredits(tradeInValue)}</p>
+      <p>Net cost: ${formatCredits(netCost)}</p>
+      ${statusLine}
+    `;
+    const buyBtn = document.createElement("button");
+    buyBtn.textContent = isCurrent ? "Current" : "Buy";
+    buyBtn.disabled = isCurrent || player.credits < netCost;
+    buyBtn.addEventListener("click", () => {
+      sendAction({ type: "buyShip", shipId: ship.id });
+    });
+    card.appendChild(buyBtn);
+    shipListEl.appendChild(card);
+  });
+};
+
 const renderMissions = (missions) => {
   if (!missions || !world) {
     return;
@@ -1096,14 +1139,16 @@ const refreshUi = () => {
 
     if (planet?.outfitter) {
       renderOutfits();
+      renderWeapons();
     } else {
       outfitListEl.innerHTML = "<p>Outfitter unavailable here.</p>";
+      weaponListEl.innerHTML = "<p>Outfitter unavailable here.</p>";
     }
 
     if (planet?.shipyard) {
-      renderWeapons();
+      renderShipyard();
     } else {
-      weaponListEl.innerHTML = "<p>Shipyard access unavailable here.</p>";
+      shipListEl.innerHTML = "<p>Shipyard access unavailable here.</p>";
     }
   } else {
     missionBoardEl.innerHTML = "<p>Dock to access the mission board.</p>";
@@ -1111,7 +1156,8 @@ const refreshUi = () => {
       missionDetailEl.innerHTML = "<p>Dock to access the mission board.</p>";
     }
     outfitListEl.innerHTML = "<p>Dock to access the outfitter.</p>";
-    weaponListEl.innerHTML = "<p>Dock to access the shipyard.</p>";
+    weaponListEl.innerHTML = "<p>Dock to access the outfitter.</p>";
+    shipListEl.innerHTML = "<p>Dock to access the shipyard.</p>";
     availableMissions = [];
     highlightedMissionId = null;
   }
