@@ -61,7 +61,7 @@ const sendTo = (socket, payload) => {
 const handleAction = (player, action, socket) => {
   let shouldPersist = true;
   let shouldBroadcast = true;
-  let hitPlayers = [];
+  let hitReport = { hits: [], destroyed: [] };
 
   switch (action.type) {
     case "jump":
@@ -96,8 +96,8 @@ const handleAction = (player, action, socket) => {
       shouldPersist = false;
       break;
     case "fire":
-      hitPlayers = fireWeapons(player, action);
-      shouldPersist = hitPlayers.length > 0;
+      hitReport = fireWeapons(player, action);
+      shouldPersist = hitReport.hits.length > 0;
       break;
     default:
       break;
@@ -124,12 +124,41 @@ const handleAction = (player, action, socket) => {
     });
   }
 
+  if (hitReport.destroyed.length > 0) {
+    hitReport.destroyed.forEach((destroyed) => {
+      const destroyedPlayer = getPlayer(destroyed.id);
+      if (destroyedPlayer) {
+        destroyedPlayer.hull = destroyedPlayer.ship.hull;
+        destroyedPlayer.shield = destroyedPlayer.ship.shield;
+        destroyedPlayer.x = 0;
+        destroyedPlayer.y = 0;
+        destroyedPlayer.planetId = null;
+        persistPlayer(destroyedPlayer);
+      }
+      const destroyedSocket = connections.get(destroyed.id);
+      if (destroyedSocket) {
+        sendTo(destroyedSocket, { type: "destroyed", ...destroyed });
+        sendTo(destroyedSocket, {
+          type: "loginRequired",
+          message: "Ship destroyed. Re-login to respawn."
+        });
+      }
+      removePlayer(destroyed.id);
+      connections.delete(destroyed.id);
+      broadcast({ type: "destroyed", ...destroyed });
+    });
+  }
+
   if (shouldBroadcast) {
     broadcast({ type: "presence", players: getSystemStatus() });
   }
 
-  if (hitPlayers.length > 0) {
-    hitPlayers.forEach((hitId) => {
+  if (hitReport.hits.length > 0) {
+    const destroyedIds = new Set(hitReport.destroyed.map((entry) => entry.id));
+    hitReport.hits.forEach((hitId) => {
+      if (destroyedIds.has(hitId)) {
+        return;
+      }
       const hitPlayer = getPlayer(hitId);
       const hitSocket = connections.get(hitId);
       if (hitPlayer && hitSocket) {

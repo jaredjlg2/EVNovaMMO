@@ -62,6 +62,7 @@ const flightState = {
 
 const keysPressed = new Set();
 const projectiles = [];
+const explosions = [];
 const jumpState = {
   active: false,
   phase: "idle",
@@ -85,6 +86,8 @@ const starField = {
     alpha: Math.random() * 0.6 + 0.3
   }))
 };
+
+const shipHitRadius = 16;
 
 const sendAction = (payload) => {
   if (!socket || socket.readyState !== 1) {
@@ -367,7 +370,7 @@ const handleMapClick = (event) => {
   }
 };
 
-const spawnProjectiles = (originX, originY, angle, weaponIds) => {
+const spawnProjectiles = (originX, originY, angle, weaponIds, ownerId = null) => {
   const resolvedWeapons = weaponIds.length > 0 ? weaponIds : ["pulse_laser"];
   const spacing = 8;
   const forwardOffset = 18;
@@ -388,8 +391,22 @@ const spawnProjectiles = (originX, originY, angle, weaponIds) => {
       vy: sin * 520,
       life: 0.8,
       angle,
-      style
+      style,
+      ownerId
     });
+  });
+};
+
+const spawnExplosion = (x, y, options = {}) => {
+  const { maxLife = 0.6, maxRadius = 32, color = "#ffb772", glow = "#ff6f4a" } = options;
+  explosions.push({
+    x,
+    y,
+    life: maxLife,
+    maxLife,
+    maxRadius,
+    color,
+    glow
   });
 };
 
@@ -398,7 +415,7 @@ const firePrimaryWeapons = () => {
     return;
   }
   const weaponIds = player.weapons.length > 0 ? player.weapons : ["pulse_laser"];
-  spawnProjectiles(flightState.x, flightState.y, flightState.angle, weaponIds);
+  spawnProjectiles(flightState.x, flightState.y, flightState.angle, weaponIds, player.id);
   sendAction({
     type: "fire",
     x: flightState.x,
@@ -422,13 +439,44 @@ const getVisiblePlayers = () => {
   );
 };
 
+const getProjectileTargets = () => {
+  const targets = getVisiblePlayers().map((other) => ({
+    id: other.id,
+    x: other.x,
+    y: other.y
+  }));
+  if (player && isLoggedIn && !player.planetId) {
+    targets.push({ id: player.id, x: flightState.x, y: flightState.y });
+  }
+  return targets;
+};
+
 const updateProjectiles = (deltaSeconds) => {
+  const targets = getProjectileTargets();
   for (let i = projectiles.length - 1; i >= 0; i -= 1) {
     const projectile = projectiles[i];
     projectile.x += projectile.vx * deltaSeconds;
     projectile.y += projectile.vy * deltaSeconds;
     projectile.life -= deltaSeconds;
-    if (projectile.life <= 0) {
+    let hitTarget = false;
+    for (let t = 0; t < targets.length; t += 1) {
+      const target = targets[t];
+      if (projectile.ownerId && projectile.ownerId === target.id) {
+        continue;
+      }
+      const distance = Math.hypot(projectile.x - target.x, projectile.y - target.y);
+      if (distance <= shipHitRadius) {
+        hitTarget = true;
+        spawnExplosion(projectile.x, projectile.y, {
+          maxLife: 0.25,
+          maxRadius: 16,
+          color: "#ffd27a",
+          glow: "#ff7f62"
+        });
+        break;
+      }
+    }
+    if (projectile.life <= 0 || hitTarget) {
       projectiles.splice(i, 1);
     }
   }
@@ -448,6 +496,42 @@ const renderProjectiles = (ctx, centerX, centerY) => {
     ctx.beginPath();
     ctx.moveTo(-projectile.style.length, 0);
     ctx.lineTo(0, 0);
+    ctx.stroke();
+    ctx.restore();
+  });
+};
+
+const updateExplosions = (deltaSeconds) => {
+  for (let i = explosions.length - 1; i >= 0; i -= 1) {
+    const explosion = explosions[i];
+    explosion.life -= deltaSeconds;
+    if (explosion.life <= 0) {
+      explosions.splice(i, 1);
+    }
+  }
+};
+
+const renderExplosions = (ctx, centerX, centerY) => {
+  explosions.forEach((explosion) => {
+    const screenX = centerX + (explosion.x - flightState.x);
+    const screenY = centerY + (explosion.y - flightState.y);
+    const progress = 1 - explosion.life / explosion.maxLife;
+    const radius = explosion.maxRadius * (0.4 + progress * 0.6);
+    const alpha = explosion.life / explosion.maxLife;
+    ctx.save();
+    ctx.translate(screenX, screenY);
+    ctx.globalAlpha = alpha;
+    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+    gradient.addColorStop(0, explosion.color);
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = explosion.glow;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.6, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
   });
@@ -606,6 +690,7 @@ const renderFlight = (now) => {
   flightState.lastFrame = now;
   updateFlight(deltaSeconds);
   updateProjectiles(deltaSeconds);
+  updateExplosions(deltaSeconds);
   updateJumpSequence(now);
 
   const { width, height } = flightCanvas;
@@ -727,6 +812,7 @@ const renderFlight = (now) => {
 
   if (player && isLoggedIn) {
     renderProjectiles(ctx, centerX, centerY);
+    renderExplosions(ctx, centerX, centerY);
   }
 
   if (!player || !isLoggedIn) {
@@ -951,7 +1037,12 @@ const connect = () => {
   socket.addEventListener("message", (event) => {
     const payload = JSON.parse(event.data);
     if (payload.type === "loginRequired") {
-      showLoginOverlay();
+      isLoggedIn = false;
+      player = null;
+      presencePlayers = [];
+      projectiles.length = 0;
+      explosions.length = 0;
+      showLoginOverlay(payload.message || "");
       return;
     }
     if (payload.type === "loginError") {
@@ -995,7 +1086,24 @@ const connect = () => {
         return;
       }
       const weaponIds = Array.isArray(payload.weapons) ? payload.weapons : ["pulse_laser"];
-      spawnProjectiles(originX, originY, angle, weaponIds);
+      const ownerId = payload.shooterId || null;
+      spawnProjectiles(originX, originY, angle, weaponIds, ownerId);
+    }
+    if (payload.type === "destroyed") {
+      if (payload.systemId && player?.systemId !== payload.systemId) {
+        return;
+      }
+      if (typeof payload.x === "number" && typeof payload.y === "number") {
+        spawnExplosion(payload.x, payload.y, { maxLife: 0.8, maxRadius: 48 });
+      }
+      if (payload.playerId === player?.id) {
+        isLoggedIn = false;
+        player = null;
+        presencePlayers = [];
+        projectiles.length = 0;
+        explosions.length = 0;
+        showLoginOverlay("Ship destroyed. Re-login to respawn.");
+      }
     }
     if (payload.type === "missions") {
       renderMissions(payload.missions);
