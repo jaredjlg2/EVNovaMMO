@@ -40,6 +40,7 @@ let planetPositions = new Map();
 let mapOpen = false;
 let routePlan = [];
 let presencePlayers = [];
+const presenceSnapshots = new Map();
 let positionInterval = null;
 let availableMissions = [];
 let highlightedMissionId = null;
@@ -483,11 +484,63 @@ const firePrimaryWeapons = () => {
   });
 };
 
+const lerp = (start, end, t) => start + (end - start) * t;
+
+const lerpAngle = (start, end, t) => {
+  const delta = Math.atan2(Math.sin(end - start), Math.cos(end - start));
+  return start + delta * t;
+};
+
+const updatePresencePlayers = (players) => {
+  presencePlayers = players;
+  const now = performance.now();
+  const seen = new Set();
+  players.forEach((entry) => {
+    if (!entry?.id) {
+      return;
+    }
+    seen.add(entry.id);
+    const previous = presenceSnapshots.get(entry.id);
+    const prevX = previous ? previous.currX : entry.x ?? 0;
+    const prevY = previous ? previous.currY : entry.y ?? 0;
+    const prevAngle =
+      previous?.currAngle ?? (typeof entry.angle === "number" ? entry.angle : 0);
+    const interval = previous ? Math.min(Math.max(now - previous.updatedAt, 80), 320) : 160;
+    presenceSnapshots.set(entry.id, {
+      data: entry,
+      prevX,
+      prevY,
+      currX: typeof entry.x === "number" ? entry.x : prevX,
+      currY: typeof entry.y === "number" ? entry.y : prevY,
+      prevAngle,
+      currAngle: typeof entry.angle === "number" ? entry.angle : prevAngle,
+      updatedAt: now,
+      interval
+    });
+  });
+  Array.from(presenceSnapshots.keys()).forEach((id) => {
+    if (!seen.has(id)) {
+      presenceSnapshots.delete(id);
+    }
+  });
+};
+
 const getVisiblePlayers = () => {
   if (!player) {
     return [];
   }
-  return presencePlayers.filter(
+  const now = performance.now();
+  const smoothed = Array.from(presenceSnapshots.values()).map((snapshot) => {
+    const t =
+      snapshot.interval > 0
+        ? Math.min((now - snapshot.updatedAt) / snapshot.interval, 1)
+        : 1;
+    const x = lerp(snapshot.prevX, snapshot.currX, t);
+    const y = lerp(snapshot.prevY, snapshot.currY, t);
+    const angle = lerpAngle(snapshot.prevAngle, snapshot.currAngle, t);
+    return { ...snapshot.data, x, y, angle };
+  });
+  return smoothed.filter(
     (other) =>
       other.id !== player.id &&
       other.systemId === player.systemId &&
@@ -1140,6 +1193,7 @@ const connect = () => {
     isLoggedIn = false;
     player = null;
     presencePlayers = [];
+    presenceSnapshots.clear();
     pilotNameDisplayEl.textContent = "";
     showLoginOverlay("Connection lost. Please reconnect.");
   });
@@ -1150,6 +1204,7 @@ const connect = () => {
       isLoggedIn = false;
       player = null;
       presencePlayers = [];
+      presenceSnapshots.clear();
       projectiles.length = 0;
       explosions.length = 0;
       showLoginOverlay(payload.message || "");
@@ -1162,7 +1217,7 @@ const connect = () => {
     if (payload.type === "init") {
       world = payload.world;
       player = payload.player;
-      presencePlayers = payload.players || [];
+      updatePresencePlayers(payload.players || []);
       isLoggedIn = true;
       saveStoredPilot(player.name);
       hideLoginOverlay();
@@ -1176,7 +1231,7 @@ const connect = () => {
       return;
     }
     if (payload.type === "presence") {
-      presencePlayers = payload.players || [];
+      updatePresencePlayers(payload.players || []);
       return;
     }
     if (payload.type === "fire") {
@@ -1210,6 +1265,7 @@ const connect = () => {
         isLoggedIn = false;
         player = null;
         presencePlayers = [];
+        presenceSnapshots.clear();
         projectiles.length = 0;
         explosions.length = 0;
         showLoginOverlay("Ship destroyed. Re-login to respawn.");

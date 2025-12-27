@@ -26,9 +26,9 @@ const buildPlanetPositions = () => {
 buildPlanetPositions();
 
 const trafficLevels = {
-  light: { min: 2, max: 4 },
-  medium: { min: 4, max: 7 },
-  heavy: { min: 7, max: 11 }
+  light: { min: 1, max: 3 },
+  medium: { min: 3, max: 6 },
+  heavy: { min: 6, max: 9 }
 };
 
 const systemTraffic = {
