@@ -308,7 +308,8 @@ const spawnAiShip = (systemId) => {
       targetY: planetPosition?.y ?? 0,
       stateUntil: 0,
       nextWaypointAt: 0,
-      lastAttackAt: 0
+      lastAttackAt: 0,
+      hostileTo: new Set()
     }
   };
   aiShips.set(shipId, newShip);
@@ -341,6 +342,27 @@ const applyDamage = (ship, damage) => {
     ship.hull = Math.max(0, ship.hull - remaining);
   }
 };
+
+const markShipHostileToPlayer = (shipId, playerId) => {
+  const ship = aiShips.get(shipId);
+  if (!ship || !playerId) {
+    return null;
+  }
+  if (!ship.ai.hostileTo) {
+    ship.ai.hostileTo = new Set();
+  }
+  ship.ai.hostileTo.add(playerId);
+  return ship;
+};
+
+const getAiShips = () => Array.from(aiShips.values());
+
+const removeAiShip = (shipId) => {
+  aiShips.delete(shipId);
+};
+
+const getRoleCombatProfile = (role) =>
+  roleCombatProfile[role] || roleCombatProfile.courier;
 
 const isHostile = (system, ship, other) => {
   if (!ship.factionId || !other.factionId) {
@@ -503,10 +525,16 @@ const getAiShipStatus = () =>
     angle: ship.angle,
     hull: ship.hull,
     shield: ship.shield,
-    factionId: ship.factionId
+    factionId: ship.factionId,
+    isAi: true,
+    hostileTo: Array.from(ship.ai.hostileTo || [])
   }));
 
 module.exports = {
   tickAiShips,
-  getAiShipStatus
+  getAiShipStatus,
+  getAiShips,
+  markShipHostileToPlayer,
+  removeAiShip,
+  getRoleCombatProfile
 };
