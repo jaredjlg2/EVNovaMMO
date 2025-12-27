@@ -11,6 +11,13 @@ const missionBoardEl = document.getElementById("missionBoard");
 const missionDetailEl = document.getElementById("missionDetail");
 const dockedPanelEl = document.getElementById("dockedPanel");
 const dockedInfoEl = document.getElementById("dockedInfo");
+const dockedMenuEl = document.getElementById("dockedMenu");
+const dockedBackBtn = document.getElementById("dockedBackBtn");
+const dockedMenuMissionBtn = document.getElementById("dockedMenuMissions");
+const dockedMenuTradingBtn = document.getElementById("dockedMenuTrading");
+const dockedMenuOutfitterBtn = document.getElementById("dockedMenuOutfitter");
+const dockedMenuShipyardBtn = document.getElementById("dockedMenuShipyard");
+const dockedMenuBarBtn = document.getElementById("dockedMenuBar");
 const cargoSummaryEl = document.getElementById("cargoSummary");
 const tradeListEl = document.getElementById("tradeList");
 const logEl = document.getElementById("log");
@@ -33,6 +40,14 @@ const loginHintEl = document.getElementById("loginHint");
 
 const undockBtn = document.getElementById("undockBtn");
 const completeBtn = document.getElementById("completeBtn");
+const dockedSectionEls = Array.from(document.querySelectorAll(".docked-section"));
+const dockedMenuButtons = [
+  dockedMenuMissionBtn,
+  dockedMenuTradingBtn,
+  dockedMenuOutfitterBtn,
+  dockedMenuShipyardBtn,
+  dockedMenuBarBtn
+];
 
 let world = null;
 let player = null;
@@ -49,6 +64,8 @@ let positionInterval = null;
 let availableMissions = [];
 let highlightedMissionId = null;
 let marketGoods = [];
+let activeDockedSection = null;
+let lastDockedPlanetId = null;
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
@@ -1301,6 +1318,54 @@ const renderDockedInfo = () => {
   `;
 };
 
+const setDockedSection = (section) => {
+  activeDockedSection = section;
+  if (dockedMenuEl) {
+    dockedMenuEl.classList.toggle("hidden", Boolean(section));
+  }
+  if (dockedBackBtn) {
+    dockedBackBtn.classList.toggle("hidden", !section);
+  }
+  dockedSectionEls.forEach((el) => {
+    const isActive = el.dataset.section === section;
+    el.classList.toggle("hidden", !isActive);
+  });
+};
+
+const updateDockedMenuAvailability = (planet) => {
+  if (!planet) {
+    dockedMenuButtons.forEach((button) => {
+      if (button) {
+        button.disabled = true;
+      }
+    });
+    return;
+  }
+  if (dockedMenuMissionBtn) {
+    dockedMenuMissionBtn.disabled = !planet.missionBoard;
+  }
+  if (dockedMenuOutfitterBtn) {
+    dockedMenuOutfitterBtn.disabled = !planet.outfitter;
+  }
+  if (dockedMenuShipyardBtn) {
+    dockedMenuShipyardBtn.disabled = !planet.shipyard;
+  }
+  if (dockedMenuTradingBtn) {
+    dockedMenuTradingBtn.disabled = false;
+  }
+  if (dockedMenuBarBtn) {
+    dockedMenuBarBtn.disabled = false;
+  }
+  if (activeDockedSection) {
+    const disabledSection = dockedMenuButtons.find(
+      (button) => button?.dataset.section === activeDockedSection && button.disabled
+    );
+    if (disabledSection) {
+      setDockedSection(null);
+    }
+  }
+};
+
 const refreshUi = () => {
   if (!player) {
     return;
@@ -1320,6 +1385,11 @@ const refreshUi = () => {
 
   if (docked) {
     const planet = getCurrentPlanet();
+    if (player.planetId !== lastDockedPlanetId) {
+      setDockedSection(null);
+      lastDockedPlanetId = player.planetId;
+    }
+    updateDockedMenuAvailability(planet);
     if (planet?.missionBoard) {
       sendAction({ type: "requestMissions" });
     } else {
@@ -1348,6 +1418,9 @@ const refreshUi = () => {
       shipListEl.innerHTML = "<p>Shipyard access unavailable here.</p>";
     }
   } else {
+    setDockedSection(null);
+    lastDockedPlanetId = null;
+    updateDockedMenuAvailability(null);
     missionBoardEl.innerHTML = "<p>Dock to access the mission board.</p>";
     if (missionDetailEl) {
       missionDetailEl.innerHTML = "<p>Dock to access the mission board.</p>";
@@ -1480,6 +1553,24 @@ undockBtn.addEventListener("click", () => {
 completeBtn.addEventListener("click", () => {
   sendAction({ type: "completeMissions" });
 });
+
+dockedMenuButtons.forEach((button) => {
+  if (!button) {
+    return;
+  }
+  button.addEventListener("click", () => {
+    if (button.disabled) {
+      return;
+    }
+    setDockedSection(button.dataset.section ?? null);
+  });
+});
+
+if (dockedBackBtn) {
+  dockedBackBtn.addEventListener("click", () => {
+    setDockedSection(null);
+  });
+}
 
 loginFormEl.addEventListener("submit", (event) => {
   event.preventDefault();
