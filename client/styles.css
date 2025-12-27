@@ -20,6 +20,10 @@ body {
   background: #05070f;
 }
 
+.hidden {
+  display: none;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
