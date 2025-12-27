@@ -1,5 +1,6 @@
 const { createPlayer } = require("./player");
 const { loadPilot, savePilot } = require("./storage");
+const { getAiShipStatus, tickAiShips } = require("./ai");
 const {
   initialWorld,
   planetById,
@@ -180,18 +181,21 @@ const getPlayerState = (player) => ({
 const getWorldState = () => initialWorld;
 
 const getSystemStatus = () =>
-  Array.from(players.values()).map((player) => ({
-    id: player.id,
-    name: player.name,
-    systemId: player.systemId,
-    planetId: player.planetId,
-    ship: player.ship,
-    x: player.x,
-    y: player.y,
-    angle: player.angle,
-    hull: player.hull,
-    shield: player.shield
-  }));
+  [
+    ...Array.from(players.values()).map((player) => ({
+      id: player.id,
+      name: player.name,
+      systemId: player.systemId,
+      planetId: player.planetId,
+      ship: player.ship,
+      x: player.x,
+      y: player.y,
+      angle: player.angle,
+      hull: player.hull,
+      shield: player.shield
+    })),
+    ...getAiShipStatus()
+  ];
 
 const updatePosition = (player, { x, y, angle }) => {
   if (typeof x === "number") {
@@ -288,6 +292,7 @@ module.exports = {
   getPlayerState,
   getWorldState,
   getSystemStatus,
+  tickAiShips,
   updatePosition,
   fireWeapons,
   jumpSystem,

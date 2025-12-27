@@ -12,6 +12,7 @@ const {
   persistPlayer,
   updatePosition,
   fireWeapons,
+  tickAiShips,
   jumpSystem,
   dockPlanet,
   undock,
@@ -42,6 +43,7 @@ const server = app.listen(port, () => {
 
 const wss = new WebSocketServer({ server });
 const connections = new Map();
+const aiTickIntervalMs = 200;
 
 const broadcast = (payload) => {
   const message = JSON.stringify(payload);
@@ -57,6 +59,13 @@ const sendTo = (socket, payload) => {
     socket.send(JSON.stringify(payload));
   }
 };
+
+setInterval(() => {
+  tickAiShips(aiTickIntervalMs / 1000);
+  if (wss.clients.size > 0) {
+    broadcast({ type: "presence", players: getSystemStatus() });
+  }
+}, aiTickIntervalMs);
 
 const handleAction = (player, action, socket) => {
   let shouldPersist = true;
