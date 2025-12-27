@@ -10,6 +10,8 @@ const {
   getWorldState,
   getSystemStatus,
   persistPlayer,
+  updatePosition,
+  fireWeapons,
   jumpSystem,
   dockPlanet,
   undock,
@@ -39,6 +41,7 @@ const server = app.listen(port, () => {
 });
 
 const wss = new WebSocketServer({ server });
+const connections = new Map();
 
 const broadcast = (payload) => {
   const message = JSON.stringify(payload);
@@ -56,6 +59,10 @@ const sendTo = (socket, payload) => {
 };
 
 const handleAction = (player, action, socket) => {
+  let shouldPersist = true;
+  let shouldBroadcast = true;
+  let hitPlayers = [];
+
   switch (action.type) {
     case "jump":
       jumpSystem(player, action.systemId);
@@ -84,16 +91,53 @@ const handleAction = (player, action, socket) => {
         missions: getAvailableMissions(player.planetId)
       });
       return;
+    case "position":
+      updatePosition(player, action);
+      shouldPersist = false;
+      break;
+    case "fire":
+      hitPlayers = fireWeapons(player, action);
+      shouldPersist = hitPlayers.length > 0;
+      break;
     default:
       break;
   }
 
-  persistPlayer(player);
+  if (shouldPersist) {
+    persistPlayer(player);
+  }
+
   sendTo(socket, {
     type: "state",
     player: getPlayerState(player)
   });
-  broadcast({ type: "presence", players: getSystemStatus() });
+
+  if (action.type === "fire") {
+    broadcast({
+      type: "fire",
+      shooterId: player.id,
+      systemId: player.systemId,
+      x: player.x,
+      y: player.y,
+      angle: player.angle,
+      weapons: player.weapons
+    });
+  }
+
+  if (shouldBroadcast) {
+    broadcast({ type: "presence", players: getSystemStatus() });
+  }
+
+  if (hitPlayers.length > 0) {
+    hitPlayers.forEach((hitId) => {
+      const hitPlayer = getPlayer(hitId);
+      const hitSocket = connections.get(hitId);
+      if (hitPlayer && hitSocket) {
+        persistPlayer(hitPlayer);
+        sendTo(hitSocket, { type: "state", player: getPlayerState(hitPlayer) });
+      }
+    });
+  }
 };
 
 wss.on("connection", (socket) => {
@@ -119,6 +163,7 @@ wss.on("connection", (socket) => {
         }
         playerId = Math.random().toString(36).slice(2, 9);
         const player = addPlayer({ id: playerId, name });
+        connections.set(playerId, socket);
         persistPlayer(player);
         sendTo(socket, {
           type: "init",
@@ -152,6 +197,7 @@ wss.on("connection", (socket) => {
         persistPlayer(existingPlayer);
       }
       removePlayer(playerId);
+      connections.delete(playerId);
     }
     broadcast({ type: "presence", players: getSystemStatus() });
   });
