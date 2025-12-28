@@ -1,0 +1,22 @@
+Ship image roster
+
+Place ship PNGs in this folder named with the ship id from the data list.
+Example: shuttle.png, courier.png, frigate.png, etc.
+
+Format: id | name | type | class | description
+
+shuttle | Drifter Shuttle | Shuttle | Light Utility | Starter utility shuttle built for basic transport and short-range runs.
+courier | Wayfarer Courier | Courier | Light | Fast courier designed for quick deliveries and light cargo.
+frigate | Frontier Frigate | Frigate | Medium | Patrol frigate with balanced combat and endurance.
+sparrow_mk1 | Sparrow Mk I | Fighter | Light | Agile light fighter focused on speed and intercepts.
+sparrow_mk2 | Sparrow Mk II | Fighter | Medium | Up-armored medium fighter with improved firepower.
+vanguard | Vanguard Talon | Fighter | Heavy | Heavy fighter built to take hits and deliver sustained damage.
+wisp_runner | Wisp Runner | Escort | Light | Light escort craft optimized for screening and pursuit.
+bastion_guard | Bastion Guard | Escort | Medium | Medium escort with reinforced defenses for convoy protection.
+ironclad | Ironclad Ward | Escort | Heavy | Heavy escort that anchors formations with heavy plating.
+pioneer_hauler | Pioneer Hauler | Freighter | Small | Compact freighter built for early trade lanes.
+atlas_bulk | Atlas Bulk | Freighter | Medium | Mid-size bulk hauler with expanded cargo holds.
+caravel_super | Caravel Super | Freighter | Heavy | Heavy freighter for high-volume, long-haul shipments.
+nomad_liner | Nomad Liner | Freighter | Passenger | Passenger liner configured for civilian transport.
+ember_skiff | Ember Skiff | Scout | Light | Lightweight scout for exploration and recon.
+aurora_clipper | Aurora Clipper | Trader | Fast | Fast trader optimized for speed and agile commerce runs.

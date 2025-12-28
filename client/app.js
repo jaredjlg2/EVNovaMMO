@@ -117,6 +117,27 @@ const starField = {
 };
 
 const shipHitRadius = 16;
+const shipSprites = new Map();
+const shipSpriteBasePath = "images/ships";
+
+const loadShipSprites = (ships = []) => {
+  ships.forEach((ship) => {
+    if (!ship?.id || shipSprites.has(ship.id)) {
+      return;
+    }
+    const sprite = { image: new Image(), loaded: false, failed: false };
+    sprite.image.onload = () => {
+      sprite.loaded = true;
+    };
+    sprite.image.onerror = () => {
+      sprite.failed = true;
+    };
+    sprite.image.src = `${shipSpriteBasePath}/${ship.id}.png`;
+    shipSprites.set(ship.id, sprite);
+  });
+};
+
+const getShipSprite = (shipId) => (shipId ? shipSprites.get(shipId) : null);
 
 const sendAction = (payload) => {
   if (!socket || socket.readyState !== 1) {
@@ -751,6 +772,36 @@ const renderExplosions = (ctx, centerX, centerY) => {
   });
 };
 
+const renderShipIcon = (ctx, shipId, angle, options = {}) => {
+  const size = options.size ?? 30;
+  const fallbackColor = options.fallbackColor ?? "#8bd4ff";
+  const outlineColor = options.outlineColor ?? null;
+  const sprite = getShipSprite(shipId);
+
+  ctx.save();
+  ctx.rotate(angle + Math.PI / 2);
+  if (sprite?.loaded) {
+    ctx.drawImage(sprite.image, -size / 2, -size / 2, size, size);
+  } else {
+    ctx.fillStyle = fallbackColor;
+    ctx.beginPath();
+    ctx.moveTo(0, -(size * 0.55));
+    ctx.lineTo(size * 0.4, size * 0.4);
+    ctx.lineTo(0, size * 0.2);
+    ctx.lineTo(-size * 0.4, size * 0.4);
+    ctx.closePath();
+    ctx.fill();
+  }
+  if (outlineColor) {
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+};
+
 const startJumpSequence = (targetSystemId) => {
   jumpState.active = true;
   jumpState.phase = "spool";
@@ -994,18 +1045,14 @@ const renderFlight = (now) => {
       }
       ctx.save();
       ctx.translate(screenX, screenY);
-      ctx.rotate((other.angle ?? 0) + Math.PI / 2);
       const isHostile = other.isAi
         ? (other.hostileTo || []).includes(player.id)
         : true;
-      ctx.fillStyle = isHostile ? "#ff7a7a" : "#7ad2ff";
-      ctx.beginPath();
-      ctx.moveTo(0, -12);
-      ctx.lineTo(9, 9);
-      ctx.lineTo(0, 5);
-      ctx.lineTo(-9, 9);
-      ctx.closePath();
-      ctx.fill();
+      renderShipIcon(ctx, other.ship?.id, other.angle ?? 0, {
+        size: 28,
+        fallbackColor: isHostile ? "#ff7a7a" : "#7ad2ff",
+        outlineColor: isHostile ? "rgba(255, 122, 122, 0.6)" : "rgba(122, 210, 255, 0.6)"
+      });
       ctx.restore();
 
       ctx.fillStyle = isHostile ? "rgba(255, 210, 210, 0.9)" : "rgba(190, 230, 255, 0.9)";
@@ -1015,15 +1062,10 @@ const renderFlight = (now) => {
 
     ctx.save();
     ctx.translate(centerX, centerY);
-    ctx.rotate(flightState.angle + Math.PI / 2);
-    ctx.fillStyle = "#8bd4ff";
-    ctx.beginPath();
-    ctx.moveTo(0, -14);
-    ctx.lineTo(10, 10);
-    ctx.lineTo(0, 6);
-    ctx.lineTo(-10, 10);
-    ctx.closePath();
-    ctx.fill();
+    renderShipIcon(ctx, player.ship?.id, flightState.angle, {
+      size: 32,
+      fallbackColor: "#8bd4ff"
+    });
     ctx.restore();
   }
 
@@ -1518,6 +1560,7 @@ const connect = () => {
     }
     if (payload.type === "init") {
       world = payload.world;
+      loadShipSprites(world?.ships || []);
       player = payload.player;
       updatePresencePlayers(payload.players || []);
       isLoggedIn = true;
