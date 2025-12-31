@@ -53,7 +53,7 @@
           <p id="weaponStatus" class="hud-emphasis"></p>
           <p class="hud-hint">
             W/↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · Tab = cycle targets ·
-            R = lock nearest hostile · L to dock · M for map · J to jump
+            R = lock nearest hostile · L to dock · M for map · J to jump · I for mission log
           </p>
         </section>
         <section class="hud-section hidden" id="dockedPanel">
@@ -138,6 +138,18 @@
             <button id="clearRouteBtn" type="button">Clear Route</button>
           </div>
         </div>
+      </div>
+    </div>
+    <div id="missionLogOverlay" class="overlay hidden mission-log-overlay">
+      <div class="mission-log-card">
+        <div class="mission-log-header">
+          <div>
+            <h2>Active Mission Log</h2>
+            <p>Accepted contracts and payouts.</p>
+          </div>
+          <button id="closeMissionLogBtn" type="button">Close (I)</button>
+        </div>
+        <div id="missionLogList" class="list"></div>
       </div>
     </div>
     <script src="app.js"></script>
