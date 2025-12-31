@@ -8,6 +8,7 @@ const {
   missionTemplates,
   goods,
   markets,
+  tradeRoutes,
   factions
 } = require("./data");
 
@@ -23,17 +24,20 @@ const initialWorld = {
   missions,
   goods,
   markets,
+  tradeRoutes,
   factions
 };
 
 const marketLevels = {
   low: 0.6,
   medium: 1,
-  high: 1.55
+  high: 1.55,
+  contraband: 2.1
 };
 
 const missionRotationMinutes = 20;
 const missionCount = 5;
+const marketRotationMinutes = 30;
 
 const hashString = (value) => {
   let hash = 0;
@@ -53,6 +57,8 @@ const seededRandom = (seed) => {
     return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
   };
 };
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 const canJump = (fromSystemId, toSystemId) => {
   const fromSystem = systemById.get(fromSystemId);
@@ -91,19 +97,109 @@ const getSystemDistance = (fromSystemId, toSystemId) => {
   return 3;
 };
 
+const getFactionReputation = (player, factionId) =>
+  player?.reputation?.[factionId] ?? 0;
+
+const isTemplateAvailable = (template, origin, player) => {
+  if (template.requiresBlackMarket && !origin?.blackMarket) {
+    return false;
+  }
+  if (template.minCombatRating && (player?.combatRating ?? 0) < template.minCombatRating) {
+    return false;
+  }
+  if (template.maxLegalStatus && (player?.legalStatus ?? 0) > template.maxLegalStatus) {
+    return false;
+  }
+  if (template.minReputation && origin?.systemId) {
+    const system = systemById.get(origin.systemId);
+    const factionRep = getFactionReputation(player, system?.factionId);
+    if (factionRep < template.minReputation) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const pickWeighted = (items, rng) => {
+  if (!items.length) {
+    return null;
+  }
+  const total = items.reduce((sum, item) => sum + (item.weight ?? 1), 0);
+  let roll = rng() * total;
+  for (const item of items) {
+    roll -= item.weight ?? 1;
+    if (roll <= 0) {
+      return item;
+    }
+  }
+  return items[0];
+};
+
+const getContrabandScanRisk = (planetId) => {
+  const planet = planetById.get(planetId);
+  const system = planet ? systemById.get(planet.systemId) : null;
+  const baseRisk = {
+    core: 0.32,
+    border: 0.22,
+    frontier: 0.14
+  }[system?.status || "border"] ?? 0.2;
+  const trafficBoost = {
+    heavy: 0.08,
+    medium: 0.04,
+    light: 0
+  }[system?.traffic || "medium"] ?? 0.04;
+  const marketRelief = planet?.blackMarket ? -0.12 : 0;
+  return clamp(baseRisk + trafficBoost + marketRelief, 0.05, 0.45);
+};
+
 const getMarketForPlanet = (planetId) => {
+  const planet = planetById.get(planetId);
+  if (!planet) {
+    return [];
+  }
   const market = markets[planetId] || {};
-  return goods.map((good) => {
-    const level = market[good.id] || "medium";
-    const multiplier = marketLevels[level] ?? 1;
-    return {
-      id: good.id,
-      name: good.name,
-      basePrice: good.basePrice,
-      level,
-      price: Math.round(good.basePrice * multiplier),
-      volume: 1
-    };
+  const rotationSlot = Math.floor(Date.now() / (marketRotationMinutes * 60 * 1000));
+  return goods.flatMap((good) => {
+    if (good.isContraband && !planet.blackMarket) {
+      return [];
+    }
+    const level =
+      market[good.id] ||
+      (good.isContraband ? "contraband" : "medium");
+    const baseMultiplier = marketLevels[level] ?? 1;
+    const rng = seededRandom(
+      hashString(`${planetId}-${good.id}-${rotationSlot}`)
+    );
+    const variance = clamp(0.82 + rng() * 0.4, 0.72, 1.4);
+    let routeMultiplier = 1;
+    let routeHint = null;
+    tradeRoutes.forEach((route) => {
+      if (route.goodId !== good.id) {
+        return;
+      }
+      if (route.fromPlanetId === planetId) {
+        routeMultiplier *= 0.78;
+        routeHint = `Export route to ${planetById.get(route.toPlanetId)?.name || "neighbor"}`;
+      }
+      if (route.toPlanetId === planetId) {
+        routeMultiplier *= 1.32;
+        routeHint = `Import route from ${planetById.get(route.fromPlanetId)?.name || "neighbor"}`;
+      }
+    });
+    const price = Math.round(good.basePrice * baseMultiplier * variance * routeMultiplier);
+    return [
+      {
+        id: good.id,
+        name: good.name,
+        basePrice: good.basePrice,
+        level,
+        price,
+        volume: Math.round(10 + rng() * 20),
+        isContraband: Boolean(good.isContraband),
+        routeHint,
+        scanRisk: good.isContraband ? getContrabandScanRisk(planetId) : 0
+      }
+    ];
   });
 };
 
@@ -113,7 +209,12 @@ const formatMissionDescription = (template, origin, destination) =>
     .replace("{destination}", destination?.name ?? "Unknown")
     .replace("{cargo}", template.cargo);
 
-const getAvailableMissions = (planetId, now = Date.now()) => {
+const getAvailableMissions = (playerOrPlanetId, now = Date.now()) => {
+  const planetId =
+    typeof playerOrPlanetId === "string"
+      ? playerOrPlanetId
+      : playerOrPlanetId?.planetId;
+  const player = typeof playerOrPlanetId === "string" ? null : playerOrPlanetId;
   if (!planetId) {
     return [];
   }
@@ -127,14 +228,31 @@ const getAvailableMissions = (planetId, now = Date.now()) => {
   if (destinationPool.length === 0) {
     return [];
   }
+  const availableTemplates = missionTemplates.filter((template) =>
+    isTemplateAvailable(template, origin, player)
+  );
+  if (availableTemplates.length === 0) {
+    return [];
+  }
   const generated = [];
   for (let i = 0; i < missionCount; i += 1) {
-    const template = missionTemplates[Math.floor(rng() * missionTemplates.length)];
+    const template = pickWeighted(availableTemplates, rng);
+    if (!template) {
+      continue;
+    }
     const destination =
       destinationPool[Math.floor(rng() * destinationPool.length)] || destinationPool[0];
     const distance = getSystemDistance(origin.systemId, destination.systemId);
-    const reward =
-      template.baseReward + template.rewardPerJump * Math.max(1, distance) + Math.round(rng() * 180);
+    const distanceReward = (template.rewardPerJump || 0) * Math.max(1, distance);
+    const cargoBonus = (template.cargoSpace || 0) * (template.rewardPerCargo || 0);
+    const variance = Math.round(rng() * (template.rewardVariance ?? 2500));
+    let reward = (template.baseReward || 0) + distanceReward + cargoBonus + variance;
+    if (template.minReward) {
+      reward = Math.max(template.minReward, reward);
+    }
+    if (template.maxReward) {
+      reward = Math.min(template.maxReward, reward);
+    }
     const missionId = `${template.id}_${planetId}_${destination.id}_${rotationSlot}_${i}`;
     generated.push({
       id: missionId,
@@ -145,7 +263,16 @@ const getAvailableMissions = (planetId, now = Date.now()) => {
       cargo: template.cargo,
       cargoSpace: template.cargoSpace,
       fromPlanetId: planetId,
-      toPlanetId: destination.id
+      toPlanetId: destination.id,
+      factionId: systemById.get(origin.systemId)?.factionId || null,
+      timeLimitMinutes: template.timeLimitMinutes || null,
+      targetRoles: template.targetRoles || null,
+      legalRisk:
+        template.type === "smuggling" || template.type === "united_shipping_long"
+          ? "high"
+          : template.type === "rush"
+            ? "medium"
+            : "low"
     });
   }
   return generated;

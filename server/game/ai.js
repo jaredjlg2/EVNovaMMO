@@ -286,6 +286,7 @@ const spawnAiShip = (systemId) => {
   const spawnAngle = Math.random() * Math.PI * 2;
   const spawnDistance = randomRange(520, 760);
   const shipId = `ai-${Math.random().toString(36).slice(2, 9)}`;
+  const cargo = randomCargoManifest(ship.cargo);
   const newShip = {
     id: shipId,
     name: createShipName(ship, role),
@@ -300,8 +301,8 @@ const spawnAiShip = (systemId) => {
     hull: ship.hull,
     shield: ship.shield,
     factionId,
-    cargo: randomCargoManifest(ship.cargo),
-    credits: getAiCredits(ship, role),
+    cargo,
+    credits: getAiCredits(ship, role, cargo),
     ai: {
       state: "approach",
       role,
@@ -320,7 +321,8 @@ const spawnAiShip = (systemId) => {
       holdX: null,
       holdY: null,
       hired: false,
-      dailyRate: 0
+      dailyRate: 0,
+      bounty: getAiBounty(role, system, factionId)
     }
   };
   aiShips.set(shipId, newShip);
@@ -350,21 +352,42 @@ const disableThresholds = {
   maxHull: 30
 };
 
-const getAiCredits = (ship, role) => {
-  const base = randomRange(220, 520);
-  const priceFactor = (ship?.price ?? 0) * 0.05;
-  const cargoFactor = (ship?.cargo ?? 0) * 32;
-  const roleBonus = {
-    freighter: 800,
-    escort: 650,
-    frigate: 900,
-    fighter: 350,
-    courier: 250,
-    scout: 180,
-    shuttle: 120
-  }[role] ?? 0;
-  const variance = randomRange(0, 700);
-  return Math.floor(base + priceFactor + cargoFactor + roleBonus + variance);
+const getCargoValue = (cargo) =>
+  (cargo || []).reduce((total, entry) => {
+    const good = goods.find((item) => item.id === entry.goodId);
+    return total + (good?.basePrice ?? 0) * entry.quantity;
+  }, 0);
+
+const getAiCredits = (ship, role, cargo) => {
+  const cargoValue = getCargoValue(cargo);
+  const base = {
+    freighter: 260000,
+    escort: 200000,
+    frigate: 320000,
+    fighter: 160000,
+    courier: 120000,
+    scout: 100000,
+    shuttle: 80000
+  }[role] ?? 90000;
+  const priceFactor = (ship?.price ?? 0) * 2.5;
+  const cargoFactor = cargoValue * 0.2;
+  const variance = randomRange(20000, 120000);
+  return Math.floor(base + priceFactor + cargoFactor + variance);
+};
+
+const getAiBounty = (role, system, factionId) => {
+  const baseRange = {
+    shuttle: [20000, 26000],
+    courier: [22000, 28000],
+    scout: [20000, 26000],
+    fighter: [45000, 90000],
+    escort: [55000, 105000],
+    freighter: [90000, 135000],
+    frigate: [95000, 135000]
+  }[role] || [30000, 60000];
+  const statusBonus = system?.status === "border" ? 1.15 : system?.status === "frontier" ? 1.25 : 1;
+  const pirateBonus = factionId === "draco_syndicate" ? 1.2 : 1;
+  return Math.round(randomRange(baseRange[0], baseRange[1]) * statusBonus * pirateBonus);
 };
 
 const randomCargoManifest = (cargoCapacity) => {
@@ -372,7 +395,7 @@ const randomCargoManifest = (cargoCapacity) => {
     return [];
   }
   const selectionCount = Math.max(1, Math.min(3, Math.floor(Math.random() * 3) + 1));
-  const targetLoad = Math.max(1, Math.round(randomRange(cargoCapacity * 0.35, cargoCapacity * 0.75)));
+  const targetLoad = Math.max(1, Math.round(randomRange(cargoCapacity * 0.55, cargoCapacity * 0.95)));
   let remaining = targetLoad;
   const manifest = [];
   const chosen = new Set();

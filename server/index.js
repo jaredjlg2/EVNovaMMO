@@ -20,7 +20,9 @@ const {
   dockPlanet,
   undock,
   buyWeapon,
+  sellWeapon,
   buyOutfit,
+  sellOutfit,
   buyShip,
   acceptMission,
   completeMissions,
@@ -35,7 +37,8 @@ const {
   stealBoardingLoot,
   captureShip,
   removeEscortFromPlayer,
-  releaseEscort
+  releaseEscort,
+  gambleAtBar
 } = require("./game/game");
 const { removeAiShip } = require("./game/ai");
 
@@ -203,8 +206,14 @@ const handleAction = (player, action, socket) => {
     case "buyWeapon":
       buyWeapon(player, action.weaponId);
       break;
+    case "sellWeapon":
+      sellWeapon(player, action.weaponId);
+      break;
     case "buyOutfit":
       buyOutfit(player, action.outfitId);
+      break;
+    case "sellOutfit":
+      sellOutfit(player, action.outfitId);
       break;
     case "buyShip":
       buyShip(player, action.shipId);
@@ -236,6 +245,9 @@ const handleAction = (player, action, socket) => {
       break;
     case "releaseEscort":
       releaseEscort(player, action.escortId);
+      break;
+    case "gamble":
+      gambleAtBar(player);
       break;
     case "commsMessage": {
       const targetId = action.targetId;
@@ -310,7 +322,7 @@ const handleAction = (player, action, socket) => {
     case "requestMissions":
       sendTo(socket, {
         type: "missions",
-        missions: getAvailableMissions(player.planetId)
+        missions: getAvailableMissions(player)
       });
       return;
     case "requestMarket":

@@ -15,6 +15,7 @@ const {
 } = require("./ai");
 const {
   initialWorld,
+  systemById,
   planetById,
   canJump,
   getAvailableMissions,
@@ -29,6 +30,7 @@ const tradeInRate = 0.6;
 const shieldRegenRate = 0.08;
 const armorRegenRate = 0.04;
 const boardingRange = 60;
+const tributeIntervalMs = 1000 * 60 * 60 * 24;
 
 const getSecondaryAmmoCount = (player, ammoId) =>
   Math.max(0, player.secondaryAmmo?.[ammoId] ?? 0);
@@ -121,12 +123,87 @@ const persistPlayer = (player) => {
     missions: player.missions,
     cargo: player.cargo,
     log: player.log,
-    escorts: player.escorts
+    escorts: player.escorts,
+    reputation: player.reputation,
+    legalStatus: player.legalStatus,
+    combatRating: player.combatRating,
+    dominatedPlanets: player.dominatedPlanets,
+    lastTributeAt: player.lastTributeAt
   });
 };
 
 const appendLog = (player, message) => {
   player.log = [message, ...player.log].slice(0, 8);
+};
+
+const getFactionReputation = (player, factionId) =>
+  player.reputation?.[factionId] ?? 0;
+
+const adjustReputation = (player, factionId, delta, reason) => {
+  if (!factionId) {
+    return;
+  }
+  if (!player.reputation) {
+    player.reputation = {};
+  }
+  const current = getFactionReputation(player, factionId);
+  const next = clamp(current + delta, -100, 100);
+  player.reputation[factionId] = next;
+  if (reason) {
+    appendLog(player, `${reason} (${delta > 0 ? "+" : ""}${delta} reputation).`);
+  }
+};
+
+const adjustLegalStatus = (player, delta, reason) => {
+  const current = player.legalStatus ?? 0;
+  const next = clamp(current + delta, 0, 100);
+  player.legalStatus = next;
+  if (reason) {
+    appendLog(player, `${reason} (legal status ${next}).`);
+  }
+};
+
+const getSystemFactionId = (systemId) => systemById.get(systemId)?.factionId || null;
+
+const awardBounty = (player, target) => {
+  if (!target?.ai) {
+    return;
+  }
+  const bounty = target.ai.bounty || 0;
+  if (bounty > 0) {
+    player.credits += bounty;
+    appendLog(player, `Bounty collected: ${bounty} credits.`);
+  }
+  player.combatRating = (player.combatRating ?? 0) + 1;
+  const targetFactionId = target.factionId;
+  if (targetFactionId && targetFactionId !== "draco_syndicate") {
+    adjustReputation(player, targetFactionId, -2, "Combat incident reported");
+    adjustLegalStatus(player, 2, "Security notified of combat");
+  }
+};
+
+const registerBountyMissionKill = (player, target) => {
+  if (!target?.ai) {
+    return;
+  }
+  const role = target.ai.role;
+  if (!role) {
+    return;
+  }
+  let updated = false;
+  player.missions = player.missions.map((mission) => {
+    if (mission.status !== "active" || mission.type !== "bounty") {
+      return mission;
+    }
+    if (mission.targetRoles && !mission.targetRoles.includes(role)) {
+      return mission;
+    }
+    updated = true;
+    return { ...mission, status: "complete" };
+  });
+  if (updated) {
+    appendLog(player, "Bounty target neutralized. Return to claim payment.");
+  }
 };
 
 const applyDamageToTarget = (target, damage) => {
@@ -256,6 +333,26 @@ const getDockedPlanetService = (player, service) => {
   return planet;
 };
 
+const gambleAtBar = (player) => {
+  if (!player.planetId) {
+    appendLog(player, "Dock at a planet to gamble.");
+    return;
+  }
+  const wager = 4000;
+  if (player.credits < wager) {
+    appendLog(player, "Insufficient credits to gamble.");
+    return;
+  }
+  const win = Math.random() < 0.25;
+  if (win) {
+    player.credits += wager;
+    appendLog(player, `Gambling win! Payout: ${wager} credits.`);
+  } else {
+    player.credits -= wager;
+    appendLog(player, `Gambling loss. Lost ${wager} credits.`);
+  }
+};
+
 const buyWeapon = (player, weaponId) => {
   if (!getDockedPlanetService(player, "outfitter")) {
     appendLog(player, "Outfitter service unavailable here.");
@@ -304,6 +401,50 @@ const buyWeapon = (player, weaponId) => {
   appendLog(player, `Purchased ${weapon.name}.`);
 };
 
+const sellWeapon = (player, weaponId) => {
+  if (!getDockedPlanetService(player, "outfitter")) {
+    appendLog(player, "Outfitter service unavailable here.");
+    return;
+  }
+  const weapon = initialWorld.weapons.find((item) => item.id === weaponId);
+  if (!weapon) {
+    appendLog(player, "Weapon unavailable.");
+    return;
+  }
+  const isSecondary = weapon.slotType === "secondary" || weapon.slotType === "secondaryAmmo";
+  const tradeInValue = Math.round(weapon.price * tradeInRate);
+  if (weapon.slotType === "secondaryAmmo") {
+    const ammoCount = getSecondaryAmmoCount(player, weaponId);
+    if (ammoCount <= 0) {
+      appendLog(player, "No ammo to sell.");
+      return;
+    }
+    adjustSecondaryAmmo(player, weaponId, -1);
+    player.credits += tradeInValue;
+    appendLog(player, `Sold ${weapon.name} for ${tradeInValue} credits.`);
+    return;
+  }
+  if (isSecondary) {
+    const index = player.secondaryWeapons.indexOf(weaponId);
+    if (index === -1) {
+      appendLog(player, "Weapon not installed.");
+      return;
+    }
+    player.secondaryWeapons.splice(index, 1);
+    player.credits += tradeInValue;
+    appendLog(player, `Sold ${weapon.name} for ${tradeInValue} credits.`);
+    return;
+  }
+  const index = player.weapons.indexOf(weaponId);
+  if (index === -1) {
+    appendLog(player, "Weapon not installed.");
+    return;
+  }
+  player.weapons.splice(index, 1);
+  player.credits += tradeInValue;
+  appendLog(player, `Sold ${weapon.name} for ${tradeInValue} credits.`);
+};
+
 const buyOutfit = (player, outfitId) => {
   if (!getDockedPlanetService(player, "outfitter")) {
     appendLog(player, "Outfitter service unavailable here.");
@@ -321,6 +462,27 @@ const buyOutfit = (player, outfitId) => {
   player.credits -= outfit.price;
   player.outfits.push(outfitId);
   appendLog(player, `Installed ${outfit.name}.`);
+};
+
+const sellOutfit = (player, outfitId) => {
+  if (!getDockedPlanetService(player, "outfitter")) {
+    appendLog(player, "Outfitter service unavailable here.");
+    return;
+  }
+  const outfit = initialWorld.outfits.find((item) => item.id === outfitId);
+  if (!outfit) {
+    appendLog(player, "Outfit unavailable.");
+    return;
+  }
+  const index = player.outfits.indexOf(outfitId);
+  if (index === -1) {
+    appendLog(player, "Outfit not installed.");
+    return;
+  }
+  player.outfits.splice(index, 1);
+  const tradeInValue = Math.round(outfit.price * tradeInRate);
+  player.credits += tradeInValue;
+  appendLog(player, `Removed ${outfit.name}. Sold for ${tradeInValue} credits.`);
 };
 
 const applyShipToPlayer = (player, ship) => {
@@ -381,7 +543,7 @@ const buyShip = (player, shipId) => {
 };
 
 const acceptMission = (player, missionId) => {
-  const missions = getAvailableMissions(player.planetId);
+  const missions = getAvailableMissions(player);
   const mission = missions.find((item) => item.id === missionId);
   if (!mission) {
     appendLog(player, "Mission unavailable.");
@@ -396,6 +558,9 @@ const acceptMission = (player, missionId) => {
     appendLog(player, "Insufficient cargo space for this mission.");
     return;
   }
+  const expiresAt = mission.timeLimitMinutes
+    ? Date.now() + mission.timeLimitMinutes * 60 * 1000
+    : null;
   player.missions.push({
     id: mission.id,
     title: mission.title,
@@ -405,29 +570,80 @@ const acceptMission = (player, missionId) => {
     fromPlanetId: mission.fromPlanetId,
     toPlanetId: mission.toPlanetId,
     reward: mission.reward,
-    status: "active"
+    status: "active",
+    expiresAt,
+    targetRoles: mission.targetRoles || null,
+    factionId: mission.factionId || null,
+    legalRisk: mission.legalRisk || "low"
   });
   appendLog(player, `Accepted mission: ${mission.title}.`);
 };
 
 const completeMissions = (player) => {
+  const now = Date.now();
   let completed = 0;
-  player.missions = player.missions.map((mission) => {
-    if (mission.status === "active" && mission.toPlanetId === player.planetId) {
-      completed += 1;
-      return { ...mission, status: "complete" };
+  let failed = 0;
+  const completedMissions = [];
+  const remaining = [];
+  player.missions.forEach((mission) => {
+    if (mission.expiresAt && now > mission.expiresAt) {
+      failed += 1;
+      if (mission.type === "smuggling") {
+        adjustLegalStatus(player, 8, "Smuggling contract expired");
+      }
+      return;
     }
-    return mission;
+    if (
+      mission.status === "active" &&
+      mission.toPlanetId === player.planetId &&
+      mission.type !== "bounty"
+    ) {
+      completed += 1;
+      completedMissions.push({ ...mission, status: "complete" });
+      return;
+    }
+    if (mission.status === "complete" && mission.toPlanetId === player.planetId) {
+      completed += 1;
+      completedMissions.push(mission);
+      return;
+    }
+    remaining.push(mission);
   });
-  if (completed > 0) {
-    const reward = player.missions
-      .filter((mission) => mission.status === "complete" && mission.toPlanetId === player.planetId)
-      .reduce((total, mission) => total + mission.reward, 0);
+
+  if (completedMissions.length > 0) {
+    const reward = completedMissions.reduce((total, mission) => total + mission.reward, 0);
     player.credits += reward;
+    completedMissions.forEach((mission) => {
+      const systemFactionId = getSystemFactionId(
+        planetById.get(mission.toPlanetId)?.systemId
+      );
+      if (mission.type === "smuggling") {
+        adjustLegalStatus(player, 12, "Smuggling payout received");
+        adjustReputation(player, systemFactionId, -8, "Smuggling rumors spread");
+      } else {
+        adjustReputation(player, systemFactionId, 3, "Mission success");
+      }
+      if (mission.type === "domination") {
+        if (!player.dominatedPlanets) {
+          player.dominatedPlanets = [];
+        }
+        if (!player.dominatedPlanets.includes(mission.toPlanetId)) {
+          player.dominatedPlanets.push(mission.toPlanetId);
+          adjustLegalStatus(player, 25, "Planetary domination recorded");
+          adjustReputation(player, systemFactionId, -20, "Local authorities enraged");
+        }
+      }
+    });
     appendLog(player, `Completed ${completed} mission(s). Reward: ${reward} credits.`);
-  } else {
+  }
+
+  if (failed > 0) {
+    appendLog(player, `Failed ${failed} mission(s) due to expired deadlines.`);
+  } else if (completed === 0) {
     appendLog(player, "No missions to complete here.");
   }
+
+  player.missions = remaining;
 };
 
 const getPlayerState = (player) => ({
@@ -449,7 +665,11 @@ const getPlayerState = (player) => ({
   missions: player.missions,
   cargo: player.cargo,
   log: player.log,
-  escorts: player.escorts
+  escorts: player.escorts,
+  reputation: player.reputation,
+  legalStatus: player.legalStatus,
+  combatRating: player.combatRating,
+  dominatedPlanets: player.dominatedPlanets
 });
 
 const getWorldState = () => initialWorld;
@@ -496,6 +716,27 @@ const updatePosition = (player, { x, y, angle }) => {
   }
 };
 
+const applyTributeIncome = (player, now) => {
+  if (!player.dominatedPlanets || player.dominatedPlanets.length === 0) {
+    player.lastTributeAt = player.lastTributeAt || now;
+    return;
+  }
+  const last = player.lastTributeAt || now;
+  const elapsed = now - last;
+  if (elapsed < tributeIntervalMs) {
+    return;
+  }
+  const cycles = Math.floor(elapsed / tributeIntervalMs);
+  const tributePerPlanet = 2500;
+  const payout = cycles * tributePerPlanet * player.dominatedPlanets.length;
+  player.credits += payout;
+  player.lastTributeAt = last + cycles * tributeIntervalMs;
+  appendLog(
+    player,
+    `Tribute collected: ${payout} credits from dominated planets.`
+  );
+};
+
 const tickWorld = (deltaSeconds) => {
   tickAiShips(deltaSeconds, Array.from(players.values()));
   const now = Date.now();
@@ -504,6 +745,7 @@ const tickWorld = (deltaSeconds) => {
   const aiShots = [];
 
   players.forEach((current) => {
+    applyTributeIncome(current, now);
     if (current.shield < current.ship.shield) {
       const shieldGain = current.ship.shield * shieldRegenRate * deltaSeconds;
       current.shield = Math.min(current.ship.shield, current.shield + shieldGain);
@@ -674,6 +916,37 @@ const getEscortCargoCapacity = (player) =>
 
 const getCargoCapacity = (player) => (player.ship?.cargo || 0) + getEscortCargoCapacity(player);
 
+const getContrabandScanRisk = (planetId) => {
+  const planet = planetById.get(planetId);
+  const system = planet ? systemById.get(planet.systemId) : null;
+  const baseRisk = {
+    core: 0.32,
+    border: 0.22,
+    frontier: 0.14
+  }[system?.status || "border"] ?? 0.2;
+  const trafficBoost = {
+    heavy: 0.08,
+    medium: 0.04,
+    light: 0
+  }[system?.traffic || "medium"] ?? 0.04;
+  const marketRelief = planet?.blackMarket ? -0.12 : 0;
+  return clamp(baseRisk + trafficBoost + marketRelief, 0.05, 0.45);
+};
+
+const applyContrabandScan = (player, planetId, value) => {
+  const scanRisk = getContrabandScanRisk(planetId);
+  if (Math.random() > scanRisk) {
+    return false;
+  }
+  const fine = Math.max(12000, Math.round(value * 0.4));
+  player.credits = Math.max(0, player.credits - fine);
+  const systemFactionId = getSystemFactionId(planetById.get(planetId)?.systemId);
+  adjustLegalStatus(player, 15, "Contraband scan triggered");
+  adjustReputation(player, systemFactionId, -6, "Caught with contraband");
+  appendLog(player, `Contraband seized. Fine imposed: ${fine} credits.`);
+  return true;
+};
+
 const upsertCargo = (player, goodId, quantity) => {
   const existing = player.cargo.find((entry) => entry.goodId === goodId);
   if (existing) {
@@ -739,6 +1012,16 @@ const sellGoods = (player, goodId, quantity = 1) => {
     return;
   }
   const totalPrice = market.price * amount;
+  if (good.isContraband) {
+    const scanned = applyContrabandScan(player, player.planetId, totalPrice);
+    upsertCargo(player, goodId, -amount);
+    if (scanned) {
+      return;
+    }
+    player.credits += totalPrice;
+    appendLog(player, `Smuggled ${amount} × ${good.name} successfully.`);
+    return;
+  }
   upsertCargo(player, goodId, -amount);
   player.credits += totalPrice;
   appendLog(player, `Sold ${amount} × ${good.name}.`);
@@ -751,7 +1034,7 @@ const getEscortHireShips = () =>
     ["wisp_runner", "bastion_guard", "ironclad"].includes(ship.id)
   );
 
-const getEscortDailyRate = (ship) => Math.max(60, Math.round(ship.price * 0.02));
+const getEscortDailyRate = (ship) => Math.max(2500, Math.round(ship.price * 0.06));
 
 const getEscortHireOffers = () => {
   const pool = getEscortHireShips();
@@ -964,6 +1247,8 @@ const stealBoardingLoot = (player, targetId, lootType) => {
     ship.ai.boardingLoot.creditsTaken = true;
     player.credits += stolenCredits;
     appendLog(player, `Boarding success: stole ${stolenCredits} credits from ${ship.name}.`);
+    adjustLegalStatus(player, 18, "Piracy alert issued");
+    adjustReputation(player, ship.factionId, -18, "Piracy strike logged");
     return {
       ok: true,
       message: "Credits secured. Prepare to raid the cargo hold.",
@@ -982,6 +1267,8 @@ const stealBoardingLoot = (player, targetId, lootType) => {
   ship.cargo = [];
   ship.ai.boardingLoot.cargoTaken = true;
   appendLog(player, `Boarding success: transferred cargo from ${ship.name}.`);
+  adjustLegalStatus(player, 16, "Cargo raid reported");
+  adjustReputation(player, ship.factionId, -14, "Piracy strike logged");
   return {
     ok: true,
     message: "Cargo secured. Boarding team returning.",
@@ -1009,6 +1296,8 @@ const captureShip = (player, targetId, decision) => {
     removeAiShip(ship.id);
     removeEscortFromPlayer(player, ship.id);
     appendLog(player, `Captured ${ship.name} and assumed control.`);
+    adjustLegalStatus(player, 24, "Ship capture logged");
+    adjustReputation(player, ship.factionId, -22, "Ship seized");
     return { ok: true, message: "Ship captured. You are now at the helm." };
   }
   const formationIndex = (player.escorts || []).length;
@@ -1024,6 +1313,8 @@ const captureShip = (player, targetId, decision) => {
   });
   moveEscortsToPlayer(player);
   appendLog(player, `Captured ${ship.name} and added it as an escort.`);
+  adjustLegalStatus(player, 18, "Escort capture reported");
+  adjustReputation(player, ship.factionId, -18, "Escort seized");
   return { ok: true, message: "Ship captured and assigned as escort." };
 };
 
@@ -1127,6 +1418,8 @@ const fireWeapons = (player, payload, weaponIds, { allowFallback = true } = {}) 
         isAi: true
       });
       appendLog(player, `${target.name} was destroyed.`);
+      awardBounty(player, target);
+      registerBountyMissionKill(player, target);
     }
   });
 
@@ -1179,6 +1472,10 @@ const fireTargetedWeapon = (player, payload, weaponId, options = {}) => {
       appendLog(target, "Ship destroyed! Rescue crews will tow you back once you relog.");
     }
     appendLog(player, `${target.name} was destroyed.`);
+    if (targetAi) {
+      awardBounty(player, target);
+      registerBountyMissionKill(player, target);
+    }
   }
   return { hits, destroyed, weaponsFired: [projectileId], fired: true, targetId };
 };
@@ -1246,7 +1543,9 @@ module.exports = {
   dockPlanet,
   undock,
   buyWeapon,
+  sellWeapon,
   buyOutfit,
+  sellOutfit,
   buyShip,
   acceptMission,
   completeMissions,
@@ -1262,6 +1561,7 @@ module.exports = {
   getBoardingData,
   stealBoardingLoot,
   captureShip,
+  gambleAtBar,
   releaseEscort,
   removeEscortFromPlayer
 };
