@@ -1732,7 +1732,6 @@ const renderShip = () => {
   const cargoUsed = getCargoUsed();
   const cargoCapacity = getCargoCapacity();
   const escortCapacity = getEscortCargoCapacity();
-  const escortCapacity = getEscortCargoCapacity();
   const shieldMax = ship.shield || 0;
   const hullMax = ship.hull || 0;
   const shieldValue = Math.max(0, player.shield || 0);
