@@ -1422,6 +1422,31 @@ const renderMiniMap = () => {
     ctx.fill();
   };
 
+  const drawDirectionArrow = (dx, dy, color) => {
+    const distance = Math.hypot(dx, dy);
+    if (distance <= miniMapRange || distance === 0) {
+      return;
+    }
+    const angle = Math.atan2(dy, dx);
+    const tipDistance = Math.max(radius - 6, 0);
+    const baseDistance = Math.max(tipDistance - 8, 0);
+    const spread = Math.PI / 7;
+    const tipX = centerX + Math.cos(angle) * tipDistance;
+    const tipY = centerY + Math.sin(angle) * tipDistance;
+    const leftX = centerX + Math.cos(angle - spread) * baseDistance;
+    const leftY = centerY + Math.sin(angle - spread) * baseDistance;
+    const rightX = centerX + Math.cos(angle + spread) * baseDistance;
+    const rightY = centerY + Math.sin(angle + spread) * baseDistance;
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(tipX, tipY);
+    ctx.lineTo(leftX, leftY);
+    ctx.lineTo(rightX, rightY);
+    ctx.closePath();
+    ctx.fill();
+  };
+
   if (!player.planetId) {
     ctx.strokeStyle = "rgba(120, 160, 220, 0.2)";
     ctx.beginPath();
@@ -1439,6 +1464,15 @@ const renderMiniMap = () => {
     const dy = position.y - flightState.y;
     drawDot(dx, dy, "rgba(130, 200, 255, 0.75)", 4);
   });
+
+  if (currentDockingTarget) {
+    const position = planetPositions.get(currentDockingTarget.planet.id);
+    if (position) {
+      const dx = position.x - flightState.x;
+      const dy = position.y - flightState.y;
+      drawDirectionArrow(dx, dy, "rgba(130, 200, 255, 0.85)");
+    }
+  }
 
   const targets = getVisiblePlayers();
   targets.forEach((other) => {
