@@ -2114,7 +2114,8 @@ const renderLog = () => {
     return;
   }
   logEl.innerHTML = "";
-  player.log.forEach((entry) => {
+  const recentEntries = player.log.slice(-4);
+  recentEntries.forEach((entry) => {
     const line = document.createElement("div");
     line.textContent = entry;
     logEl.appendChild(line);
