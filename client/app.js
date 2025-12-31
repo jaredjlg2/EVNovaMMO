@@ -45,6 +45,8 @@ const boardingStatusEl = document.getElementById("boardingStatus");
 const boardingInfoEl = document.getElementById("boardingInfo");
 const boardingCargoEl = document.getElementById("boardingCargo");
 const boardingCloseBtn = document.getElementById("boardingCloseBtn");
+const boardingStealCreditsBtn = document.getElementById("boardingStealCreditsBtn");
+const boardingStealCargoBtn = document.getElementById("boardingStealCargoBtn");
 const boardingTakeoverBtn = document.getElementById("boardingTakeoverBtn");
 const boardingEscortBtn = document.getElementById("boardingEscortBtn");
 
@@ -2112,7 +2114,21 @@ const renderBar = (escortsForHire = [], currentEscorts = []) => {
   });
 };
 
-const showBoardingOverlay = (data) => {
+const updateBoardingActions = (data) => {
+  if (boardingStealCreditsBtn) {
+    const creditsAvailable = (data.credits || 0) > 0;
+    const creditsTaken = data.lootStatus?.creditsTaken;
+    boardingStealCreditsBtn.disabled = !creditsAvailable || creditsTaken;
+  }
+  if (boardingStealCargoBtn) {
+    const cargoAvailable = Array.isArray(data.cargo) && data.cargo.length > 0;
+    const creditsCleared = data.lootStatus?.creditsTaken || (data.credits || 0) === 0;
+    const cargoTaken = data.lootStatus?.cargoTaken;
+    boardingStealCargoBtn.disabled = !cargoAvailable || !creditsCleared || cargoTaken;
+  }
+};
+
+const updateBoardingOverlay = (data) => {
   if (!boardingOverlayEl) {
     return;
   }
@@ -2120,14 +2136,14 @@ const showBoardingOverlay = (data) => {
   if (boardingTargetNameEl) {
     boardingTargetNameEl.textContent = data.name || "Unknown vessel";
   }
-  if (boardingStatusEl) {
-    boardingStatusEl.textContent = "";
-  }
   if (boardingInfoEl) {
-    const chancePercent = Math.round((data.captureChance || 0) * 100);
+    const capturePercent = Math.round((data.captureChance || 0) * 100);
+    const lootPercent = Math.round((data.lootChance || 0) * 100);
     boardingInfoEl.innerHTML = `
       <span>Credits on board: ${formatCredits(data.credits || 0)}</span>
-      <span>Capture chance: ${chancePercent}%</span>
+      <span>Cargo value: ${formatCredits(data.cargoValue || 0)}</span>
+      <span>Loot chance: ${lootPercent}%</span>
+      <span>Capture chance: ${capturePercent}%</span>
     `;
   }
   if (boardingCargoEl) {
@@ -2139,14 +2155,28 @@ const showBoardingOverlay = (data) => {
       data.cargo.forEach((entry) => {
         const card = document.createElement("div");
         card.className = "list-item";
-        const goodName = goodsById.get(entry.goodId)?.name ?? entry.goodId;
+        const good = goodsById.get(entry.goodId);
+        const goodName = good?.name ?? entry.goodId;
+        const cargoValue = (good?.basePrice ?? 0) * entry.quantity;
         card.innerHTML = `
           <h4>${goodName}</h4>
           <p>Quantity: ${entry.quantity}</p>
+          <p>Value: ${formatCredits(cargoValue)}</p>
         `;
         boardingCargoEl.appendChild(card);
       });
     }
+  }
+  updateBoardingActions(data);
+};
+
+const showBoardingOverlay = (data) => {
+  if (!boardingOverlayEl) {
+    return;
+  }
+  updateBoardingOverlay(data);
+  if (boardingStatusEl) {
+    boardingStatusEl.textContent = "";
   }
   boardingOverlayEl.classList.remove("hidden");
 };
@@ -2414,11 +2444,18 @@ const connect = () => {
     if (payload.type === "boarding") {
       showBoardingOverlay(payload);
     }
+    if (payload.type === "boardingUpdate") {
+      if (boardingStatusEl) {
+        boardingStatusEl.textContent = payload.message || "";
+      }
+      updateBoardingOverlay(payload);
+      boardingOverlayEl?.classList.remove("hidden");
+    }
     if (payload.type === "boardingResult") {
       if (boardingStatusEl) {
         boardingStatusEl.textContent = payload.message || "";
       }
-      if (payload.success) {
+      if (payload.closeBoarding || payload.success) {
         hideBoardingOverlay();
       }
     }
@@ -2469,6 +2506,24 @@ loginFormEl.addEventListener("submit", (event) => {
 if (boardingCloseBtn) {
   boardingCloseBtn.addEventListener("click", () => {
     hideBoardingOverlay();
+  });
+}
+
+if (boardingStealCreditsBtn) {
+  boardingStealCreditsBtn.addEventListener("click", () => {
+    if (!boardingData) {
+      return;
+    }
+    sendAction({ type: "stealBoardingLoot", targetId: boardingData.id, lootType: "credits" });
+  });
+}
+
+if (boardingStealCargoBtn) {
+  boardingStealCargoBtn.addEventListener("click", () => {
+    if (!boardingData) {
+      return;
+    }
+    sendAction({ type: "stealBoardingLoot", targetId: boardingData.id, lootType: "cargo" });
   });
 }
 

@@ -819,6 +819,41 @@ const getCaptureChance = (ship) => {
   return clamp(0.35 + damageFactor * 0.4, 0.2, 0.85);
 };
 
+const getCargoValue = (cargo) =>
+  (cargo || []).reduce((total, entry) => {
+    const good = goodsById.get(entry.goodId);
+    const unitPrice = good?.basePrice ?? 0;
+    return total + unitPrice * entry.quantity;
+  }, 0);
+
+const getLootChance = (ship) => {
+  const range = disableThresholds.maxHull - disableThresholds.minHull;
+  const damageFactor = clamp(
+    (disableThresholds.maxHull - ship.hull) / range,
+    0,
+    1
+  );
+  return clamp(0.65 + damageFactor * 0.2, 0.5, 0.9);
+};
+
+const getBoardingPayload = (ship) => {
+  const cargo = ship.cargo || [];
+  return {
+    id: ship.id,
+    name: ship.name,
+    ship: ship.ship,
+    cargo,
+    cargoValue: getCargoValue(cargo),
+    credits: ship.credits || 0,
+    captureChance: getCaptureChance(ship),
+    lootChance: getLootChance(ship),
+    lootStatus: {
+      creditsTaken: Boolean(ship.ai.boardingLoot?.creditsTaken),
+      cargoTaken: Boolean(ship.ai.boardingLoot?.cargoTaken)
+    }
+  };
+};
+
 const getBoardingData = (player, targetId) => {
   const ship = getBoardableShip(player, targetId);
   if (!ship) {
@@ -826,14 +861,72 @@ const getBoardingData = (player, targetId) => {
   }
   return {
     ok: true,
-    data: {
-      id: ship.id,
-      name: ship.name,
-      ship: ship.ship,
-      cargo: ship.cargo || [],
-      credits: ship.credits || 0,
-      captureChance: getCaptureChance(ship)
+    data: getBoardingPayload(ship)
+  };
+};
+
+const triggerBoardingExplosion = (ship, player) => {
+  removeAiShip(ship.id);
+  appendLog(player, `${ship.name} detonated during boarding.`);
+  return {
+    id: ship.id,
+    name: ship.name,
+    systemId: ship.systemId,
+    x: ship.x,
+    y: ship.y,
+    isAi: true
+  };
+};
+
+const stealBoardingLoot = (player, targetId, lootType) => {
+  const ship = getBoardableShip(player, targetId);
+  if (!ship) {
+    return { ok: false, message: "Boarding target lost.", closeBoarding: true };
+  }
+  if (!ship.ai.boardingLoot) {
+    ship.ai.boardingLoot = { creditsTaken: false, cargoTaken: false };
+  }
+  const lootChance = getLootChance(ship);
+  if (Math.random() > lootChance) {
+    const destroyed = triggerBoardingExplosion(ship, player);
+    return {
+      ok: false,
+      message: "Boarding failed. The target detonated.",
+      closeBoarding: true,
+      destroyed
+    };
+  }
+  if (lootType === "credits") {
+    if (ship.ai.boardingLoot.creditsTaken || ship.credits <= 0) {
+      return { ok: false, message: "No credits left to steal." };
     }
+    const stolenCredits = ship.credits;
+    ship.credits = 0;
+    ship.ai.boardingLoot.creditsTaken = true;
+    player.credits += stolenCredits;
+    appendLog(player, `Boarding success: stole ${stolenCredits} credits from ${ship.name}.`);
+    return {
+      ok: true,
+      message: "Credits secured. Prepare to raid the cargo hold.",
+      data: getBoardingPayload(ship)
+    };
+  }
+  if (!ship.ai.boardingLoot.creditsTaken && ship.credits > 0) {
+    return { ok: false, message: "Secure the credits before raiding the cargo." };
+  }
+  if (ship.ai.boardingLoot.cargoTaken || (ship.cargo || []).length === 0) {
+    return { ok: false, message: "No cargo left to steal." };
+  }
+  (ship.cargo || []).forEach((entry) => {
+    upsertCargo(player, entry.goodId, entry.quantity);
+  });
+  ship.cargo = [];
+  ship.ai.boardingLoot.cargoTaken = true;
+  appendLog(player, `Boarding success: transferred cargo from ${ship.name}.`);
+  return {
+    ok: true,
+    message: "Cargo secured. Boarding team returning.",
+    data: getBoardingPayload(ship)
   };
 };
 
@@ -1106,6 +1199,7 @@ module.exports = {
   hireEscort,
   setEscortCommand,
   getBoardingData,
+  stealBoardingLoot,
   captureShip,
   removeEscortFromPlayer
 };
