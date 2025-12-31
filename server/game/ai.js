@@ -568,12 +568,23 @@ const tickAiShips = (deltaSeconds, players = []) => {
       const wingIndex = Math.floor((formationIndex + 1) / 2);
       const wingSide =
         formationIndex === 0 ? 0 : formationIndex % 2 === 1 ? -1 : 1;
-      const angleOffset =
-        wingSide === 0 ? 0 : wingSide * (Math.PI / 10) * Math.max(1, wingIndex);
-      const formationAngle = owner.angle + Math.PI + angleOffset;
-      const formationRadius = 36 + wingIndex * 8;
-      const formationX = owner.x + Math.cos(formationAngle) * formationRadius;
-      const formationY = owner.y + Math.sin(formationAngle) * formationRadius;
+      const backAngle = owner.angle + Math.PI;
+      const lateralAngle = backAngle + Math.PI / 2;
+      const backSpacing = 52;
+      const rowSpacing = 24;
+      const lateralSpacing = 30;
+      const backDistance =
+        formationIndex === 0 ? backSpacing : backSpacing + (wingIndex - 1) * rowSpacing;
+      const lateralOffset =
+        wingSide === 0 ? 0 : wingSide * lateralSpacing * Math.max(1, wingIndex);
+      const formationX =
+        owner.x +
+        Math.cos(backAngle) * backDistance +
+        Math.cos(lateralAngle) * lateralOffset;
+      const formationY =
+        owner.y +
+        Math.sin(backAngle) * backDistance +
+        Math.sin(lateralAngle) * lateralOffset;
       if (ship.ai.escortMode === "hold") {
         if (ship.ai.holdX == null || ship.ai.holdY == null) {
           ship.ai.holdX = ship.x;

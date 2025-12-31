@@ -46,6 +46,37 @@ const adjustSecondaryAmmo = (player, ammoId, delta) => {
   player.secondaryAmmo[ammoId] = next;
 };
 
+const applyDefaultSecondaryLoadout = (player, ship) => {
+  if (ship.defaultSecondaryWeapons?.length) {
+    player.secondaryWeapons = ship.defaultSecondaryWeapons.slice(
+      0,
+      ship.secondaryHardpoints
+    );
+  }
+  if (ship.defaultSecondaryAmmo) {
+    player.secondaryAmmo = {};
+    Object.entries(ship.defaultSecondaryAmmo).forEach(([ammoId, count]) => {
+      if (count > 0) {
+        player.secondaryAmmo[ammoId] = count;
+      }
+    });
+  }
+};
+
+const refillDefaultSecondaryAmmo = (player, ship) => {
+  if (!ship?.defaultSecondaryAmmo) {
+    return;
+  }
+  if (!player.secondaryAmmo) {
+    player.secondaryAmmo = {};
+  }
+  Object.entries(ship.defaultSecondaryAmmo).forEach(([ammoId, count]) => {
+    if (count > 0) {
+      player.secondaryAmmo[ammoId] = count;
+    }
+  });
+};
+
 const resolveSecondaryWeaponId = (player, requestedId) => {
   if (requestedId && player.secondaryWeapons.includes(requestedId)) {
     return requestedId;
@@ -186,6 +217,7 @@ const dockPlanet = (player, planetId) => {
   player.planetId = planetId;
   player.x = 0;
   player.y = 0;
+  refillDefaultSecondaryAmmo(player, shipById.get(player.ship.id));
   appendLog(player, `Docked at ${planet.name}.`);
 };
 
@@ -296,7 +328,9 @@ const applyShipToPlayer = (player, ship) => {
     player.weapons = player.weapons.slice(0, ship.hardpoints);
     appendLog(player, "Hardpoints limited: some weapons were removed.");
   }
-  if (player.secondaryWeapons.length > ship.secondaryHardpoints) {
+  if (ship.defaultSecondaryWeapons?.length || ship.defaultSecondaryAmmo) {
+    applyDefaultSecondaryLoadout(player, ship);
+  } else if (player.secondaryWeapons.length > ship.secondaryHardpoints) {
     player.secondaryWeapons = player.secondaryWeapons.slice(
       0,
       ship.secondaryHardpoints

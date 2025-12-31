@@ -850,7 +850,9 @@ const ships = [
     fuel: 200,
     hardpoints: 4,
     secondaryHardpoints: 2,
-    price: 30000
+    price: 30000,
+    defaultSecondaryWeapons: ["radar_missile_launcher"],
+    defaultSecondaryAmmo: { radar_missile: 6 }
   },
   {
     id: "sparrow_mk1",
@@ -861,7 +863,9 @@ const ships = [
     fuel: 140,
     hardpoints: 2,
     secondaryHardpoints: 1,
-    price: 9000
+    price: 9000,
+    defaultSecondaryWeapons: ["radar_missile_launcher"],
+    defaultSecondaryAmmo: { radar_missile: 4 }
   },
   {
     id: "sparrow_mk2",
@@ -872,7 +876,9 @@ const ships = [
     fuel: 160,
     hardpoints: 3,
     secondaryHardpoints: 1,
-    price: 16000
+    price: 16000,
+    defaultSecondaryWeapons: ["radar_missile_launcher"],
+    defaultSecondaryAmmo: { radar_missile: 6 }
   },
   {
     id: "vanguard",
@@ -883,7 +889,9 @@ const ships = [
     fuel: 180,
     hardpoints: 4,
     secondaryHardpoints: 2,
-    price: 26000
+    price: 26000,
+    defaultSecondaryWeapons: ["radar_missile_launcher"],
+    defaultSecondaryAmmo: { radar_missile: 8 }
   },
   {
     id: "wisp_runner",
@@ -894,7 +902,9 @@ const ships = [
     fuel: 200,
     hardpoints: 4,
     secondaryHardpoints: 2,
-    price: 22000
+    price: 22000,
+    defaultSecondaryWeapons: ["radar_missile_launcher"],
+    defaultSecondaryAmmo: { radar_missile: 6 }
   },
   {
     id: "bastion_guard",
@@ -905,7 +915,9 @@ const ships = [
     fuel: 220,
     hardpoints: 5,
     secondaryHardpoints: 2,
-    price: 38000
+    price: 38000,
+    defaultSecondaryWeapons: ["radar_missile_launcher"],
+    defaultSecondaryAmmo: { radar_missile: 8 }
   },
   {
     id: "ironclad",
@@ -916,7 +928,9 @@ const ships = [
     fuel: 240,
     hardpoints: 6,
     secondaryHardpoints: 3,
-    price: 52000
+    price: 52000,
+    defaultSecondaryWeapons: ["radar_missile_launcher"],
+    defaultSecondaryAmmo: { radar_missile: 10 }
   },
   {
     id: "pioneer_hauler",
