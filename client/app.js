@@ -198,6 +198,76 @@ const shipHitRadius = 16;
 const shipSprites = new Map();
 const shipSpriteBasePath = "images/ships";
 
+const isNearWhite = (r, g, b, threshold = 245) =>
+  r >= threshold && g >= threshold && b >= threshold;
+
+const removeWhiteBackground = (image) => {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return image;
+  }
+  canvas.width = image.width;
+  canvas.height = image.height;
+  ctx.drawImage(image, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const { data } = imageData;
+  let hasTransparency = false;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 255) {
+      hasTransparency = true;
+      break;
+    }
+  }
+  if (hasTransparency) {
+    return image;
+  }
+  const width = canvas.width;
+  const height = canvas.height;
+  const visited = new Uint8Array(width * height);
+  const stack = [];
+  const pushIfWhite = (x, y) => {
+    const idx = y * width + x;
+    if (visited[idx]) {
+      return;
+    }
+    visited[idx] = 1;
+    const offset = idx * 4;
+    if (isNearWhite(data[offset], data[offset + 1], data[offset + 2])) {
+      stack.push(idx);
+    }
+  };
+  for (let x = 0; x < width; x += 1) {
+    pushIfWhite(x, 0);
+    pushIfWhite(x, height - 1);
+  }
+  for (let y = 0; y < height; y += 1) {
+    pushIfWhite(0, y);
+    pushIfWhite(width - 1, y);
+  }
+  while (stack.length) {
+    const idx = stack.pop();
+    const offset = idx * 4;
+    data[offset + 3] = 0;
+    const x = idx % width;
+    const y = Math.floor(idx / width);
+    if (x > 0) {
+      pushIfWhite(x - 1, y);
+    }
+    if (x < width - 1) {
+      pushIfWhite(x + 1, y);
+    }
+    if (y > 0) {
+      pushIfWhite(x, y - 1);
+    }
+    if (y < height - 1) {
+      pushIfWhite(x, y + 1);
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+  return canvas;
+};
+
 const loadShipSprites = (ships = []) => {
   ships.forEach((ship) => {
     if (!ship?.id || shipSprites.has(ship.id)) {
@@ -205,6 +275,7 @@ const loadShipSprites = (ships = []) => {
     }
     const sprite = { image: new Image(), loaded: false, failed: false };
     sprite.image.onload = () => {
+      sprite.image = removeWhiteBackground(sprite.image);
       sprite.loaded = true;
     };
     sprite.image.onerror = () => {
