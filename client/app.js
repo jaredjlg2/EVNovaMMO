@@ -103,16 +103,6 @@ let commsTargetId = null;
 let commsTargetIsAi = false;
 let commsTargetName = "";
 const commsThreads = new Map();
-const mapView = {
-  zoom: 1,
-  panX: 0,
-  panY: 0,
-  isPanning: false,
-  lastX: 0,
-  lastY: 0,
-  dragged: false
-};
-
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
 const dockingRange = 70;
@@ -125,15 +115,25 @@ const jumpAcceleration = 720;
 const jumpTurnRate = 7.5;
 const jumpMaxSpeed = 520;
 const miniMapRange = 520;
+const mapZoom = {
+  min: 0.35,
+  max: 4.5,
+  default: 1.8
+};
+const mapView = {
+  zoom: mapZoom.default,
+  panX: 0,
+  panY: 0,
+  isPanning: false,
+  lastX: 0,
+  lastY: 0,
+  dragged: false
+};
 const jumpDurations = {
   align: 0.3,
   burn: 0.35,
   flash: 0.25,
   cooldown: 0.35
-};
-const mapZoom = {
-  min: 0.6,
-  max: 2.6
 };
 
 const commsAiResponses = [
@@ -507,6 +507,35 @@ const getHighlightedMissionDestinationSystemId = () => {
 
 const getDistanceFromCenter = () => Math.hypot(flightState.x, flightState.y);
 
+const focusMapOnCurrentSystem = ({ resetZoom = false } = {}) => {
+  if (!world) {
+    return;
+  }
+  const currentSystem = getCurrentSystem();
+  if (!currentSystem) {
+    return;
+  }
+  const { clientWidth, clientHeight } = mapCanvas;
+  if (mapCanvas.width !== clientWidth || mapCanvas.height !== clientHeight) {
+    mapCanvas.width = clientWidth;
+    mapCanvas.height = clientHeight;
+  }
+  if (resetZoom) {
+    mapView.zoom = mapZoom.default;
+    mapView.panX = 0;
+    mapView.panY = 0;
+  }
+  const layout = computeMapLayout();
+  if (!layout) {
+    return;
+  }
+  const target = systemToMap(currentSystem, layout);
+  const centerX = mapCanvas.width / 2;
+  const centerY = mapCanvas.height / 2;
+  mapView.panX += centerX - target.x;
+  mapView.panY += centerY - target.y;
+};
+
 const setMapOpen = (nextState) => {
   if (!world) {
     return;
@@ -514,6 +543,7 @@ const setMapOpen = (nextState) => {
   mapOpen = typeof nextState === "boolean" ? nextState : !mapOpen;
   mapOverlayEl.classList.toggle("hidden", !mapOpen);
   if (mapOpen) {
+    focusMapOnCurrentSystem({ resetZoom: true });
     renderMap();
   }
 };
