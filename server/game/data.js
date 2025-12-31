@@ -558,7 +558,8 @@ const planets = [
     name: "Scar Relay",
     outfitter: false,
     shipyard: false,
-    missionBoard: true
+    missionBoard: true,
+    blackMarket: true
   },
   {
     id: "vega_prime",
@@ -606,7 +607,8 @@ const planets = [
     name: "Windfall Crossing",
     outfitter: false,
     shipyard: false,
-    missionBoard: true
+    missionBoard: true,
+    blackMarket: true
   },
   {
     id: "ember_yards",
@@ -614,7 +616,8 @@ const planets = [
     name: "Ember Yards",
     outfitter: true,
     shipyard: false,
-    missionBoard: true
+    missionBoard: true,
+    blackMarket: true
   },
   {
     id: "draco_den",
@@ -622,7 +625,8 @@ const planets = [
     name: "Draco Den",
     outfitter: true,
     shipyard: true,
-    missionBoard: true
+    missionBoard: true,
+    blackMarket: true
   },
   {
     id: "bastion_ring",
@@ -1093,6 +1097,12 @@ const outfits = [
     name: "Fuel Cells",
     effect: "+40 fuel",
     price: 900
+  },
+  {
+    id: "quantum_core",
+    name: "Quantum Core",
+    effect: "+120 shield · +80 fuel",
+    price: 1800000
   }
 ];
 
@@ -1101,7 +1111,7 @@ const missions = [
     id: "med_delivery",
     title: "Medical Delivery",
     description: "Rush medical supplies to Orion Tradehub.",
-    reward: 2600,
+    reward: 12000,
     fromPlanetId: "earth",
     toPlanetId: "orion_tradehub"
   },
@@ -1109,7 +1119,7 @@ const missions = [
     id: "data_courier",
     title: "Encrypted Datapad",
     description: "Carry the encrypted datapad to New Turin.",
-    reward: 1700,
+    reward: 8000,
     fromPlanetId: "luna",
     toPlanetId: "new_turin"
   },
@@ -1117,7 +1127,7 @@ const missions = [
     id: "ore_contract",
     title: "Vega Ore Contract",
     description: "Deliver ore samples to Vega Prime.",
-    reward: 2000,
+    reward: 15000,
     fromPlanetId: "sirius_port",
     toPlanetId: "vega_prime"
   }
@@ -1125,77 +1135,294 @@ const missions = [
 
 const missionTemplates = [
   {
-    id: "relief",
-    type: "relief",
-    title: "Relief Convoy",
-    cargo: "relief supplies",
-    baseReward: 1100,
-    rewardPerJump: 260,
-    cargoSpace: 6,
-    description:
-      "Relief coordinators need {cargo} delivered to {destination}. Keep the timeline tight."
+    id: "fuel_refill",
+    type: "fuel_refill",
+    title: "Fuel Refill",
+    cargo: "refined fuel",
+    baseReward: 2000,
+    rewardPerJump: 120,
+    minReward: 2000,
+    maxReward: 2600,
+    cargoSpace: 2,
+    weight: 1.1,
+    description: "Deliver {cargo} to {destination} to top off a convoy."
   },
   {
     id: "courier",
     type: "courier",
     title: "Priority Dispatch",
     cargo: "encrypted dispatches",
-    baseReward: 800,
-    rewardPerJump: 200,
+    baseReward: 7000,
+    rewardPerJump: 2000,
+    minReward: 5000,
+    maxReward: 15000,
     cargoSpace: 2,
+    weight: 1.2,
     description: "Carry {cargo} from {origin} to {destination} without delays."
   },
   {
-    id: "charter",
+    id: "passenger",
     type: "passenger",
     title: "Passenger Charter",
     cargo: "passenger accommodations",
-    baseReward: 1350,
-    rewardPerJump: 320,
+    baseReward: 6000,
+    rewardPerJump: 2200,
+    minReward: 5000,
+    maxReward: 15000,
     cargoSpace: 8,
+    weight: 1.1,
     description: "Escort {cargo} from {origin} to {destination}. Discretion required."
   },
   {
-    id: "survey",
-    type: "survey",
-    title: "Survey Drop",
-    cargo: "survey drones",
-    baseReward: 950,
-    rewardPerJump: 240,
-    cargoSpace: 4,
-    description: "Deliver {cargo} to {destination} for a scheduled deployment."
-  },
-  {
-    id: "salvage",
-    type: "salvage",
-    title: "Salvage Pickup",
-    cargo: "salvage crates",
-    baseReward: 1250,
-    rewardPerJump: 280,
+    id: "delivery",
+    type: "delivery",
+    title: "Commercial Delivery",
+    cargo: "trade bundles",
+    baseReward: 10000,
+    rewardPerJump: 4200,
+    minReward: 10000,
+    maxReward: 20000,
     cargoSpace: 10,
-    description: "Retrieve {cargo} at {destination} for onward transfer."
+    weight: 1.4,
+    description: "Move {cargo} from {origin} to {destination}. Standard priority."
   },
   {
-    id: "security",
-    type: "security",
-    title: "Security Transfer",
-    cargo: "security equipment",
-    baseReward: 1150,
-    rewardPerJump: 300,
-    cargoSpace: 5,
-    description: "Move {cargo} from {origin} to {destination}. Remain vigilant."
+    id: "escort",
+    type: "escort",
+    title: "Escort & Special Delivery",
+    cargo: "priority cargo",
+    baseReward: 26000,
+    rewardPerJump: 5200,
+    minReward: 30000,
+    maxReward: 42000,
+    cargoSpace: 12,
+    weight: 0.9,
+    minCombatRating: 3,
+    description: "Protect {cargo} en route to {destination}. Hostile contacts expected."
+  },
+  {
+    id: "equipment",
+    type: "equipment",
+    title: "Equipment Delivery",
+    cargo: "industrial gear",
+    baseReward: 28000,
+    rewardPerJump: 4800,
+    minReward: 30000,
+    maxReward: 42000,
+    cargoSpace: 10,
+    weight: 0.9,
+    description: "Deliver {cargo} to {destination} under strict handling protocols."
+  },
+  {
+    id: "united_shipping",
+    type: "united_shipping",
+    title: "United Shipping Contract",
+    cargo: "United Shipping freight",
+    baseReward: 12000,
+    rewardPerJump: 9000,
+    minReward: 10000,
+    maxReward: 50000,
+    cargoSpace: 14,
+    weight: 0.9,
+    minReputation: 5,
+    maxLegalStatus: 60,
+    description: "Fulfill a United Shipping freight run to {destination}."
+  },
+  {
+    id: "special_mission",
+    type: "special",
+    title: "Special Assignment",
+    cargo: "secure package",
+    baseReward: 50000,
+    rewardPerJump: 0,
+    minReward: 50000,
+    maxReward: 50000,
+    cargoSpace: 4,
+    weight: 0.3,
+    minReputation: 12,
+    maxLegalStatus: 55,
+    description: "Confidential cargo needs delivery to {destination}. One-off assignment."
+  },
+  {
+    id: "rush_delivery",
+    type: "rush",
+    title: "Rush Delivery",
+    cargo: "urgent medical relay",
+    baseReward: 32000,
+    rewardPerJump: 11000,
+    minReward: 30000,
+    maxReward: 60000,
+    cargoSpace: 8,
+    weight: 0.8,
+    timeLimitMinutes: 18,
+    description: "Rush {cargo} to {destination}. Delays void the bonus."
+  },
+  {
+    id: "rescue",
+    type: "rescue",
+    title: "Rescue Operation",
+    cargo: "rescue survivors",
+    baseReward: 75000,
+    rewardPerJump: 6000,
+    minReward: 75000,
+    maxReward: 95000,
+    cargoSpace: 12,
+    weight: 0.6,
+    minCombatRating: 4,
+    maxLegalStatus: 60,
+    description: "Extract {cargo} from {destination} and return safely."
+  },
+  {
+    id: "colonist",
+    type: "colonist",
+    title: "Colonist Transport",
+    cargo: "colonist berths",
+    baseReward: 75000,
+    rewardPerJump: 7000,
+    minReward: 75000,
+    maxReward: 100000,
+    cargoSpace: 18,
+    weight: 0.6,
+    minReputation: 8,
+    maxLegalStatus: 60,
+    description: "Relocate {cargo} to {destination}. Comfort is mandatory."
+  },
+  {
+    id: "mining",
+    type: "mining",
+    title: "Asteroid Mining Run",
+    cargo: "mineral crates",
+    baseReward: 150000,
+    rewardPerJump: 0,
+    minReward: 150000,
+    maxReward: 150000,
+    cargoSpace: 20,
+    weight: 0.5,
+    minCombatRating: 6,
+    description: "Collect {cargo} from {destination} and return with a full haul."
+  },
+  {
+    id: "us_long",
+    type: "united_shipping_long",
+    title: "United Shipping Long Haul",
+    cargo: "sealed freight",
+    baseReward: 120000,
+    rewardPerJump: 90000,
+    minReward: 100000,
+    maxReward: 500000,
+    cargoSpace: 20,
+    weight: 0.3,
+    minReputation: 15,
+    timeLimitMinutes: 28,
+    description:
+      "Long-haul delivery to {destination}. Tight deadline and inspection risk."
+  },
+  {
+    id: "smuggling",
+    type: "smuggling",
+    title: "Smuggling Run",
+    cargo: "restricted cargo",
+    baseReward: 180000,
+    rewardPerJump: 70000,
+    minReward: 200000,
+    maxReward: 450000,
+    cargoSpace: 12,
+    weight: 0.35,
+    minCombatRating: 4,
+    maxLegalStatus: 70,
+    requiresBlackMarket: true,
+    description: "Slip {cargo} to {destination} without drawing scans."
+  },
+  {
+    id: "domination",
+    type: "domination",
+    title: "Planetary Domination",
+    cargo: "occupation supplies",
+    baseReward: 50000,
+    rewardPerJump: 0,
+    minReward: 50000,
+    maxReward: 50000,
+    cargoSpace: 16,
+    weight: 0.2,
+    minCombatRating: 8,
+    description:
+      "Land {cargo} on {destination} and establish a tribute regime."
+  },
+  {
+    id: "bounty_small",
+    type: "bounty",
+    title: "Local Bounty",
+    cargo: "bounty directive",
+    baseReward: 22500,
+    rewardPerJump: 0,
+    minReward: 22500,
+    maxReward: 22500,
+    cargoSpace: 0,
+    weight: 0.8,
+    targetRoles: ["shuttle", "courier", "scout"],
+    description: "Eliminate a petty raider near {destination} and report back."
+  },
+  {
+    id: "bounty_medium",
+    type: "bounty",
+    title: "Regional Bounty",
+    cargo: "bounty directive",
+    baseReward: 65000,
+    rewardPerJump: 0,
+    minReward: 45000,
+    maxReward: 90000,
+    cargoSpace: 0,
+    weight: 0.6,
+    minCombatRating: 4,
+    targetRoles: ["fighter", "escort"],
+    description: "Track and neutralize a hostile patrol near {destination}."
+  },
+  {
+    id: "bounty_large",
+    type: "bounty",
+    title: "High-Value Bounty",
+    cargo: "bounty directive",
+    baseReward: 120000,
+    rewardPerJump: 0,
+    minReward: 90000,
+    maxReward: 135000,
+    cargoSpace: 0,
+    weight: 0.4,
+    minCombatRating: 7,
+    targetRoles: ["freighter", "frigate"],
+    description: "Hunt down a dangerous target operating near {destination}."
   }
 ];
 
 const goods = [
-  { id: "foodstuffs", name: "Foodstuffs", basePrice: 40 },
-  { id: "textiles", name: "Textiles", basePrice: 55 },
-  { id: "industrial_ore", name: "Industrial Ore", basePrice: 70 },
-  { id: "machinery", name: "Machinery", basePrice: 120 },
-  { id: "electronics", name: "Electronics", basePrice: 160 },
-  { id: "medical_supplies", name: "Medical Supplies", basePrice: 150 },
-  { id: "luxury_goods", name: "Luxury Goods", basePrice: 220 },
-  { id: "refined_fuel", name: "Refined Fuel", basePrice: 90 }
+  { id: "foodstuffs", name: "Foodstuffs", basePrice: 2000 },
+  { id: "textiles", name: "Textiles", basePrice: 3000 },
+  { id: "industrial_ore", name: "Industrial Ore", basePrice: 4500 },
+  { id: "machinery", name: "Machinery", basePrice: 9000 },
+  { id: "electronics", name: "Electronics", basePrice: 12000 },
+  { id: "medical_supplies", name: "Medical Supplies", basePrice: 10000 },
+  { id: "luxury_goods", name: "Luxury Goods", basePrice: 18000 },
+  { id: "refined_fuel", name: "Refined Fuel", basePrice: 6000 },
+  { id: "salvaged_components", name: "Salvaged Components", basePrice: 38000 },
+  { id: "prototype_cores", name: "Prototype Cores", basePrice: 52000 },
+  {
+    id: "shadow_stims",
+    name: "Shadow Stims",
+    basePrice: 26000,
+    isContraband: true
+  },
+  {
+    id: "illegal_weapons",
+    name: "Illegal Weapons",
+    basePrice: 32000,
+    isContraband: true
+  },
+  {
+    id: "forbidden_artifacts",
+    name: "Forbidden Artifacts",
+    basePrice: 60000,
+    isContraband: true
+  }
 ];
 
 const markets = {
@@ -1391,6 +1618,37 @@ const markets = {
   }
 };
 
+const tradeRoutes = [
+  {
+    id: "sol_relief_loop",
+    name: "Sol Relief Loop",
+    fromPlanetId: "earth",
+    toPlanetId: "orion_tradehub",
+    goodId: "medical_supplies"
+  },
+  {
+    id: "vega_industrial",
+    name: "Vega Industrial Exchange",
+    fromPlanetId: "auriga_foundry",
+    toPlanetId: "earth",
+    goodId: "machinery"
+  },
+  {
+    id: "luxury_spiral",
+    name: "Luxury Spiral",
+    fromPlanetId: "palatine_court",
+    toPlanetId: "draco_den",
+    goodId: "luxury_goods"
+  },
+  {
+    id: "fuel_corridor",
+    name: "Fuel Corridor",
+    fromPlanetId: "crown_bastion",
+    toPlanetId: "orion_tradehub",
+    goodId: "refined_fuel"
+  }
+];
+
 const factions = [
   {
     id: "free_traders",
@@ -1460,5 +1718,6 @@ module.exports = {
   missionTemplates,
   goods,
   markets,
+  tradeRoutes,
   factions
 };

@@ -1,4 +1,4 @@
-const { ships } = require("./data");
+const { ships, factions } = require("./data");
 
 const starterShip = ships[0];
 
@@ -20,6 +20,10 @@ const applyDefaultSecondaryLoadout = (player, ship) => {
 };
 
 const createPlayer = ({ id, name, savedState = null }) => {
+  const baseReputation = factions.reduce((acc, faction) => {
+    acc[faction.id] = 0;
+    return acc;
+  }, {});
   const basePlayer = {
     id,
     name,
@@ -48,7 +52,12 @@ const createPlayer = ({ id, name, savedState = null }) => {
     missions: [],
     cargo: [],
     log: ["Welcome to the frontier, Captain."],
-    escorts: []
+    escorts: [],
+    reputation: baseReputation,
+    legalStatus: 0,
+    combatRating: 0,
+    dominatedPlanets: [],
+    lastTributeAt: Date.now()
   };
 
   if (!savedState) {
@@ -73,7 +82,12 @@ const createPlayer = ({ id, name, savedState = null }) => {
     outfits: savedState.outfits ?? basePlayer.outfits,
     missions: savedState.missions ?? basePlayer.missions,
     cargo: savedState.cargo ?? basePlayer.cargo,
-    escorts: savedState.escorts ?? basePlayer.escorts
+    escorts: savedState.escorts ?? basePlayer.escorts,
+    reputation: savedState.reputation ?? basePlayer.reputation,
+    legalStatus: savedState.legalStatus ?? basePlayer.legalStatus,
+    combatRating: savedState.combatRating ?? basePlayer.combatRating,
+    dominatedPlanets: savedState.dominatedPlanets ?? basePlayer.dominatedPlanets,
+    lastTributeAt: savedState.lastTributeAt ?? basePlayer.lastTributeAt
   };
 };
 

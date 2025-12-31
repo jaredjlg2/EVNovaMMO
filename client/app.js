@@ -24,6 +24,7 @@ const cargoSummaryEl = document.getElementById("cargoSummary");
 const tradeListEl = document.getElementById("tradeList");
 const barEscortListEl = document.getElementById("barEscortList");
 const barEscortRosterEl = document.getElementById("barEscortRoster");
+const barGambleBtn = document.getElementById("barGambleBtn");
 const logEl = document.getElementById("log");
 const flightCanvas = document.getElementById("flightCanvas");
 const flightStatusEl = document.getElementById("flightStatus");
@@ -468,6 +469,9 @@ const getSystemById = (systemId) => world?.systems.find((system) => system.id ==
 const getCurrentSystem = () => (player ? getSystemById(player.systemId) : null);
 
 const getPlanetById = (planetId) => world?.planets.find((planet) => planet.id === planetId) ?? null;
+
+const getFactionById = (factionId) =>
+  world?.factions.find((faction) => faction.id === factionId) ?? null;
 
 const getMissionDestinationSystemId = (mission) => {
   if (!mission || !world) {
@@ -1916,6 +1920,13 @@ const renderWeapons = () => {
       sendAction({ type: "buyWeapon", weaponId: weapon.id });
     });
     card.appendChild(buyBtn);
+    const sellBtn = document.createElement("button");
+    sellBtn.textContent = "Sell";
+    sellBtn.disabled = installed <= 0;
+    sellBtn.addEventListener("click", () => {
+      sendAction({ type: "sellWeapon", weaponId: weapon.id });
+    });
+    card.appendChild(sellBtn);
     if (isSecondary) {
       secondaryWeaponListEl.appendChild(card);
     } else {
@@ -1944,6 +1955,14 @@ const renderOutfits = () => {
       sendAction({ type: "buyOutfit", outfitId: outfit.id });
     });
     card.appendChild(buyBtn);
+    const installedCount = player.outfits.filter((id) => id === outfit.id).length;
+    const sellBtn = document.createElement("button");
+    sellBtn.textContent = "Sell";
+    sellBtn.disabled = installedCount <= 0;
+    sellBtn.addEventListener("click", () => {
+      sendAction({ type: "sellOutfit", outfitId: outfit.id });
+    });
+    card.appendChild(sellBtn);
     outfitListEl.appendChild(card);
   });
 };
@@ -1986,6 +2005,7 @@ const renderMarket = (market) => {
   marketGoods = market;
   const cargoUsed = getCargoUsed();
   const cargoCapacity = getCargoCapacity();
+  const escortCapacity = getEscortCargoCapacity();
   const manifest = getCargoManifest();
   const manifestText =
     manifest.length > 0
@@ -2001,11 +2021,22 @@ const renderMarket = (market) => {
   tradeListEl.innerHTML = "";
   market.forEach((good) => {
     const owned = player.cargo.find((entry) => entry.goodId === good.id)?.quantity ?? 0;
+    const tags = [];
+    if (good.isContraband) {
+      tags.push("Contraband");
+    }
+    if (good.routeHint) {
+      tags.push(good.routeHint);
+    }
+    if (good.isContraband && good.scanRisk) {
+      tags.push(`Scan risk: ${Math.round(good.scanRisk * 100)}%`);
+    }
     const card = document.createElement("div");
     card.className = "list-item";
     card.innerHTML = `
       <h4>${good.name}</h4>
       <p>Market: ${good.level} · Price: ${formatCredits(good.price)}</p>
+      ${tags.length ? `<p class="hud-hint">${tags.join(" · ")}</p>` : ""}
       <p>In hold: ${owned}</p>
     `;
     const controls = document.createElement("div");
@@ -2064,12 +2095,22 @@ const renderMissions = (missions) => {
     const from = getPlanetById(mission.fromPlanetId);
     const to = getPlanetById(mission.toPlanetId);
     const destinationSystem = getSystemById(to?.systemId);
+    const timeLimitLine = mission.timeLimitMinutes
+      ? `<p>Time limit: ${mission.timeLimitMinutes} minutes</p>`
+      : "";
+    const riskLine = mission.legalRisk ? `<p>Legal risk: ${mission.legalRisk}</p>` : "";
+    const targetLine = mission.targetRoles?.length
+      ? `<p>Target profile: ${mission.targetRoles.join(", ")}</p>`
+      : "";
     missionDetailEl.innerHTML = `
       <h4>${mission.title}</h4>
       <p>Type: ${mission.type ?? "delivery"} · Cargo: ${mission.cargoSpace ?? 0}</p>
       <p>${mission.description}</p>
+      ${targetLine}
       <p>Route: ${from?.name ?? "Unknown"} → ${to?.name ?? "Unknown"}</p>
       <p>Destination system: ${destinationSystem?.name ?? "Unknown"}</p>
+      ${timeLimitLine}
+      ${riskLine}
       <p>Reward: ${formatCredits(mission.reward)}</p>
     `;
     const acceptBtn = document.createElement("button");
@@ -2092,6 +2133,7 @@ const renderMissions = (missions) => {
       <h4>${mission.title}</h4>
       <p>${mission.type ?? "delivery"} · Cargo: ${mission.cargoSpace ?? 0}</p>
       <p>${from?.name ?? "Unknown"} → ${to?.name ?? "Unknown"}</p>
+      <p>Reward: ${formatCredits(mission.reward)}</p>
     `;
     card.addEventListener("click", () => {
       highlightedMissionId = mission.id;
@@ -2142,11 +2184,15 @@ const renderMissionLog = () => {
     activeMissions.forEach((mission) => {
       const planet = getPlanetById(mission.toPlanetId);
       const system = planet ? getSystemById(planet.systemId) : null;
+      const timeLimit = mission.expiresAt
+        ? Math.max(0, Math.ceil((mission.expiresAt - Date.now()) / 60000))
+        : null;
+      const timeLine = timeLimit !== null ? ` · ${timeLimit}m left` : "";
       const card = document.createElement("div");
       card.className = "list-item";
       card.innerHTML = `
         <h4>${mission.title}</h4>
-        <p>Destination: ${system?.name ?? "Unknown System"} · ${planet?.name ?? "Unknown Planet"}</p>
+        <p>Destination: ${system?.name ?? "Unknown System"} · ${planet?.name ?? "Unknown Planet"}${timeLine}</p>
         <p>Reward: ${formatCredits(mission.reward)}</p>
       `;
       missionLogListEl.appendChild(card);
@@ -2181,6 +2227,19 @@ const renderMissionLog = () => {
   });
 };
 
+const getLegalStatusLabel = (statusValue) => {
+  if (statusValue >= 80) {
+    return "Most Wanted";
+  }
+  if (statusValue >= 55) {
+    return "Wanted";
+  }
+  if (statusValue >= 30) {
+    return "Suspicious";
+  }
+  return "Clean";
+};
+
 const renderDockedInfo = () => {
   if (!player || !world) {
     return;
@@ -2191,6 +2250,10 @@ const renderDockedInfo = () => {
     return;
   }
   const services = ["Recharge", "Trade"];
+  const system = getSystemById(planet.systemId);
+  const faction = getFactionById(system?.factionId);
+  const reputationValue = player.reputation?.[system?.factionId] ?? 0;
+  const legalStatus = player.legalStatus ?? 0;
   if (planet.missionBoard) {
     services.push("Mission BBS");
   }
@@ -2203,6 +2266,8 @@ const renderDockedInfo = () => {
   dockedInfoEl.innerHTML = `
     <span><strong>${planet.name}</strong></span>
     <span>Services: ${services.join(" · ")}</span>
+    <span>Authority: ${faction?.name ?? "Independent"} · Rep: ${reputationValue}</span>
+    <span>Legal status: ${getLegalStatusLabel(legalStatus)} (${legalStatus})</span>
   `;
 };
 
@@ -2213,7 +2278,13 @@ const renderBar = (escortsForHire = [], currentEscorts = []) => {
   if (!player || !player.planetId) {
     barEscortListEl.innerHTML = "<p>Dock to browse escort contracts.</p>";
     barEscortRosterEl.innerHTML = "<p>Dock to view escort roster.</p>";
+    if (barGambleBtn) {
+      barGambleBtn.disabled = true;
+    }
     return;
+  }
+  if (barGambleBtn) {
+    barGambleBtn.disabled = player.credits < 4000;
   }
   if (escortsForHire.length === 0) {
     barEscortListEl.innerHTML = "<p>No escorts available right now.</p>";
@@ -2661,6 +2732,12 @@ dockedMenuButtons.forEach((button) => {
 if (dockedBackBtn) {
   dockedBackBtn.addEventListener("click", () => {
     setDockedSection(null);
+  });
+}
+
+if (barGambleBtn) {
+  barGambleBtn.addEventListener("click", () => {
+    sendAction({ type: "gamble" });
   });
 }
 
