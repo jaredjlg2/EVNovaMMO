@@ -875,6 +875,63 @@ const getLinkCurveOffset = (key, distance) => {
   return direction * Math.min(32, distance * 0.18);
 };
 
+const getMapLinkKey = (startId, endId) => [startId, endId].sort().join("-");
+
+const buildMapLinkSet = (layout) => {
+  const maxLinksPerSystem = 4;
+  const allowedLinks = new Map();
+
+  world.systems.forEach((system) => {
+    const systemLinks = (system.links || [])
+      .map((linkedId) => {
+        const linkedSystem = getSystemById(linkedId);
+        if (!linkedSystem) {
+          return null;
+        }
+        const start = systemToMap(system, layout);
+        const end = systemToMap(linkedSystem, layout);
+        const distance = Math.hypot(end.x - start.x, end.y - start.y) || 1;
+        return { id: linkedId, distance };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, maxLinksPerSystem);
+
+    allowedLinks.set(
+      system.id,
+      new Set(systemLinks.map((link) => link.id))
+    );
+  });
+
+  const linkKeys = new Set();
+  world.systems.forEach((system) => {
+    const systemAllowed = allowedLinks.get(system.id);
+    if (!systemAllowed) {
+      return;
+    }
+    systemAllowed.forEach((linkedId) => {
+      const otherAllowed = allowedLinks.get(linkedId);
+      if (!otherAllowed || !otherAllowed.has(system.id)) {
+        return;
+      }
+      linkKeys.add(getMapLinkKey(system.id, linkedId));
+    });
+  });
+
+  return linkKeys;
+};
+
+const isTextInputActive = () => {
+  const active = document.activeElement;
+  if (!active) {
+    return false;
+  }
+  if (active.isContentEditable) {
+    return true;
+  }
+  return ["INPUT", "TEXTAREA"].includes(active.tagName);
+};
+
 const renderMap = () => {
   if (!mapOpen || !world) {
     return;
@@ -894,11 +951,15 @@ const renderMap = () => {
     return;
   }
   const linkSet = new Set();
+  const linkKeys = buildMapLinkSet(layout);
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   world.systems.forEach((system) => {
     system.links.forEach((linkedId) => {
-      const key = [system.id, linkedId].sort().join("-");
+      const key = getMapLinkKey(system.id, linkedId);
+      if (!linkKeys.has(key)) {
+        return;
+      }
       if (linkSet.has(key)) {
         return;
       }
@@ -3023,6 +3084,12 @@ if (boardingEscortBtn) {
 }
 
 window.addEventListener("keydown", (event) => {
+  if (loginOverlayEl && !loginOverlayEl.classList.contains("hidden")) {
+    return;
+  }
+  if (isTextInputActive()) {
+    return;
+  }
   if (event.key === "Escape" && activeDockedSection) {
     event.preventDefault();
     setDockedSection(null);
