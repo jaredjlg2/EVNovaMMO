@@ -31,6 +31,7 @@ const {
   hireEscort,
   setEscortCommand,
   getBoardingData,
+  stealBoardingLoot,
   captureShip,
   removeEscortFromPlayer
 } = require("./game/game");
@@ -233,6 +234,27 @@ const handleAction = (player, action, socket) => {
       shouldPersist = false;
       shouldBroadcast = false;
       return;
+    }
+    case "stealBoardingLoot": {
+      const outcome = stealBoardingLoot(player, action.targetId, action.lootType);
+      if (outcome.destroyed) {
+        broadcast({ type: "destroyed", ...outcome.destroyed });
+      }
+      if (outcome.data) {
+        sendTo(socket, {
+          type: "boardingUpdate",
+          message: outcome.message || "",
+          ...outcome.data
+        });
+        break;
+      }
+      sendTo(socket, {
+        type: "boardingResult",
+        success: outcome.ok,
+        message: outcome.message,
+        closeBoarding: outcome.closeBoarding || false
+      });
+      break;
     }
     case "captureShip": {
       const outcome = captureShip(player, action.targetId, action.decision);
