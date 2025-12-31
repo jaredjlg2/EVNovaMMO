@@ -38,13 +38,15 @@
           <h2>Tactical Mini Map</h2>
           <canvas id="miniMapCanvas" class="mini-map" width="220" height="220"></canvas>
         </section>
-        <section class="hud-section">
-          <h2>Ship Status</h2>
-          <div id="shipInfo" class="hud-list"></div>
-        </section>
-        <section class="hud-section">
-          <h2>Target Lock</h2>
-          <div id="targetInfo" class="hud-list"></div>
+        <section class="hud-section hud-section--split">
+          <div>
+            <h2>Ship Status</h2>
+            <div id="shipInfo" class="hud-list"></div>
+          </div>
+          <div>
+            <h2>Target Lock</h2>
+            <div id="targetInfo" class="hud-list"></div>
+          </div>
         </section>
         <section class="hud-section">
           <h2>Flight</h2>
@@ -53,8 +55,8 @@
           <p id="weaponStatus" class="hud-emphasis"></p>
           <p id="secondaryStatus" class="hud-emphasis"></p>
           <p class="hud-hint">
-            ↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · W = cycle secondary ·
-            Tab = cycle targets · R = lock nearest hostile · L to dock · M for map · J to jump · I for mission log · Y for comms
+            Controls: ↑ boost · A/D turn · Space fire · Shift secondary · Tab target · R lock · L dock · M map · I log ·
+            Y comms
           </p>
         </section>
         <section class="hud-section hidden" id="dockedPanel">
@@ -118,7 +120,7 @@
           </div>
         </section>
         <section class="hud-section">
-          <h2>Captain's Log</h2>
+          <h2>Recent Events</h2>
           <div id="log" class="log"></div>
         </section>
       </aside>
