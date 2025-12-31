@@ -127,6 +127,7 @@ const jumpState = {
   headingY: 0,
   targetAngle: 0
 };
+let jumpHoldActive = false;
 
 const weaponStyles = {
   pulse_laser: { color: "#ff7ad8", glow: "rgba(255, 170, 230, 0.9)", width: 2, length: 18 },
@@ -1240,6 +1241,9 @@ const updateJumpSequence = (now) => {
     jumpState.headingX = 0;
     jumpState.headingY = 0;
     jumpState.targetAngle = flightState.angle;
+    if (jumpHoldActive) {
+      attemptJump();
+    }
   }
 };
 
@@ -2306,6 +2310,7 @@ window.addEventListener("keydown", (event) => {
   }
   if (event.key === "j" || event.key === "J") {
     event.preventDefault();
+    jumpHoldActive = true;
     if (!event.repeat) {
       attemptJump();
     }
@@ -2324,6 +2329,9 @@ window.addEventListener("keydown", (event) => {
 });
 
 window.addEventListener("keyup", (event) => {
+  if (event.key === "j" || event.key === "J") {
+    jumpHoldActive = false;
+  }
   keysPressed.delete(event.key);
 });
 
