@@ -26,6 +26,7 @@ const createPlayer = ({ id, name, savedState = null }) => {
     shield: starterShip.shield,
     weapons: ["pulse_laser"],
     secondaryWeapons: [],
+    secondaryAmmo: {},
     outfits: [],
     missions: [],
     cargo: [],
@@ -49,6 +50,7 @@ const createPlayer = ({ id, name, savedState = null }) => {
     shield: savedState.shield ?? basePlayer.shield,
     weapons: savedState.weapons ?? basePlayer.weapons,
     secondaryWeapons: savedState.secondaryWeapons ?? basePlayer.secondaryWeapons,
+    secondaryAmmo: savedState.secondaryAmmo ?? basePlayer.secondaryAmmo,
     outfits: savedState.outfits ?? basePlayer.outfits,
     missions: savedState.missions ?? basePlayer.missions,
     cargo: savedState.cargo ?? basePlayer.cargo

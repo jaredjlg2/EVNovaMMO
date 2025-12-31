@@ -1020,6 +1020,30 @@ const weapons = [
     price: 3200
   },
   {
+    id: "radar_missile_launcher",
+    name: "Radar Missile Launcher",
+    damage: 0,
+    energyCost: 0,
+    slotType: "secondary",
+    ammoType: "radar_missile",
+    requiresLock: true,
+    price: 5200
+  },
+  {
+    id: "radar_missile",
+    name: "Radar Missile",
+    damage: 70,
+    energyCost: 0,
+    slotType: "secondaryAmmo",
+    ammoFor: "radar_missile_launcher",
+    homing: true,
+    projectileSpeed: 320,
+    projectileLife: 2.6,
+    turnRate: 4.5,
+    range: 900,
+    price: 350
+  },
+  {
     id: "viper_rockets",
     name: "Viper Rocket Pod",
     damage: 55,

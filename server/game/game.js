@@ -23,6 +23,29 @@ const tradeInRate = 0.6;
 const shieldRegenRate = 0.08;
 const armorRegenRate = 0.04;
 
+const getSecondaryAmmoCount = (player, ammoId) =>
+  Math.max(0, player.secondaryAmmo?.[ammoId] ?? 0);
+
+const adjustSecondaryAmmo = (player, ammoId, delta) => {
+  if (!player.secondaryAmmo) {
+    player.secondaryAmmo = {};
+  }
+  const current = getSecondaryAmmoCount(player, ammoId);
+  const next = Math.max(0, current + delta);
+  if (next === 0) {
+    delete player.secondaryAmmo[ammoId];
+    return;
+  }
+  player.secondaryAmmo[ammoId] = next;
+};
+
+const resolveSecondaryWeaponId = (player, requestedId) => {
+  if (requestedId && player.secondaryWeapons.includes(requestedId)) {
+    return requestedId;
+  }
+  return player.secondaryWeapons[0] ?? null;
+};
+
 const getPlayer = (id) => players.get(id);
 
 const addPlayer = ({ id, name }) => {
@@ -53,6 +76,7 @@ const persistPlayer = (player) => {
     shield: player.shield,
     weapons: player.weapons,
     secondaryWeapons: player.secondaryWeapons,
+    secondaryAmmo: player.secondaryAmmo,
     outfits: player.outfits,
     missions: player.missions,
     cargo: player.cargo,
@@ -132,6 +156,21 @@ const buyWeapon = (player, weaponId) => {
   }
   if (player.credits < weapon.price) {
     appendLog(player, "Insufficient credits.");
+    return;
+  }
+  if (weapon.slotType === "secondaryAmmo") {
+    if (!weapon.ammoFor) {
+      appendLog(player, "Ammo unavailable.");
+      return;
+    }
+    if (!player.secondaryWeapons.includes(weapon.ammoFor)) {
+      const launcherName = weaponById.get(weapon.ammoFor)?.name || "launcher";
+      appendLog(player, `Install a ${launcherName} before buying ammo.`);
+      return;
+    }
+    player.credits -= weapon.price;
+    adjustSecondaryAmmo(player, weapon.id, 1);
+    appendLog(player, `Purchased ${weapon.name}.`);
     return;
   }
   if (weapon.slotType === "secondary") {
@@ -284,6 +323,7 @@ const getPlayerState = (player) => ({
   shield: player.shield,
   weapons: player.weapons,
   secondaryWeapons: player.secondaryWeapons,
+  secondaryAmmo: player.secondaryAmmo,
   outfits: player.outfits,
   missions: player.missions,
   cargo: player.cargo,
@@ -597,6 +637,99 @@ const fireWeapons = (player, payload, weaponIds, { allowFallback = true } = {}) 
   return { hits, destroyed, weaponsFired: resolvedWeaponIds };
 };
 
+const fireTargetedWeapon = (player, payload, weaponId, options = {}) => {
+  updatePosition(player, payload);
+  const hits = [];
+  const destroyed = [];
+  const targetId = payload.targetId;
+  const projectileId = options.projectileId || weaponId;
+  if (!targetId) {
+    return { hits, destroyed, weaponsFired: [], fired: false };
+  }
+  const damage = getWeaponDamage([weaponId]);
+  if (damage <= 0) {
+    return { hits, destroyed, weaponsFired: [], fired: false };
+  }
+  const targetPlayer = players.get(targetId);
+  const targetAi = getAiShips().find((ship) => ship.id === targetId);
+  const target = targetPlayer || targetAi;
+  if (!target || target.systemId !== player.systemId || target.planetId) {
+    return { hits, destroyed, weaponsFired: [projectileId], fired: true, targetId };
+  }
+  const range = options.range ?? 900;
+  const distance = Math.hypot(target.x - player.x, target.y - player.y);
+  if (distance > range) {
+    return { hits, destroyed, weaponsFired: [projectileId], fired: true, targetId };
+  }
+  const isDestroyed = applyDamageToTarget(target, damage);
+  if (targetPlayer) {
+    appendLog(target, `${player.name} hit you for ${damage} damage.`);
+    appendLog(player, `You hit ${target.name} for ${damage} damage.`);
+  } else if (targetAi) {
+    markShipHostileToPlayer(target.id, player.id);
+    appendLog(player, `You hit ${target.name} for ${damage} damage.`);
+  }
+  hits.push(target.id);
+  if (isDestroyed) {
+    destroyed.push({
+      id: target.id,
+      name: target.name,
+      systemId: target.systemId,
+      x: target.x,
+      y: target.y,
+      isAi: Boolean(targetAi)
+    });
+    if (targetPlayer) {
+      appendLog(target, "Ship destroyed! Rescue crews will tow you back once you relog.");
+    }
+    appendLog(player, `${target.name} was destroyed.`);
+  }
+  return { hits, destroyed, weaponsFired: [projectileId], fired: true, targetId };
+};
+
+const fireSecondaryWeapon = (player, payload) => {
+  const weaponId = resolveSecondaryWeaponId(player, payload.secondaryWeaponId);
+  if (!weaponId) {
+    appendLog(player, "No secondary weapons installed.");
+    return { hits: [], destroyed: [], weaponsFired: [], fired: false };
+  }
+  const weapon = weaponById.get(weaponId);
+  if (!weapon) {
+    appendLog(player, "Secondary weapon offline.");
+    return { hits: [], destroyed: [], weaponsFired: [], fired: false };
+  }
+  if (weapon.requiresLock && !payload.targetId) {
+    appendLog(player, "No target lock for that weapon.");
+    return { hits: [], destroyed: [], weaponsFired: [], fired: false };
+  }
+  let damageWeaponId = weaponId;
+  let projectileId = weapon.projectileId || weaponId;
+  if (weapon.ammoType) {
+    const ammoCount = getSecondaryAmmoCount(player, weapon.ammoType);
+    if (ammoCount <= 0) {
+      appendLog(player, `${weapon.name} out of ammo.`);
+      return { hits: [], destroyed: [], weaponsFired: [], fired: false };
+    }
+    adjustSecondaryAmmo(player, weapon.ammoType, -1);
+    damageWeaponId = weapon.ammoType;
+    projectileId = weapon.projectileId || weapon.ammoType;
+  }
+  if (weapon.requiresLock) {
+    return fireTargetedWeapon(player, payload, damageWeaponId, {
+      range: weapon.range,
+      projectileId
+    });
+  }
+  const hitReport = fireWeapons(player, payload, [damageWeaponId], { allowFallback: false });
+  return {
+    hits: hitReport.hits,
+    destroyed: hitReport.destroyed,
+    weaponsFired: [projectileId],
+    fired: true,
+    targetId: payload.targetId || null
+  };
+};
+
 module.exports = {
   addPlayer,
   removePlayer,
@@ -610,6 +743,7 @@ module.exports = {
   tickWorld,
   updatePosition,
   fireWeapons,
+  fireSecondaryWeapon,
   jumpSystem,
   dockPlanet,
   undock,
