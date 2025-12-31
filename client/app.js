@@ -75,6 +75,15 @@ let lastDockedPlanetId = null;
 let targetLockId = null;
 let missionLogOpen = false;
 let selectedSecondaryIndex = 0;
+const mapView = {
+  zoom: 1,
+  panX: 0,
+  panY: 0,
+  isPanning: false,
+  lastX: 0,
+  lastY: 0,
+  dragged: false
+};
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
@@ -91,6 +100,10 @@ const jumpDurations = {
   burn: 0.35,
   flash: 0.25,
   cooldown: 0.35
+};
+const mapZoom = {
+  min: 0.6,
+  max: 2.6
 };
 
 const flightState = {
@@ -480,7 +493,7 @@ const updateMapRoute = () => {
   mapRouteEl.innerHTML = "";
   if (!world || routePlan.length === 0) {
     mapRouteEl.innerHTML = "<li>No route plotted.</li>";
-    mapHintEl.textContent = "Click systems to add waypoints.";
+    mapHintEl.textContent = "Click systems to add waypoints. Drag to pan, scroll to zoom.";
     return;
   }
   routePlan.forEach((systemId, index) => {
@@ -492,7 +505,7 @@ const updateMapRoute = () => {
     }
     mapRouteEl.appendChild(item);
   });
-  mapHintEl.textContent = "Press J when you're far enough from the core to jump.";
+  mapHintEl.textContent = "Press J when you're far enough from the core to jump. Drag to pan, scroll to zoom.";
 };
 
 const computeMapLayout = () => {
@@ -510,12 +523,16 @@ const computeMapLayout = () => {
   const height = mapCanvas.height - padding * 2;
   const spanX = Math.max(maxX - minX, 1);
   const spanY = Math.max(maxY - minY, 1);
-  const scale = Math.min(width / spanX, height / spanY);
+  const baseScale = Math.min(width / spanX, height / spanY);
+  const scale = baseScale * mapView.zoom;
   return {
     padding,
     scale,
-    offsetX: padding - minX * scale,
-    offsetY: padding - minY * scale
+    baseScale,
+    minX,
+    minY,
+    offsetX: padding - minX * scale + mapView.panX,
+    offsetY: padding - minY * scale + mapView.panY
   };
 };
 
@@ -638,6 +655,10 @@ const handleMapClick = (event) => {
   if (!mapOpen || !world) {
     return;
   }
+  if (mapView.dragged) {
+    mapView.dragged = false;
+    return;
+  }
   const rect = mapCanvas.getBoundingClientRect();
   const clickX = event.clientX - rect.left;
   const clickY = event.clientY - rect.top;
@@ -653,6 +674,69 @@ const handleMapClick = (event) => {
   if (hitSystem) {
     updateRoutePlan(hitSystem.id);
   }
+};
+
+const handleMapPanStart = (event) => {
+  if (!mapOpen || !world || event.button !== 0) {
+    return;
+  }
+  mapView.isPanning = true;
+  mapView.dragged = false;
+  mapView.lastX = event.clientX;
+  mapView.lastY = event.clientY;
+  mapCanvas.classList.add("is-panning");
+};
+
+const handleMapPanMove = (event) => {
+  if (!mapView.isPanning || !mapOpen || !world) {
+    return;
+  }
+  const deltaX = event.clientX - mapView.lastX;
+  const deltaY = event.clientY - mapView.lastY;
+  if (Math.hypot(deltaX, deltaY) > 2) {
+    mapView.dragged = true;
+  }
+  mapView.panX += deltaX;
+  mapView.panY += deltaY;
+  mapView.lastX = event.clientX;
+  mapView.lastY = event.clientY;
+  renderMap();
+};
+
+const handleMapPanEnd = () => {
+  if (!mapView.isPanning) {
+    return;
+  }
+  mapView.isPanning = false;
+  mapCanvas.classList.remove("is-panning");
+};
+
+const handleMapWheel = (event) => {
+  if (!mapOpen || !world) {
+    return;
+  }
+  event.preventDefault();
+  const rect = mapCanvas.getBoundingClientRect();
+  const cursorX = event.clientX - rect.left;
+  const cursorY = event.clientY - rect.top;
+  const layout = computeMapLayout();
+  if (!layout) {
+    return;
+  }
+  const worldX = (cursorX - layout.offsetX) / layout.scale;
+  const worldY = (cursorY - layout.offsetY) / layout.scale;
+  const zoomFactor = Math.exp(-event.deltaY * 0.001);
+  const nextZoom = Math.min(mapZoom.max, Math.max(mapZoom.min, mapView.zoom * zoomFactor));
+  if (nextZoom === mapView.zoom) {
+    return;
+  }
+  const nextScale = layout.baseScale * nextZoom;
+  const baseOffsetX = layout.padding - layout.minX * nextScale;
+  const baseOffsetY = layout.padding - layout.minY * nextScale;
+  mapView.panX = cursorX - (worldX * nextScale + baseOffsetX);
+  mapView.panY = cursorY - (worldY * nextScale + baseOffsetY);
+  mapView.zoom = nextZoom;
+  renderMap();
 };
 
 const spawnProjectiles = (
@@ -2251,6 +2335,11 @@ window.addEventListener("resize", () => {
 });
 
 mapCanvas.addEventListener("click", handleMapClick);
+mapCanvas.addEventListener("mousedown", handleMapPanStart);
+mapCanvas.addEventListener("mousemove", handleMapPanMove);
+mapCanvas.addEventListener("wheel", handleMapWheel, { passive: false });
+window.addEventListener("mouseup", handleMapPanEnd);
+mapCanvas.addEventListener("mouseleave", handleMapPanEnd);
 closeMapBtn.addEventListener("click", () => setMapOpen(false));
 if (closeMissionLogBtn) {
   closeMissionLogBtn.addEventListener("click", () => setMissionLogOpen(false));

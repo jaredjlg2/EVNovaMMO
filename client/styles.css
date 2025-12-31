@@ -202,6 +202,11 @@ body {
   border-radius: 14px;
   border: 1px solid #1e2a4d;
   background: radial-gradient(circle at top, #101c3c, #05070f 70%);
+  cursor: grab;
+}
+
+#mapCanvas.is-panning {
+  cursor: grabbing;
 }
 
 .map-footer {
