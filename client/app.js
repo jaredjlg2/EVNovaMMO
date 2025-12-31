@@ -118,6 +118,7 @@ const dockingRange = 70;
 const boardingRange = 60;
 const jumpMinimumDistance = 240;
 const jumpArrivalDistance = 360;
+const positionSendIntervalMs = 40;
 const jumpArrivalSpeed = 180;
 const jumpAcceleration = 720;
 const jumpTurnRate = 7.5;
@@ -2907,4 +2908,4 @@ positionInterval = setInterval(() => {
     y: flightState.y,
     angle: flightState.angle
   });
-}, 20);
+}, positionSendIntervalMs);
