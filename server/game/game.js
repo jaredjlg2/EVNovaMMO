@@ -62,6 +62,8 @@ const removePlayer = (id) => {
 const getPlayerByName = (name) =>
   Array.from(players.values()).find((player) => player.name === name);
 
+const getPlayers = () => Array.from(players.values());
+
 const persistPlayer = (player) => {
   savePilot(player.name, {
     name: player.name,
@@ -735,6 +737,7 @@ module.exports = {
   removePlayer,
   getPlayer,
   getPlayerByName,
+  getPlayers,
   persistPlayer,
   getPlayerState,
   getWorldState,

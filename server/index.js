@@ -6,6 +6,7 @@ const {
   removePlayer,
   getPlayer,
   getPlayerByName,
+  getPlayers,
   getPlayerState,
   getWorldState,
   getSystemStatus,
@@ -53,6 +54,7 @@ const aiTickIntervalMs = 20;
 let lastAiTick = Date.now();
 const presenceBroadcastIntervalMs = 20;
 let lastPresenceBroadcast = 0;
+const persistenceIntervalMs = 5000;
 
 const broadcast = (payload) => {
   const message = JSON.stringify(payload);
@@ -109,6 +111,12 @@ const handleDestroyedEntities = (destroyedList) => {
     broadcast({ type: "destroyed", ...destroyed });
   });
 };
+
+setInterval(() => {
+  getPlayers().forEach((player) => {
+    persistPlayer(player);
+  });
+}, persistenceIntervalMs);
 
 setInterval(() => {
   const now = Date.now();
