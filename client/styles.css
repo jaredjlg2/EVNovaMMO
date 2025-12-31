@@ -325,6 +325,15 @@ body {
   color: #c8d4f5;
 }
 
+.mini-map {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  border: 1px solid #1e2a4d;
+  background: radial-gradient(circle at center, #0e1730, #070b18 70%);
+  display: block;
+}
+
 .ship-bars {
   display: grid;
   gap: 10px;
