@@ -9,7 +9,8 @@ const {
   goods,
   markets,
   tradeRoutes,
-  factions
+  factions,
+  storyArcs
 } = require("./data");
 
 const systemById = new Map(systems.map((system) => [system.id, system]));
@@ -25,7 +26,8 @@ const initialWorld = {
   goods,
   markets,
   tradeRoutes,
-  factions
+  factions,
+  storyArcs
 };
 
 const marketLevels = {
@@ -100,7 +102,66 @@ const getSystemDistance = (fromSystemId, toSystemId) => {
 const getFactionReputation = (player, factionId) =>
   player?.reputation?.[factionId] ?? 0;
 
+const hasVisitedSystem = (player, systemId) =>
+  Boolean(player?.story?.visitedSystems?.includes(systemId));
+
+const hasVisitedPlanet = (player, planetId) =>
+  Boolean(player?.story?.visitedPlanets?.includes(planetId));
+
 const isTemplateAvailable = (template, origin, player) => {
+  if (template.arcId) {
+    if (!player?.story) {
+      return false;
+    }
+    const arcState = player.story.arcs?.[template.arcId];
+    if (template.arcStatusRequired && arcState?.status !== template.arcStatusRequired) {
+      return false;
+    }
+    if (typeof template.arcStepMin === "number" && (arcState?.step ?? 0) < template.arcStepMin) {
+      return false;
+    }
+    if (typeof template.arcStepMax === "number" && (arcState?.step ?? 0) > template.arcStepMax) {
+      return false;
+    }
+    if (template.arcRequiresLock && player.story.arcLock !== template.arcId) {
+      return false;
+    }
+    if (player.story.arcLock && player.story.arcLock !== template.arcId) {
+      if (template.arcConflictBehavior !== "betrayal") {
+        return false;
+      }
+      const lockedArc = player.story.arcs?.[player.story.arcLock];
+      if (lockedArc?.pointOfNoReturnReached) {
+        return false;
+      }
+    }
+    if (template.arcRequirements) {
+      const requirements = template.arcRequirements;
+      if (requirements.requiresSystemId && !hasVisitedSystem(player, requirements.requiresSystemId)) {
+        return false;
+      }
+      if (requirements.requiresPlanetId && !hasVisitedPlanet(player, requirements.requiresPlanetId)) {
+        return false;
+      }
+      if (requirements.requiresShipId && player.ship?.id !== requirements.requiresShipId) {
+        return false;
+      }
+      if (
+        typeof requirements.minCargoCapacity === "number" &&
+        (player.ship?.cargo ?? 0) < requirements.minCargoCapacity
+      ) {
+        return false;
+      }
+      if (requirements.minReputationByFactionId) {
+        const repEntries = Object.entries(requirements.minReputationByFactionId);
+        for (const [factionId, minimum] of repEntries) {
+          if (getFactionReputation(player, factionId) < minimum) {
+            return false;
+          }
+        }
+      }
+    }
+  }
   if (template.requiresBlackMarket && !origin?.blackMarket) {
     return false;
   }
@@ -272,7 +333,17 @@ const getAvailableMissions = (playerOrPlanetId, now = Date.now()) => {
           ? "high"
           : template.type === "rush"
             ? "medium"
-            : "low"
+            : "low",
+      arcId: template.arcId || null,
+      arcTemplateType: template.arcTemplateType || null,
+      arcStepMin: template.arcStepMin ?? null,
+      arcAdvanceStep: template.arcAdvanceStep ?? null,
+      arcCommitOnAccept: Boolean(template.arcCommitOnAccept),
+      arcCommitOnComplete: Boolean(template.arcCommitOnComplete),
+      arcConflictBehavior: template.arcConflictBehavior || null,
+      arcPointOfNoReturn: Boolean(template.arcPointOfNoReturn),
+      arcFailureResets: Boolean(template.arcFailureResets),
+      arcEffects: template.arcEffects || null
     });
   }
   return generated;
