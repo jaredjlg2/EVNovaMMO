@@ -35,14 +35,8 @@
           </div>
         </div>
         <section class="hud-section">
-          <h2>Flight</h2>
-          <p id="flightStatus">Awaiting login…</p>
-          <p id="dockPrompt" class="hud-emphasis"></p>
-          <p id="weaponStatus" class="hud-emphasis"></p>
-          <p class="hud-hint">
-            W/↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · Tab = target lock ·
-            L to dock · M for map · J to jump
-          </p>
+          <h2>Tactical Mini Map</h2>
+          <canvas id="miniMapCanvas" class="mini-map" width="220" height="220"></canvas>
         </section>
         <section class="hud-section">
           <h2>Ship Status</h2>
@@ -53,8 +47,14 @@
           <div id="targetInfo" class="hud-list"></div>
         </section>
         <section class="hud-section">
-          <h2>Tactical Mini Map</h2>
-          <canvas id="miniMapCanvas" class="mini-map" width="220" height="220"></canvas>
+          <h2>Flight</h2>
+          <p id="flightStatus">Awaiting login…</p>
+          <p id="dockPrompt" class="hud-emphasis"></p>
+          <p id="weaponStatus" class="hud-emphasis"></p>
+          <p class="hud-hint">
+            W/↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · Tab = cycle targets ·
+            R = lock nearest hostile · L to dock · M for map · J to jump
+          </p>
         </section>
         <section class="hud-section hidden" id="dockedPanel">
           <div class="docked-header">

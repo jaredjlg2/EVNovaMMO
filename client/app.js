@@ -707,6 +707,13 @@ const getTargetCandidates = () => {
   return getVisiblePlayers();
 };
 
+const isHostileTarget = (other) => {
+  if (!player) {
+    return false;
+  }
+  return other.isAi ? (other.hostileTo || []).includes(player.id) : true;
+};
+
 const getSortedTargetsByDistance = () =>
   getTargetCandidates()
     .map((other) => ({
@@ -728,7 +735,7 @@ const updateTargetInfo = () => {
   if (!target) {
     targetInfoEl.innerHTML = `
       <span>No target locked.</span>
-      <span class="hud-hint">Press Tab to lock the nearest ship.</span>
+      <span class="hud-hint">Press Tab to cycle ships or R to lock the nearest hostile.</span>
     `;
     return;
   }
@@ -775,6 +782,17 @@ const cycleTargetLock = () => {
   const currentIndex = targets.findIndex((target) => target.id === targetLockId);
   const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % targets.length;
   targetLockId = targets[nextIndex].id;
+  updateTargetInfo();
+};
+
+const lockNearestHostileTarget = () => {
+  const targets = getSortedTargetsByDistance().filter((target) => isHostileTarget(target));
+  if (targets.length === 0) {
+    targetLockId = null;
+    updateTargetInfo();
+    return;
+  }
+  targetLockId = targets[0].id;
   updateTargetInfo();
 };
 
@@ -1122,7 +1140,7 @@ const renderMiniMap = () => {
   targets.forEach((other) => {
     const dx = other.x - flightState.x;
     const dy = other.y - flightState.y;
-    const isHostile = other.isAi ? (other.hostileTo || []).includes(player.id) : true;
+    const isHostile = isHostileTarget(other);
     drawDot(dx, dy, isHostile ? "rgba(255, 130, 130, 0.9)" : "rgba(140, 200, 255, 0.9)", 3);
   });
 
@@ -1255,9 +1273,7 @@ const renderFlight = (now) => {
       }
       ctx.save();
       ctx.translate(screenX, screenY);
-      const isHostile = other.isAi
-        ? (other.hostileTo || []).includes(player.id)
-        : true;
+      const isHostile = isHostileTarget(other);
       if (other.id === targetLockId) {
         ctx.strokeStyle = "rgba(255, 211, 122, 0.9)";
         ctx.lineWidth = 2;
@@ -1900,6 +1916,13 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     if (!mapOpen && !event.repeat) {
       cycleTargetLock();
+    }
+    return;
+  }
+  if (event.key === "r" || event.key === "R") {
+    event.preventDefault();
+    if (!mapOpen && !event.repeat) {
+      lockNearestHostileTarget();
     }
     return;
   }
