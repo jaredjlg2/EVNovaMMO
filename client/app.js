@@ -504,12 +504,12 @@ const buildMapSystemPositions = () => {
   });
 
   const iterations = 80;
-  const repulsionRadius = 150;
-  const repulsionStrength = 0.28;
+  const repulsionRadius = 140;
+  const repulsionStrength = 0.22;
   const linkDistance = 200;
-  const linkStrength = 0.035;
-  const anchorStrength = 0.02;
-  const damping = 0.82;
+  const linkStrength = 0.04;
+  const anchorStrength = 0.05;
+  const damping = 0.85;
 
   for (let step = 0; step < iterations; step += 1) {
     nodes.forEach((node) => {
@@ -760,15 +760,16 @@ const setCommsOpen = (nextState, target = null) => {
   }
 };
 
-const canPlotRouteBetween = (startId, targetId) => {
+const findRoutePath = (startId, targetId) => {
   if (!world || !startId || !targetId) {
-    return false;
+    return null;
   }
   if (startId === targetId) {
-    return true;
+    return [startId];
   }
   const visited = new Set([startId]);
   const queue = [startId];
+  const previous = new Map();
   while (queue.length) {
     const currentId = queue.shift();
     const system = getSystemById(currentId);
@@ -779,14 +780,38 @@ const canPlotRouteBetween = (startId, targetId) => {
       if (visited.has(linkId)) {
         continue;
       }
-      if (linkId === targetId) {
-        return true;
-      }
       visited.add(linkId);
+      previous.set(linkId, currentId);
+      if (linkId === targetId) {
+        const path = [linkId];
+        let step = currentId;
+        while (step) {
+          path.unshift(step);
+          step = previous.get(step);
+        }
+        return path;
+      }
       queue.push(linkId);
     }
   }
-  return false;
+  return null;
+};
+
+const validateRoutePath = (path) => {
+  if (!path || path.length < 2) {
+    return true;
+  }
+  for (let i = 0; i < path.length - 1; i += 1) {
+    const system = getSystemById(path[i]);
+    if (!system?.links?.includes(path[i + 1])) {
+      console.warn("Route hop missing adjacency link.", {
+        from: path[i],
+        to: path[i + 1]
+      });
+      return false;
+    }
+  }
+  return true;
 };
 
 const updateRoutePlan = (systemId) => {
@@ -802,7 +827,8 @@ const updateRoutePlan = (systemId) => {
     if (!startSystemId) {
       return;
     }
-    if (!canPlotRouteBetween(startSystemId, systemId)) {
+    const path = findRoutePath(startSystemId, systemId);
+    if (!path) {
       if (mapHintEl) {
         const startName = getSystemById(startSystemId)?.name ?? "current system";
         const targetName = getSystemById(systemId)?.name ?? systemId;
@@ -810,7 +836,10 @@ const updateRoutePlan = (systemId) => {
       }
       return;
     }
-    routePlan = [...routePlan, systemId];
+    if (!validateRoutePath(path)) {
+      return;
+    }
+    routePlan = [...routePlan, ...path.slice(1)];
   }
   updateMapRoute();
   renderMap();
@@ -919,47 +948,17 @@ const getLinkCurveOffset = (key, distance) => {
 
 const getMapLinkKey = (startId, endId) => [startId, endId].sort().join("-");
 
-const buildMapLinkSet = (layout) => {
-  const maxLinksPerSystem = 4;
-  const allowedLinks = new Map();
-
-  world.systems.forEach((system) => {
-    const systemLinks = (system.links || [])
-      .map((linkedId) => {
-        const linkedSystem = getSystemById(linkedId);
-        if (!linkedSystem) {
-          return null;
-        }
-        const start = systemToMap(system, layout);
-        const end = systemToMap(linkedSystem, layout);
-        const distance = Math.hypot(end.x - start.x, end.y - start.y) || 1;
-        return { id: linkedId, distance };
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, maxLinksPerSystem);
-
-    allowedLinks.set(
-      system.id,
-      new Set(systemLinks.map((link) => link.id))
-    );
-  });
-
+const buildMapLinkSet = () => {
   const linkKeys = new Set();
   world.systems.forEach((system) => {
-    const systemAllowed = allowedLinks.get(system.id);
-    if (!systemAllowed) {
-      return;
-    }
-    systemAllowed.forEach((linkedId) => {
-      const otherAllowed = allowedLinks.get(linkedId);
-      if (!otherAllowed || !otherAllowed.has(system.id)) {
+    (system.links || []).forEach((linkedId) => {
+      const linkedSystem = getSystemById(linkedId);
+      if (!linkedSystem) {
         return;
       }
       linkKeys.add(getMapLinkKey(system.id, linkedId));
     });
   });
-
   return linkKeys;
 };
 
@@ -972,6 +971,38 @@ const isTextInputActive = () => {
     return true;
   }
   return ["INPUT", "TEXTAREA"].includes(active.tagName);
+};
+
+const getSystemZoneStyle = (system) => {
+  const tags = system.tags || [];
+  const isStory =
+    system.zoneType === "STORY_UNIQUE" ||
+    tags.includes("PSYCHIC_ANOMALY") ||
+    tags.includes("CULT_SITE");
+  const isPirate =
+    system.factionId === "black_flag_syndicate" ||
+    tags.includes("PIRATE_BASE") ||
+    tags.includes("PIRATE_MARKET");
+  const isNeutral = !system.factionId || system.zoneType === "NEUTRAL_WILD";
+  const isConflict = ["CONFLICT", "BORDER"].includes(system.zoneType) || system.status === "border";
+  const isCore = ["CORE", "HUB"].includes(system.zoneType) || system.status === "core";
+
+  if (isStory) {
+    return { color: "rgba(179, 140, 255, 0.9)" };
+  }
+  if (isPirate) {
+    return { color: "rgba(255, 98, 98, 0.9)" };
+  }
+  if (isConflict) {
+    return { color: "rgba(255, 180, 92, 0.9)" };
+  }
+  if (isNeutral) {
+    return { color: "rgba(150, 156, 175, 0.9)" };
+  }
+  if (isCore) {
+    return { color: "rgba(111, 214, 255, 0.9)" };
+  }
+  return { color: "rgba(111, 214, 255, 0.9)" };
 };
 
 const renderMap = () => {
@@ -993,7 +1024,7 @@ const renderMap = () => {
     return;
   }
   const linkSet = new Set();
-  const linkKeys = buildMapLinkSet(layout);
+  const linkKeys = buildMapLinkSet();
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   world.systems.forEach((system) => {
@@ -1058,6 +1089,12 @@ const renderMap = () => {
     const isCurrent = currentSystem && system.id === currentSystem.id;
     const isInRoute = routePlan.includes(system.id);
     const isSelected = selectedMapSystemId === system.id;
+    const zoneStyle = getSystemZoneStyle(system);
+    ctx.strokeStyle = zoneStyle.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, isCurrent ? 12 : 9, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.fillStyle = isCurrent ? "#ffd37a" : isInRoute ? "#8bd4ff" : "#5a7ad8";
     ctx.beginPath();
     ctx.arc(point.x, point.y, isCurrent ? 8 : 6, 0, Math.PI * 2);

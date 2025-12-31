@@ -24,8 +24,8 @@
   {
     "id": "deneb",
     "name": "Deneb",
-    "x": 140,
-    "y": -40,
+    "x": 160,
+    "y": -100,
     "links": [
       "sol",
       "helios",
@@ -51,8 +51,8 @@
   {
     "id": "altair",
     "name": "Altair",
-    "x": -120,
-    "y": -40,
+    "x": -160,
+    "y": -100,
     "links": [
       "sol",
       "new_eden",
@@ -78,8 +78,8 @@
   {
     "id": "arcadia",
     "name": "Arcadia",
-    "x": 80,
-    "y": 120,
+    "x": 100,
+    "y": 160,
     "links": [
       "sol",
       "helios",
@@ -102,7 +102,7 @@
   {
     "id": "helios",
     "name": "Helios",
-    "x": 200,
+    "x": 240,
     "y": 60,
     "links": [
       "deneb",
@@ -127,8 +127,8 @@
   {
     "id": "new_eden",
     "name": "New Eden",
-    "x": -140,
-    "y": 120,
+    "x": -120,
+    "y": 160,
     "links": [
       "altair",
       "cinder",
@@ -153,7 +153,7 @@
     "id": "borealis_gate",
     "name": "Borealis Gate",
     "x": 0,
-    "y": 220,
+    "y": 280,
     "links": [
       "arcadia",
       "new_eden",
@@ -181,8 +181,8 @@
   {
     "id": "cinder",
     "name": "Cinder",
-    "x": -220,
-    "y": 140,
+    "x": -260,
+    "y": 220,
     "links": [
       "new_eden",
       "vega",
@@ -207,7 +207,7 @@
   {
     "id": "lancer",
     "name": "Lancer",
-    "x": 220,
+    "x": 280,
     "y": 200,
     "links": [
       "helios",
@@ -229,8 +229,8 @@
   {
     "id": "redoubt",
     "name": "Redoubt",
-    "x": -20,
-    "y": -200,
+    "x": 0,
+    "y": -300,
     "links": [
       "altair",
       "sirius",
@@ -251,8 +251,8 @@
   {
     "id": "riftwatch",
     "name": "Riftwall",
-    "x": 200,
-    "y": -200,
+    "x": 260,
+    "y": -220,
     "links": [
       "deneb",
       "crown",
@@ -279,8 +279,8 @@
   {
     "id": "scar",
     "name": "Scar",
-    "x": -160,
-    "y": -140,
+    "x": -140,
+    "y": -220,
     "links": [
       "redoubt",
       "draco",
@@ -308,8 +308,8 @@
   {
     "id": "vega",
     "name": "Vega",
-    "x": -360,
-    "y": 120,
+    "x": -440,
+    "y": 160,
     "links": [
       "cinder",
       "auriga",
@@ -337,8 +337,8 @@
   {
     "id": "auriga",
     "name": "Auriga",
-    "x": -420,
-    "y": 0,
+    "x": -520,
+    "y": 60,
     "links": [
       "vega",
       "cygnus",
@@ -364,8 +364,8 @@
   {
     "id": "lyra",
     "name": "Lyra",
-    "x": -480,
-    "y": 200,
+    "x": -640,
+    "y": 220,
     "links": [
       "vega",
       "polaris",
@@ -388,8 +388,8 @@
   {
     "id": "cygnus",
     "name": "Cygnus",
-    "x": -520,
-    "y": 80,
+    "x": -560,
+    "y": 140,
     "links": [
       "auriga",
       "lyra",
@@ -412,8 +412,8 @@
   {
     "id": "polaris",
     "name": "Polaris",
-    "x": -560,
-    "y": 260,
+    "x": -700,
+    "y": 300,
     "links": [
       "lyra",
       "cygnus",
@@ -441,7 +441,7 @@
   {
     "id": "windfall",
     "name": "Windfall",
-    "x": -340,
+    "x": -360,
     "y": 260,
     "links": [
       "vega",
@@ -469,8 +469,8 @@
   {
     "id": "ember",
     "name": "Ember",
-    "x": -320,
-    "y": -80,
+    "x": -360,
+    "y": -40,
     "links": [
       "auriga",
       "draco",
@@ -498,8 +498,8 @@
   {
     "id": "draco",
     "name": "Draco",
-    "x": -260,
-    "y": -200,
+    "x": -300,
+    "y": -180,
     "links": [
       "scar",
       "ember",
@@ -520,7 +520,7 @@
   {
     "id": "bastion",
     "name": "Bastion",
-    "x": -340,
+    "x": -360,
     "y": -140,
     "links": [
       "draco",
@@ -548,7 +548,7 @@
   {
     "id": "fenrir",
     "name": "Fenrir",
-    "x": -380,
+    "x": -460,
     "y": -260,
     "links": [
       "bastion",
@@ -568,8 +568,8 @@
   {
     "id": "azrael",
     "name": "Azrael",
-    "x": -220,
-    "y": -320,
+    "x": -80,
+    "y": -380,
     "links": [
       "fenrir",
       "obsidian",
@@ -595,8 +595,8 @@
   {
     "id": "obsidian",
     "name": "Obsidian",
-    "x": -120,
-    "y": -280,
+    "x": -40,
+    "y": -320,
     "links": [
       "draco",
       "azrael",
@@ -624,8 +624,8 @@
   {
     "id": "sirius",
     "name": "Sirius",
-    "x": 20,
-    "y": -360,
+    "x": 320,
+    "y": -320,
     "links": [
       "redoubt",
       "helene",
@@ -645,8 +645,8 @@
   {
     "id": "helene",
     "name": "Helene",
-    "x": -120,
-    "y": -420,
+    "x": 260,
+    "y": -400,
     "links": [
       "sirius",
       "obsidian",
@@ -667,8 +667,8 @@
   {
     "id": "valkyr",
     "name": "Valkyr",
-    "x": 200,
-    "y": -360,
+    "x": 420,
+    "y": -280,
     "links": [
       "sirius",
       "mirage",
@@ -694,8 +694,8 @@
   {
     "id": "mirage",
     "name": "Mirage",
-    "x": 120,
-    "y": -420,
+    "x": 500,
+    "y": -360,
     "links": [
       "valkyr",
       "numen",
@@ -720,8 +720,8 @@
   {
     "id": "numen",
     "name": "Numen",
-    "x": 0,
-    "y": -480,
+    "x": 360,
+    "y": -460,
     "links": [
       "helene",
       "mirage",
@@ -751,8 +751,8 @@
   {
     "id": "duskfall",
     "name": "Duskfall",
-    "x": 140,
-    "y": -280,
+    "x": 360,
+    "y": -200,
     "links": [
       "valkyr",
       "riftwatch",
@@ -778,8 +778,8 @@
   {
     "id": "orion",
     "name": "Orion",
-    "x": 360,
-    "y": -80,
+    "x": 420,
+    "y": 120,
     "links": [
       "aurora",
       "castor",
@@ -801,7 +801,7 @@
   {
     "id": "castor",
     "name": "Castor",
-    "x": 420,
+    "x": 260,
     "y": 40,
     "links": [
       "orion",
@@ -825,7 +825,7 @@
     "id": "palatine",
     "name": "Palatine",
     "x": 520,
-    "y": -20,
+    "y": 200,
     "links": [
       "castor",
       "eridani",
@@ -848,8 +848,8 @@
   {
     "id": "eridani",
     "name": "Eridani",
-    "x": 480,
-    "y": -140,
+    "x": 600,
+    "y": 120,
     "links": [
       "palatine",
       "miranda",
@@ -871,8 +871,8 @@
   {
     "id": "miranda",
     "name": "Miranda",
-    "x": 440,
-    "y": -260,
+    "x": 360,
+    "y": -200,
     "links": [
       "eridani",
       "mirage",
@@ -895,8 +895,8 @@
   {
     "id": "aurora",
     "name": "Aurora",
-    "x": 300,
-    "y": 40,
+    "x": 200,
+    "y": 120,
     "links": [
       "orion",
       "castor",
@@ -921,8 +921,8 @@
   {
     "id": "crown",
     "name": "Crown",
-    "x": 300,
-    "y": -200,
+    "x": 260,
+    "y": -120,
     "links": [
       "orion",
       "riftwatch",
@@ -947,7 +947,7 @@
     "id": "borealis",
     "name": "Borealis",
     "x": 0,
-    "y": 360,
+    "y": 380,
     "links": [
       "borealis_gate",
       "kepler",
@@ -975,8 +975,8 @@
   {
     "id": "kepler",
     "name": "Kepler",
-    "x": 120,
-    "y": 420,
+    "x": 140,
+    "y": 480,
     "links": [
       "borealis",
       "arkady",
@@ -996,8 +996,8 @@
   {
     "id": "luyten",
     "name": "Luyten",
-    "x": -80,
-    "y": 460,
+    "x": 120,
+    "y": 520,
     "links": [
       "zenith",
       "tundra",
@@ -1022,8 +1022,8 @@
   {
     "id": "arkady",
     "name": "Arkady",
-    "x": 200,
-    "y": 340,
+    "x": 320,
+    "y": 320,
     "links": [
       "kepler",
       "lancer",
@@ -1050,8 +1050,8 @@
   {
     "id": "zenith",
     "name": "Zenith",
-    "x": -200,
-    "y": 360,
+    "x": 0,
+    "y": 520,
     "links": [
       "borealis",
       "windfall",
@@ -1078,8 +1078,8 @@
   {
     "id": "drifts",
     "name": "Drifts",
-    "x": 260,
-    "y": 440,
+    "x": 460,
+    "y": 320,
     "links": [
       "kepler",
       "arkady",
@@ -1104,8 +1104,8 @@
   {
     "id": "tundra",
     "name": "Tundra",
-    "x": -260,
-    "y": 420,
+    "x": -120,
+    "y": 520,
     "links": [
       "zenith",
       "polaris",
@@ -1130,8 +1130,8 @@
   {
     "id": "sd_01",
     "name": "Solaria 01",
-    "x": -90,
-    "y": -170,
+    "x": -180,
+    "y": -240,
     "links": [
       "sol",
       "sd_02"
@@ -1150,8 +1150,8 @@
   {
     "id": "sd_02",
     "name": "Solaria 02",
-    "x": -30,
-    "y": -170,
+    "x": -80,
+    "y": -240,
     "links": [
       "deneb",
       "sd_01",
@@ -1171,8 +1171,8 @@
   {
     "id": "sd_03",
     "name": "Solaria 03",
-    "x": 30,
-    "y": -170,
+    "x": 20,
+    "y": -240,
     "links": [
       "altair",
       "sd_02",
@@ -1192,8 +1192,8 @@
   {
     "id": "sd_04",
     "name": "Solaria 04",
-    "x": 90,
-    "y": -170,
+    "x": 120,
+    "y": -240,
     "links": [
       "arcadia",
       "sd_03",
@@ -1213,8 +1213,8 @@
   {
     "id": "sd_05",
     "name": "Solaria 05",
-    "x": -90,
-    "y": -110,
+    "x": -180,
+    "y": -180,
     "links": [
       "helios",
       "sd_04",
@@ -1234,8 +1234,8 @@
   {
     "id": "sd_06",
     "name": "Solaria 06",
-    "x": -30,
-    "y": -110,
+    "x": -80,
+    "y": -180,
     "links": [
       "new_eden",
       "sd_05",
@@ -1255,8 +1255,8 @@
   {
     "id": "sd_07",
     "name": "Solaria 07",
-    "x": 30,
-    "y": -110,
+    "x": 20,
+    "y": -180,
     "links": [
       "borealis_gate",
       "sd_06",
@@ -1276,8 +1276,8 @@
   {
     "id": "sd_08",
     "name": "Solaria 08",
-    "x": 90,
-    "y": -110,
+    "x": 120,
+    "y": -180,
     "links": [
       "sol",
       "sd_07",
@@ -1297,8 +1297,8 @@
   {
     "id": "sd_09",
     "name": "Solaria 09",
-    "x": -90,
-    "y": -50,
+    "x": -180,
+    "y": -120,
     "links": [
       "deneb",
       "sd_08",
@@ -1318,8 +1318,8 @@
   {
     "id": "sd_10",
     "name": "Solaria 10",
-    "x": -30,
-    "y": -50,
+    "x": -80,
+    "y": -120,
     "links": [
       "altair",
       "sd_09",
@@ -1339,8 +1339,8 @@
   {
     "id": "sd_11",
     "name": "Solaria 11",
-    "x": 30,
-    "y": -50,
+    "x": 20,
+    "y": -120,
     "links": [
       "arcadia",
       "sd_10",
@@ -1360,8 +1360,8 @@
   {
     "id": "sd_12",
     "name": "Solaria 12",
-    "x": 90,
-    "y": -50,
+    "x": 120,
+    "y": -120,
     "links": [
       "helios",
       "sd_11",
@@ -1381,8 +1381,8 @@
   {
     "id": "sd_13",
     "name": "Solaria 13",
-    "x": -90,
-    "y": 10,
+    "x": -60,
+    "y": 110,
     "links": [
       "new_eden",
       "sd_12",
@@ -1403,8 +1403,8 @@
   {
     "id": "sd_14",
     "name": "Solaria 14",
-    "x": -30,
-    "y": 10,
+    "x": 20,
+    "y": 160,
     "links": [
       "borealis_gate",
       "sd_13"
@@ -1424,8 +1424,8 @@
   {
     "id": "ic_01",
     "name": "Anvil 01",
-    "x": 275,
-    "y": -125,
+    "x": 220,
+    "y": -120,
     "links": [
       "orion",
       "ic_02"
@@ -1444,8 +1444,8 @@
   {
     "id": "ic_02",
     "name": "Anvil 02",
-    "x": 345,
-    "y": -125,
+    "x": 300,
+    "y": -120,
     "links": [
       "castor",
       "ic_01",
@@ -1465,8 +1465,8 @@
   {
     "id": "ic_03",
     "name": "Anvil 03",
-    "x": 415,
-    "y": -125,
+    "x": 380,
+    "y": -120,
     "links": [
       "palatine",
       "ic_02",
@@ -1486,8 +1486,8 @@
   {
     "id": "ic_04",
     "name": "Anvil 04",
-    "x": 485,
-    "y": -125,
+    "x": 460,
+    "y": -120,
     "links": [
       "eridani",
       "ic_03",
@@ -1507,8 +1507,8 @@
   {
     "id": "ic_05",
     "name": "Anvil 05",
-    "x": 275,
-    "y": -55,
+    "x": 220,
+    "y": -40,
     "links": [
       "aurora",
       "ic_04",
@@ -1528,8 +1528,8 @@
   {
     "id": "ic_06",
     "name": "Anvil 06",
-    "x": 345,
-    "y": -55,
+    "x": 300,
+    "y": -40,
     "links": [
       "crown",
       "ic_05",
@@ -1549,8 +1549,8 @@
   {
     "id": "ic_07",
     "name": "Anvil 07",
-    "x": 415,
-    "y": -55,
+    "x": 380,
+    "y": -40,
     "links": [
       "orion",
       "ic_06",
@@ -1570,8 +1570,8 @@
   {
     "id": "ic_08",
     "name": "Anvil 08",
-    "x": 485,
-    "y": -55,
+    "x": 460,
+    "y": -40,
     "links": [
       "castor",
       "ic_07",
@@ -1591,8 +1591,8 @@
   {
     "id": "ic_09",
     "name": "Anvil 09",
-    "x": 275,
-    "y": 15,
+    "x": 220,
+    "y": 40,
     "links": [
       "palatine",
       "ic_08",
@@ -1612,8 +1612,8 @@
   {
     "id": "ic_10",
     "name": "Anvil 10",
-    "x": 345,
-    "y": 15,
+    "x": 300,
+    "y": 40,
     "links": [
       "eridani",
       "ic_09",
@@ -1633,8 +1633,8 @@
   {
     "id": "ic_11",
     "name": "Anvil 11",
-    "x": 415,
-    "y": 15,
+    "x": 380,
+    "y": 40,
     "links": [
       "aurora",
       "ic_10",
@@ -1655,8 +1655,8 @@
   {
     "id": "ic_12",
     "name": "Anvil 12",
-    "x": 485,
-    "y": 15,
+    "x": 460,
+    "y": 40,
     "links": [
       "crown",
       "ic_11"
@@ -1676,8 +1676,8 @@
   {
     "id": "lu_01",
     "name": "Prism 01",
-    "x": 35,
-    "y": -625,
+    "x": 320,
+    "y": -620,
     "links": [
       "sirius",
       "lu_02"
@@ -1696,8 +1696,8 @@
   {
     "id": "lu_02",
     "name": "Prism 02",
-    "x": 105,
-    "y": -625,
+    "x": 400,
+    "y": -620,
     "links": [
       "helene",
       "lu_01",
@@ -1717,8 +1717,8 @@
   {
     "id": "lu_03",
     "name": "Prism 03",
-    "x": 175,
-    "y": -625,
+    "x": 480,
+    "y": -620,
     "links": [
       "valkyr",
       "lu_02",
@@ -1738,8 +1738,8 @@
   {
     "id": "lu_04",
     "name": "Prism 04",
-    "x": 245,
-    "y": -625,
+    "x": 560,
+    "y": -620,
     "links": [
       "mirage",
       "lu_03",
@@ -1759,8 +1759,8 @@
   {
     "id": "lu_05",
     "name": "Prism 05",
-    "x": 35,
-    "y": -555,
+    "x": 320,
+    "y": -560,
     "links": [
       "numen",
       "lu_04",
@@ -1780,8 +1780,8 @@
   {
     "id": "lu_06",
     "name": "Prism 06",
-    "x": 105,
-    "y": -555,
+    "x": 400,
+    "y": -560,
     "links": [
       "duskfall",
       "lu_05",
@@ -1801,8 +1801,8 @@
   {
     "id": "lu_07",
     "name": "Prism 07",
-    "x": 175,
-    "y": -555,
+    "x": 480,
+    "y": -560,
     "links": [
       "riftwatch",
       "lu_06",
@@ -1822,8 +1822,8 @@
   {
     "id": "lu_08",
     "name": "Prism 08",
-    "x": 245,
-    "y": -555,
+    "x": 560,
+    "y": -560,
     "links": [
       "sirius",
       "lu_07",
@@ -1843,8 +1843,8 @@
   {
     "id": "lu_09",
     "name": "Prism 09",
-    "x": 35,
-    "y": -485,
+    "x": 320,
+    "y": -500,
     "links": [
       "helene",
       "lu_08",
@@ -1864,8 +1864,8 @@
   {
     "id": "lu_10",
     "name": "Prism 10",
-    "x": 105,
-    "y": -485,
+    "x": 400,
+    "y": -500,
     "links": [
       "valkyr",
       "lu_09",
@@ -1885,8 +1885,8 @@
   {
     "id": "lu_11",
     "name": "Prism 11",
-    "x": 175,
-    "y": -485,
+    "x": 480,
+    "y": -500,
     "links": [
       "mirage",
       "lu_10",
@@ -1907,8 +1907,8 @@
   {
     "id": "lu_12",
     "name": "Prism 12",
-    "x": 245,
-    "y": -485,
+    "x": 560,
+    "y": -500,
     "links": [
       "numen",
       "lu_11"
@@ -1928,8 +1928,8 @@
   {
     "id": "ec_01",
     "name": "Echo 01",
-    "x": -157.5,
-    "y": 242.5,
+    "x": 20,
+    "y": 420,
     "links": [
       "borealis",
       "ec_02"
@@ -1948,8 +1948,8 @@
   {
     "id": "ec_02",
     "name": "Echo 02",
-    "x": -92.5,
-    "y": 242.5,
+    "x": 100,
+    "y": 440,
     "links": [
       "kepler",
       "ec_01",
@@ -1969,8 +1969,8 @@
   {
     "id": "ec_03",
     "name": "Echo 03",
-    "x": -27.5,
-    "y": 242.5,
+    "x": 180,
+    "y": 460,
     "links": [
       "luyten",
       "ec_02",
@@ -1990,8 +1990,8 @@
   {
     "id": "ec_04",
     "name": "Echo 04",
-    "x": 37.5,
-    "y": 242.5,
+    "x": 80,
+    "y": 500,
     "links": [
       "zenith",
       "ec_03",
@@ -2011,8 +2011,8 @@
   {
     "id": "ec_05",
     "name": "Echo 05",
-    "x": -157.5,
-    "y": 307.5,
+    "x": -40,
+    "y": 500,
     "links": [
       "tundra",
       "ec_04",
@@ -2032,8 +2032,8 @@
   {
     "id": "ec_06",
     "name": "Echo 06",
-    "x": -92.5,
-    "y": 307.5,
+    "x": 220,
+    "y": 380,
     "links": [
       "arkady",
       "ec_05",
@@ -2053,8 +2053,8 @@
   {
     "id": "ec_07",
     "name": "Echo 07",
-    "x": -27.5,
-    "y": 307.5,
+    "x": 120,
+    "y": 360,
     "links": [
       "borealis",
       "ec_06",
@@ -2074,8 +2074,8 @@
   {
     "id": "ec_08",
     "name": "Echo 08",
-    "x": 37.5,
-    "y": 307.5,
+    "x": 200,
+    "y": 420,
     "links": [
       "kepler",
       "ec_07",
@@ -2095,8 +2095,8 @@
   {
     "id": "ec_09",
     "name": "Echo 09",
-    "x": -157.5,
-    "y": 372.5,
+    "x": 160,
+    "y": 520,
     "links": [
       "luyten",
       "ec_08",
@@ -2117,8 +2117,8 @@
   {
     "id": "ec_10",
     "name": "Echo 10",
-    "x": -92.5,
-    "y": 372.5,
+    "x": 40,
+    "y": 520,
     "links": [
       "zenith",
       "ec_09"
@@ -2138,8 +2138,8 @@
   {
     "id": "bf_01",
     "name": "Corsair 01",
-    "x": -525,
-    "y": -245,
+    "x": -700,
+    "y": -240,
     "links": [
       "draco",
       "bf_02"
@@ -2158,8 +2158,8 @@
   {
     "id": "bf_02",
     "name": "Corsair 02",
-    "x": -455,
-    "y": -245,
+    "x": -620,
+    "y": -240,
     "links": [
       "bastion",
       "bf_01",
@@ -2179,8 +2179,8 @@
   {
     "id": "bf_03",
     "name": "Corsair 03",
-    "x": -385,
-    "y": -245,
+    "x": -540,
+    "y": -240,
     "links": [
       "fenrir",
       "bf_02",
@@ -2200,8 +2200,8 @@
   {
     "id": "bf_04",
     "name": "Corsair 04",
-    "x": -315,
-    "y": -245,
+    "x": -460,
+    "y": -240,
     "links": [
       "ember",
       "bf_03",
@@ -2221,8 +2221,8 @@
   {
     "id": "bf_05",
     "name": "Corsair 05",
-    "x": -525,
-    "y": -175,
+    "x": -700,
+    "y": -180,
     "links": [
       "polaris",
       "bf_04",
@@ -2242,8 +2242,8 @@
   {
     "id": "bf_06",
     "name": "Corsair 06",
-    "x": -455,
-    "y": -175,
+    "x": -620,
+    "y": -180,
     "links": [
       "lyra",
       "bf_05",
@@ -2263,8 +2263,8 @@
   {
     "id": "bf_07",
     "name": "Corsair 07",
-    "x": -385,
-    "y": -175,
+    "x": -540,
+    "y": -180,
     "links": [
       "draco",
       "bf_06",
@@ -2284,8 +2284,8 @@
   {
     "id": "bf_08",
     "name": "Corsair 08",
-    "x": -315,
-    "y": -175,
+    "x": -460,
+    "y": -180,
     "links": [
       "bastion",
       "bf_07",
@@ -2305,8 +2305,8 @@
   {
     "id": "bf_09",
     "name": "Corsair 09",
-    "x": -525,
-    "y": -105,
+    "x": -700,
+    "y": -120,
     "links": [
       "fenrir",
       "bf_08",
@@ -2326,8 +2326,8 @@
   {
     "id": "bf_10",
     "name": "Corsair 10",
-    "x": -455,
-    "y": -105,
+    "x": -620,
+    "y": -120,
     "links": [
       "ember",
       "bf_09",
@@ -2347,8 +2347,8 @@
   {
     "id": "bf_11",
     "name": "Corsair 11",
-    "x": -385,
-    "y": -105,
+    "x": -540,
+    "y": -120,
     "links": [
       "polaris",
       "bf_10",
@@ -2369,8 +2369,8 @@
   {
     "id": "bf_12",
     "name": "Corsair 12",
-    "x": -315,
-    "y": -105,
+    "x": -460,
+    "y": -120,
     "links": [
       "lyra",
       "bf_11"
@@ -2390,8 +2390,8 @@
   {
     "id": "st_01",
     "name": "Verdant 01",
-    "x": -645,
-    "y": -65,
+    "x": -520,
+    "y": 120,
     "links": [
       "vega",
       "st_02"
@@ -2410,8 +2410,8 @@
   {
     "id": "st_02",
     "name": "Verdant 02",
-    "x": -575,
-    "y": -65,
+    "x": -540,
+    "y": 20,
     "links": [
       "auriga",
       "st_01",
@@ -2431,8 +2431,8 @@
   {
     "id": "st_03",
     "name": "Verdant 03",
-    "x": -505,
-    "y": -65,
+    "x": -480,
+    "y": 140,
     "links": [
       "cygnus",
       "st_02",
@@ -2452,8 +2452,8 @@
   {
     "id": "st_04",
     "name": "Verdant 04",
-    "x": -435,
-    "y": -65,
+    "x": -420,
+    "y": 220,
     "links": [
       "windfall",
       "st_03",
@@ -2473,8 +2473,8 @@
   {
     "id": "st_05",
     "name": "Verdant 05",
-    "x": -645,
-    "y": 5,
+    "x": -600,
+    "y": -20,
     "links": [
       "cinder",
       "st_04",
@@ -2494,8 +2494,8 @@
   {
     "id": "st_06",
     "name": "Verdant 06",
-    "x": -575,
-    "y": 5,
+    "x": -440,
+    "y": 80,
     "links": [
       "vega",
       "st_05",
@@ -2515,8 +2515,8 @@
   {
     "id": "st_07",
     "name": "Verdant 07",
-    "x": -505,
-    "y": 5,
+    "x": -520,
+    "y": -40,
     "links": [
       "auriga",
       "st_06",
@@ -2536,8 +2536,8 @@
   {
     "id": "st_08",
     "name": "Verdant 08",
-    "x": -435,
-    "y": 5,
+    "x": -480,
+    "y": 40,
     "links": [
       "cygnus",
       "st_07",
@@ -2557,8 +2557,8 @@
   {
     "id": "st_09",
     "name": "Verdant 09",
-    "x": -645,
-    "y": 75,
+    "x": -580,
+    "y": 100,
     "links": [
       "windfall",
       "st_08",
@@ -2578,8 +2578,8 @@
   {
     "id": "st_10",
     "name": "Verdant 10",
-    "x": -575,
-    "y": 75,
+    "x": -460,
+    "y": 180,
     "links": [
       "cinder",
       "st_09",
@@ -2599,8 +2599,8 @@
   {
     "id": "st_11",
     "name": "Verdant 11",
-    "x": -505,
-    "y": 75,
+    "x": -520,
+    "y": 200,
     "links": [
       "vega",
       "st_10",
@@ -2621,8 +2621,8 @@
   {
     "id": "st_12",
     "name": "Verdant 12",
-    "x": -435,
-    "y": 75,
+    "x": -560,
+    "y": 0,
     "links": [
       "auriga",
       "st_11"
@@ -2642,8 +2642,8 @@
   {
     "id": "fh_01",
     "name": "Haven 01",
-    "x": -2.5,
-    "y": 77.5,
+    "x": -180,
+    "y": 120,
     "links": [
       "new_eden",
       "fh_02"
@@ -2663,8 +2663,8 @@
   {
     "id": "fh_02",
     "name": "Haven 02",
-    "x": 52.5,
-    "y": 77.5,
+    "x": -40,
+    "y": 150,
     "links": [
       "arcadia",
       "fh_01",
@@ -2685,8 +2685,8 @@
   {
     "id": "fh_03",
     "name": "Haven 03",
-    "x": 107.5,
-    "y": 77.5,
+    "x": 40,
+    "y": 230,
     "links": [
       "borealis_gate",
       "fh_02",
@@ -2707,8 +2707,8 @@
   {
     "id": "fh_04",
     "name": "Haven 04",
-    "x": 162.5,
-    "y": 77.5,
+    "x": 160,
+    "y": 150,
     "links": [
       "helios",
       "fh_03",
@@ -2729,8 +2729,8 @@
   {
     "id": "fh_05",
     "name": "Haven 05",
-    "x": -2.5,
-    "y": 132.5,
+    "x": 80,
+    "y": 40,
     "links": [
       "sol",
       "fh_04",
@@ -2752,8 +2752,8 @@
   {
     "id": "fh_06",
     "name": "Haven 06",
-    "x": 52.5,
-    "y": 132.5,
+    "x": -40,
+    "y": 70,
     "links": [
       "new_eden",
       "fh_05"
@@ -2774,8 +2774,8 @@
   {
     "id": "oc_01",
     "name": "Umbral 01",
-    "x": -230,
-    "y": -450,
+    "x": -80,
+    "y": -480,
     "links": [
       "obsidian",
       "oc_02"
@@ -2795,8 +2795,8 @@
   {
     "id": "oc_02",
     "name": "Umbral 02",
-    "x": -170,
-    "y": -450,
+    "x": -20,
+    "y": -480,
     "links": [
       "azrael",
       "oc_01",
@@ -2817,8 +2817,8 @@
   {
     "id": "oc_03",
     "name": "Umbral 03",
-    "x": -110,
-    "y": -450,
+    "x": 40,
+    "y": -480,
     "links": [
       "scar",
       "oc_02",
@@ -2839,8 +2839,8 @@
   {
     "id": "oc_04",
     "name": "Umbral 04",
-    "x": -50,
-    "y": -450,
+    "x": 100,
+    "y": -480,
     "links": [
       "numen",
       "oc_03",
@@ -2861,8 +2861,8 @@
   {
     "id": "oc_05",
     "name": "Umbral 05",
-    "x": -230,
-    "y": -390,
+    "x": -80,
+    "y": -420,
     "links": [
       "helene",
       "oc_04",
@@ -2884,8 +2884,8 @@
   {
     "id": "oc_06",
     "name": "Umbral 06",
-    "x": -170,
-    "y": -390,
+    "x": -20,
+    "y": -420,
     "links": [
       "obsidian",
       "oc_05"
@@ -2906,8 +2906,8 @@
   {
     "id": "nt_01",
     "name": "Outreach 01",
-    "x": -345,
-    "y": 415,
+    "x": -180,
+    "y": 580,
     "links": [
       "tundra",
       "nt_02"
@@ -2926,8 +2926,8 @@
   {
     "id": "nt_02",
     "name": "Outreach 02",
-    "x": -275,
-    "y": 415,
+    "x": -100,
+    "y": 580,
     "links": [
       "zenith",
       "nt_01",
@@ -2947,8 +2947,8 @@
   {
     "id": "nt_03",
     "name": "Outreach 03",
-    "x": -205,
-    "y": 415,
+    "x": -20,
+    "y": 580,
     "links": [
       "luyten",
       "nt_02",
@@ -2968,8 +2968,8 @@
   {
     "id": "nt_04",
     "name": "Outreach 04",
-    "x": -135,
-    "y": 415,
+    "x": -180,
+    "y": 640,
     "links": [
       "tundra",
       "nt_03",
@@ -2989,8 +2989,8 @@
   {
     "id": "nt_05",
     "name": "Outreach 05",
-    "x": -345,
-    "y": 485,
+    "x": -100,
+    "y": 640,
     "links": [
       "zenith",
       "nt_04",
@@ -3010,8 +3010,8 @@
   {
     "id": "nt_06",
     "name": "Outreach 06",
-    "x": -275,
-    "y": 485,
+    "x": -20,
+    "y": 640,
     "links": [
       "luyten",
       "nt_05",
@@ -3031,8 +3031,8 @@
   {
     "id": "nt_07",
     "name": "Outreach 07",
-    "x": -205,
-    "y": 485,
+    "x": -180,
+    "y": 700,
     "links": [
       "tundra",
       "nt_06",
@@ -3052,8 +3052,8 @@
   {
     "id": "nt_08",
     "name": "Outreach 08",
-    "x": -135,
-    "y": 485,
+    "x": -100,
+    "y": 700,
     "links": [
       "zenith",
       "nt_07",
@@ -3073,8 +3073,8 @@
   {
     "id": "nt_09",
     "name": "Outreach 09",
-    "x": -345,
-    "y": 555,
+    "x": -20,
+    "y": 700,
     "links": [
       "luyten",
       "nt_08",
@@ -3094,8 +3094,8 @@
   {
     "id": "nt_10",
     "name": "Outreach 10",
-    "x": -275,
-    "y": 555,
+    "x": -180,
+    "y": 760,
     "links": [
       "tundra",
       "nt_09",
@@ -3115,8 +3115,8 @@
   {
     "id": "nt_11",
     "name": "Outreach 11",
-    "x": -205,
-    "y": 555,
+    "x": -100,
+    "y": 760,
     "links": [
       "zenith",
       "nt_10",
@@ -3136,8 +3136,8 @@
   {
     "id": "nt_12",
     "name": "Outreach 12",
-    "x": -135,
-    "y": 555,
+    "x": -20,
+    "y": 760,
     "links": [
       "luyten",
       "nt_11"
@@ -3156,8 +3156,8 @@
   {
     "id": "embergate",
     "name": "Embergate",
-    "x": -240,
-    "y": -20,
+    "x": -260,
+    "y": -60,
     "links": [
       "altair",
       "ember"
@@ -3180,7 +3180,7 @@
   {
     "id": "bastion_cross",
     "name": "Bastion Cross",
-    "x": -300,
+    "x": -360,
     "y": -100,
     "links": [
       "ember",
@@ -3204,8 +3204,8 @@
   {
     "id": "rift_pass",
     "name": "Rift Pass",
-    "x": 160,
-    "y": -120,
+    "x": 200,
+    "y": -160,
     "links": [
       "deneb",
       "riftwatch"
@@ -3228,8 +3228,8 @@
   {
     "id": "dusk_bridge",
     "name": "Dusk Bridge",
-    "x": 220,
-    "y": -300,
+    "x": 380,
+    "y": -260,
     "links": [
       "riftwatch",
       "duskfall",
@@ -3253,8 +3253,8 @@
   {
     "id": "borealis_rift",
     "name": "Borealis Rift",
-    "x": 60,
-    "y": 300,
+    "x": 180,
+    "y": 360,
     "links": [
       "borealis",
       "arkady"
@@ -3277,7 +3277,7 @@
   {
     "id": "driftspur",
     "name": "Driftspur",
-    "x": 200,
+    "x": 420,
     "y": 380,
     "links": [
       "borealis",
@@ -3301,8 +3301,8 @@
   {
     "id": "windfall_cut",
     "name": "Windfall Cut",
-    "x": -420,
-    "y": 300,
+    "x": -520,
+    "y": 280,
     "links": [
       "windfall",
       "polaris"
@@ -3325,8 +3325,8 @@
   {
     "id": "vega_hook",
     "name": "Vega Hook",
-    "x": -460,
-    "y": 160,
+    "x": -560,
+    "y": 200,
     "links": [
       "vega",
       "polaris"
@@ -3349,8 +3349,8 @@
   {
     "id": "scarveil",
     "name": "Scarveil",
-    "x": -140,
-    "y": -220,
+    "x": -90,
+    "y": -270,
     "links": [
       "scar",
       "obsidian"
@@ -3374,8 +3374,8 @@
   {
     "id": "azrael_shroud",
     "name": "Azrael Shroud",
-    "x": -180,
-    "y": -360,
+    "x": -20,
+    "y": -420,
     "links": [
       "azrael",
       "numen"
