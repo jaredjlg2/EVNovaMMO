@@ -16,6 +16,32 @@ const {
 const systemById = new Map(systems.map((system) => [system.id, system]));
 const planetById = new Map(planets.map((planet) => [planet.id, planet]));
 
+const validateGalaxyLinks = () => {
+  const warnings = [];
+  systems.forEach((system) => {
+    if (!system.links || system.links.length === 0) {
+      warnings.push(`System ${system.id} has no neighbors.`);
+    }
+    (system.links || []).forEach((neighborId) => {
+      const neighbor = systemById.get(neighborId);
+      if (!neighbor) {
+        warnings.push(`System ${system.id} links to missing neighbor ${neighborId}.`);
+        return;
+      }
+      if (!neighbor.links.includes(system.id)) {
+        warnings.push(
+          `System ${system.id} links to ${neighborId} without reciprocal link.`
+        );
+      }
+    });
+  });
+  if (warnings.length > 0) {
+    console.warn("[Galaxy Validation]", warnings.join(" "));
+  }
+};
+
+validateGalaxyLinks();
+
 const initialWorld = {
   systems,
   planets,
