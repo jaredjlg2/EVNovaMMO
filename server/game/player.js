@@ -2,6 +2,23 @@ const { ships } = require("./data");
 
 const starterShip = ships[0];
 
+const applyDefaultSecondaryLoadout = (player, ship) => {
+  if (ship.defaultSecondaryWeapons?.length) {
+    player.secondaryWeapons = ship.defaultSecondaryWeapons.slice(
+      0,
+      ship.secondaryHardpoints
+    );
+  }
+  if (ship.defaultSecondaryAmmo) {
+    player.secondaryAmmo = {};
+    Object.entries(ship.defaultSecondaryAmmo).forEach(([ammoId, count]) => {
+      if (count > 0) {
+        player.secondaryAmmo[ammoId] = count;
+      }
+    });
+  }
+};
+
 const createPlayer = ({ id, name, savedState = null }) => {
   const basePlayer = {
     id,
@@ -35,6 +52,7 @@ const createPlayer = ({ id, name, savedState = null }) => {
   };
 
   if (!savedState) {
+    applyDefaultSecondaryLoadout(basePlayer, starterShip);
     return basePlayer;
   }
 
