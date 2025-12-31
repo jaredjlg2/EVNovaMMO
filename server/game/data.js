@@ -1101,7 +1101,7 @@ const missions = [
     id: "med_delivery",
     title: "Medical Delivery",
     description: "Rush medical supplies to Orion Tradehub.",
-    reward: 2400,
+    reward: 2600,
     fromPlanetId: "earth",
     toPlanetId: "orion_tradehub"
   },
@@ -1109,7 +1109,7 @@ const missions = [
     id: "data_courier",
     title: "Encrypted Datapad",
     description: "Carry the encrypted datapad to New Turin.",
-    reward: 1500,
+    reward: 1700,
     fromPlanetId: "luna",
     toPlanetId: "new_turin"
   },
@@ -1117,7 +1117,7 @@ const missions = [
     id: "ore_contract",
     title: "Vega Ore Contract",
     description: "Deliver ore samples to Vega Prime.",
-    reward: 1800,
+    reward: 2000,
     fromPlanetId: "sirius_port",
     toPlanetId: "vega_prime"
   }
@@ -1129,8 +1129,8 @@ const missionTemplates = [
     type: "relief",
     title: "Relief Convoy",
     cargo: "relief supplies",
-    baseReward: 900,
-    rewardPerJump: 360,
+    baseReward: 1100,
+    rewardPerJump: 260,
     cargoSpace: 6,
     description:
       "Relief coordinators need {cargo} delivered to {destination}. Keep the timeline tight."
@@ -1140,8 +1140,8 @@ const missionTemplates = [
     type: "courier",
     title: "Priority Dispatch",
     cargo: "encrypted dispatches",
-    baseReward: 650,
-    rewardPerJump: 280,
+    baseReward: 800,
+    rewardPerJump: 200,
     cargoSpace: 2,
     description: "Carry {cargo} from {origin} to {destination} without delays."
   },
@@ -1150,8 +1150,8 @@ const missionTemplates = [
     type: "passenger",
     title: "Passenger Charter",
     cargo: "passenger accommodations",
-    baseReward: 1200,
-    rewardPerJump: 420,
+    baseReward: 1350,
+    rewardPerJump: 320,
     cargoSpace: 8,
     description: "Escort {cargo} from {origin} to {destination}. Discretion required."
   },
@@ -1160,8 +1160,8 @@ const missionTemplates = [
     type: "survey",
     title: "Survey Drop",
     cargo: "survey drones",
-    baseReward: 800,
-    rewardPerJump: 320,
+    baseReward: 950,
+    rewardPerJump: 240,
     cargoSpace: 4,
     description: "Deliver {cargo} to {destination} for a scheduled deployment."
   },
@@ -1170,8 +1170,8 @@ const missionTemplates = [
     type: "salvage",
     title: "Salvage Pickup",
     cargo: "salvage crates",
-    baseReward: 1100,
-    rewardPerJump: 380,
+    baseReward: 1250,
+    rewardPerJump: 280,
     cargoSpace: 10,
     description: "Retrieve {cargo} at {destination} for onward transfer."
   },
@@ -1180,8 +1180,8 @@ const missionTemplates = [
     type: "security",
     title: "Security Transfer",
     cargo: "security equipment",
-    baseReward: 1000,
-    rewardPerJump: 400,
+    baseReward: 1150,
+    rewardPerJump: 300,
     cargoSpace: 5,
     description: "Move {cargo} from {origin} to {destination}. Remain vigilant."
   }
