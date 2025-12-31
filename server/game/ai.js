@@ -301,7 +301,7 @@ const spawnAiShip = (systemId) => {
     shield: ship.shield,
     factionId,
     cargo: randomCargoManifest(ship.cargo),
-    credits: Math.floor(randomRange(120, 620)),
+    credits: getAiCredits(ship, role),
     ai: {
       state: "approach",
       role,
@@ -350,20 +350,44 @@ const disableThresholds = {
   maxHull: 30
 };
 
+const getAiCredits = (ship, role) => {
+  const base = randomRange(220, 520);
+  const priceFactor = (ship?.price ?? 0) * 0.05;
+  const cargoFactor = (ship?.cargo ?? 0) * 32;
+  const roleBonus = {
+    freighter: 800,
+    escort: 650,
+    frigate: 900,
+    fighter: 350,
+    courier: 250,
+    scout: 180,
+    shuttle: 120
+  }[role] ?? 0;
+  const variance = randomRange(0, 700);
+  return Math.floor(base + priceFactor + cargoFactor + roleBonus + variance);
+};
+
 const randomCargoManifest = (cargoCapacity) => {
   if (!cargoCapacity || goods.length === 0) {
     return [];
   }
   const selectionCount = Math.max(1, Math.min(3, Math.floor(Math.random() * 3) + 1));
+  const targetLoad = Math.max(1, Math.round(randomRange(cargoCapacity * 0.35, cargoCapacity * 0.75)));
+  let remaining = targetLoad;
   const manifest = [];
   const chosen = new Set();
-  for (let i = 0; i < selectionCount; i += 1) {
+  for (let i = 0; i < selectionCount && remaining > 0; i += 1) {
     const good = goods[Math.floor(Math.random() * goods.length)];
     if (!good || chosen.has(good.id)) {
       continue;
     }
     chosen.add(good.id);
-    const quantity = Math.max(1, Math.floor(Math.random() * Math.min(8, cargoCapacity)));
+    const maxForSlot = Math.max(1, remaining - (selectionCount - i - 1));
+    const quantity = Math.min(
+      remaining,
+      Math.max(1, Math.round(randomRange(1, maxForSlot)))
+    );
+    remaining -= quantity;
     manifest.push({ goodId: good.id, quantity });
   }
   return manifest;

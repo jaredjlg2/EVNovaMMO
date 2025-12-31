@@ -27,9 +27,9 @@ const initialWorld = {
 };
 
 const marketLevels = {
-  low: 0.7,
+  low: 0.6,
   medium: 1,
-  high: 1.4
+  high: 1.55
 };
 
 const missionRotationMinutes = 20;
