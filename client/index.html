@@ -40,13 +40,21 @@
           <p id="dockPrompt" class="hud-emphasis"></p>
           <p id="weaponStatus" class="hud-emphasis"></p>
           <p class="hud-hint">
-            W/↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · L to dock · M
-            for map · J to jump
+            W/↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · Tab = target lock ·
+            L to dock · M for map · J to jump
           </p>
         </section>
         <section class="hud-section">
           <h2>Ship Status</h2>
           <div id="shipInfo" class="hud-list"></div>
+        </section>
+        <section class="hud-section">
+          <h2>Target Lock</h2>
+          <div id="targetInfo" class="hud-list"></div>
+        </section>
+        <section class="hud-section">
+          <h2>Tactical Mini Map</h2>
+          <canvas id="miniMapCanvas" class="mini-map" width="220" height="220"></canvas>
         </section>
         <section class="hud-section hidden" id="dockedPanel">
           <div class="docked-header">

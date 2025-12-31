@@ -3,6 +3,8 @@ const creditsEl = document.getElementById("credits");
 const pilotNameDisplayEl = document.getElementById("pilotNameDisplay");
 const systemNameEl = document.getElementById("systemName");
 const shipInfoEl = document.getElementById("shipInfo");
+const targetInfoEl = document.getElementById("targetInfo");
+const miniMapCanvas = document.getElementById("miniMapCanvas");
 const weaponListEl = document.getElementById("weaponList");
 const secondaryWeaponListEl = document.getElementById("secondaryWeaponList");
 const outfitListEl = document.getElementById("outfitList");
@@ -66,11 +68,13 @@ let highlightedMissionId = null;
 let marketGoods = [];
 let activeDockedSection = null;
 let lastDockedPlanetId = null;
+let targetLockId = null;
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
 const dockingRange = 70;
 const jumpMinimumDistance = 240;
+const miniMapRange = 520;
 const jumpDurations = {
   spool: 0.6,
   flash: 0.25,
@@ -147,6 +151,28 @@ const sendAction = (payload) => {
 };
 
 const formatCredits = (value) => `${value.toLocaleString()} cr`;
+
+const parseShipClassification = (shipName = "") => {
+  const match = shipName.match(/^(.*)\((.*)\)\s*$/);
+  if (match) {
+    return {
+      className: match[1].trim(),
+      typeName: match[2].trim()
+    };
+  }
+  const trimmed = shipName.trim();
+  if (!trimmed) {
+    return { className: "Unknown", typeName: "Unknown" };
+  }
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) {
+    return { className: trimmed, typeName: "Unknown" };
+  }
+  return {
+    className: parts.slice(0, -1).join(" "),
+    typeName: parts.slice(-1).join(" ")
+  };
+};
 
 const getShipTradeInValue = () => {
   if (!player || !world) {
@@ -674,6 +700,84 @@ const getVisiblePlayers = () => {
   );
 };
 
+const getTargetCandidates = () => {
+  if (!player || !isLoggedIn || player.planetId) {
+    return [];
+  }
+  return getVisiblePlayers();
+};
+
+const getSortedTargetsByDistance = () =>
+  getTargetCandidates()
+    .map((other) => ({
+      ...other,
+      distance: Math.hypot(other.x - flightState.x, other.y - flightState.y)
+    }))
+    .sort((a, b) => a.distance - b.distance);
+
+const updateTargetInfo = () => {
+  if (!targetInfoEl) {
+    return;
+  }
+  if (!player || !isLoggedIn || player.planetId) {
+    targetInfoEl.innerHTML = "<span>Targeting offline.</span>";
+    return;
+  }
+  const targets = getTargetCandidates();
+  const target = targets.find((other) => other.id === targetLockId);
+  if (!target) {
+    targetInfoEl.innerHTML = `
+      <span>No target locked.</span>
+      <span class="hud-hint">Press Tab to lock the nearest ship.</span>
+    `;
+    return;
+  }
+  const shipName = target.ship?.name ?? "Unknown Hull";
+  const { className, typeName } = parseShipClassification(shipName);
+  const shieldMax = target.ship?.shield ?? 0;
+  const hullMax = target.ship?.hull ?? 0;
+  const shieldValue = Math.max(0, target.shield ?? 0);
+  const hullValue = Math.max(0, target.hull ?? 0);
+  const distance = Math.round(Math.hypot(target.x - flightState.x, target.y - flightState.y));
+  targetInfoEl.innerHTML = `
+    <span><strong>${target.name ?? "Unknown Pilot"}</strong></span>
+    <span>Ship class: ${className}</span>
+    <span>Type: ${typeName}</span>
+    <span>Shields: ${Math.round(shieldValue)} / ${shieldMax}</span>
+    <span>Armor: ${Math.round(hullValue)} / ${hullMax}</span>
+    <span>Range: ${distance} u</span>
+  `;
+};
+
+const updateTargetLockStatus = () => {
+  if (!targetLockId) {
+    return;
+  }
+  const targets = getTargetCandidates();
+  const stillVisible = targets.some((other) => other.id === targetLockId);
+  if (!stillVisible) {
+    targetLockId = null;
+  }
+};
+
+const cycleTargetLock = () => {
+  const targets = getSortedTargetsByDistance();
+  if (targets.length === 0) {
+    targetLockId = null;
+    updateTargetInfo();
+    return;
+  }
+  if (!targetLockId) {
+    targetLockId = targets[0].id;
+    updateTargetInfo();
+    return;
+  }
+  const currentIndex = targets.findIndex((target) => target.id === targetLockId);
+  const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % targets.length;
+  targetLockId = targets[nextIndex].id;
+  updateTargetInfo();
+};
+
 const getProjectileTargets = () => {
   const targets = getVisiblePlayers().map((other) => ({
     id: other.id,
@@ -948,6 +1052,112 @@ const updateDockingTarget = () => {
   }
 };
 
+const renderMiniMap = () => {
+  if (!miniMapCanvas) {
+    return;
+  }
+  const ctx = miniMapCanvas.getContext("2d");
+  const { clientWidth, clientHeight } = miniMapCanvas;
+  if (miniMapCanvas.width !== clientWidth || miniMapCanvas.height !== clientHeight) {
+    miniMapCanvas.width = clientWidth;
+    miniMapCanvas.height = clientHeight;
+  }
+
+  const { width, height } = miniMapCanvas;
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#0b1226";
+  ctx.fillRect(0, 0, width, height);
+
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const radius = Math.max(Math.min(centerX, centerY) - 8, 0);
+
+  ctx.strokeStyle = "rgba(120, 150, 210, 0.25)";
+  ctx.lineWidth = 1;
+  for (let ring = 1; ring <= 3; ring += 1) {
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, (radius * ring) / 3, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  if (!player || !isLoggedIn) {
+    ctx.fillStyle = "rgba(160, 180, 230, 0.7)";
+    ctx.font = "12px Inter, sans-serif";
+    ctx.fillText("No telemetry", centerX - 36, centerY + 4);
+    return;
+  }
+
+  const scale = radius / miniMapRange;
+
+  const drawDot = (dx, dy, color, size = 3) => {
+    const distance = Math.hypot(dx, dy);
+    if (distance > miniMapRange) {
+      return;
+    }
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(centerX + dx * scale, centerY + dy * scale, size, 0, Math.PI * 2);
+    ctx.fill();
+  };
+
+  if (!player.planetId) {
+    ctx.strokeStyle = "rgba(120, 160, 220, 0.2)";
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, dockingRange * scale, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  const planets = getPlanetsInSystem(player.systemId);
+  planets.forEach((planet) => {
+    const position = planetPositions.get(planet.id);
+    if (!position) {
+      return;
+    }
+    const dx = position.x - flightState.x;
+    const dy = position.y - flightState.y;
+    drawDot(dx, dy, "rgba(130, 200, 255, 0.75)", 4);
+  });
+
+  const targets = getVisiblePlayers();
+  targets.forEach((other) => {
+    const dx = other.x - flightState.x;
+    const dy = other.y - flightState.y;
+    const isHostile = other.isAi ? (other.hostileTo || []).includes(player.id) : true;
+    drawDot(dx, dy, isHostile ? "rgba(255, 130, 130, 0.9)" : "rgba(140, 200, 255, 0.9)", 3);
+  });
+
+  if (targetLockId) {
+    const target = targets.find((other) => other.id === targetLockId);
+    if (target) {
+      const dx = target.x - flightState.x;
+      const dy = target.y - flightState.y;
+      const distance = Math.hypot(dx, dy);
+      if (distance <= miniMapRange) {
+        ctx.strokeStyle = "rgba(255, 211, 122, 0.9)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(centerX + dx * scale, centerY + dy * scale, 6, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+  }
+
+  ctx.fillStyle = "#ffd37a";
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(255, 211, 122, 0.8)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY);
+  ctx.lineTo(
+    centerX + Math.cos(flightState.angle) * 12,
+    centerY + Math.sin(flightState.angle) * 12
+  );
+  ctx.stroke();
+};
+
 const renderFlight = (now) => {
   const ctx = flightCanvas.getContext("2d");
   resizeFlightCanvas();
@@ -1048,6 +1258,13 @@ const renderFlight = (now) => {
       const isHostile = other.isAi
         ? (other.hostileTo || []).includes(player.id)
         : true;
+      if (other.id === targetLockId) {
+        ctx.strokeStyle = "rgba(255, 211, 122, 0.9)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, 0, Math.PI * 2);
+        ctx.stroke();
+      }
       renderShipIcon(ctx, other.ship?.id, other.angle ?? 0, {
         size: 28,
         fallbackColor: isHostile ? "#ff7a7a" : "#7ad2ff",
@@ -1098,6 +1315,10 @@ const renderFlight = (now) => {
   if (mapOpen) {
     renderMap();
   }
+
+  updateTargetLockStatus();
+  updateTargetInfo();
+  renderMiniMap();
 
   requestAnimationFrame(renderFlight);
 };
@@ -1538,6 +1759,7 @@ const connect = () => {
     player = null;
     presencePlayers = [];
     presenceSnapshots.clear();
+    targetLockId = null;
     pilotNameDisplayEl.textContent = "";
     showLoginOverlay("Connection lost. Please reconnect.");
   });
@@ -1551,6 +1773,7 @@ const connect = () => {
       presenceSnapshots.clear();
       projectiles.length = 0;
       explosions.length = 0;
+      targetLockId = null;
       showLoginOverlay(payload.message || "");
       return;
     }
@@ -1613,6 +1836,7 @@ const connect = () => {
         presenceSnapshots.clear();
         projectiles.length = 0;
         explosions.length = 0;
+        targetLockId = null;
         showLoginOverlay("Ship destroyed. Re-login to respawn.");
       }
     }
@@ -1670,6 +1894,13 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "m" || event.key === "M") {
     event.preventDefault();
     setMapOpen();
+    return;
+  }
+  if (event.key === "Tab") {
+    event.preventDefault();
+    if (!mapOpen && !event.repeat) {
+      cycleTargetLock();
+    }
     return;
   }
   if (mapOpen) {
