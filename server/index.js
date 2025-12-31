@@ -26,7 +26,13 @@ const {
   getAvailableMissions,
   getMarketForPlanet,
   buyGoods,
-  sellGoods
+  sellGoods,
+  getEscortHireOffers,
+  hireEscort,
+  setEscortCommand,
+  getBoardingData,
+  captureShip,
+  removeEscortFromPlayer
 } = require("./game/game");
 const { removeAiShip } = require("./game/ai");
 
@@ -85,7 +91,14 @@ const broadcastPresence = (force = false) => {
 const handleDestroyedEntities = (destroyedList) => {
   destroyedList.forEach((destroyed) => {
     if (destroyed.isAi) {
-      removeAiShip(destroyed.id);
+      const removedShip = removeAiShip(destroyed.id);
+      if (removedShip?.ai?.ownerId) {
+        const owner = getPlayer(removedShip.ai.ownerId);
+        if (owner) {
+          removeEscortFromPlayer(owner, removedShip.id);
+          persistPlayer(owner);
+        }
+      }
       broadcast({ type: "destroyed", ...destroyed });
       return;
     }
@@ -96,6 +109,10 @@ const handleDestroyedEntities = (destroyedList) => {
       destroyedPlayer.x = 0;
       destroyedPlayer.y = 0;
       destroyedPlayer.planetId = null;
+      (destroyedPlayer.escorts || []).forEach((escort) => {
+        removeAiShip(escort.id);
+      });
+      destroyedPlayer.escorts = [];
       persistPlayer(destroyedPlayer);
     }
     const destroyedSocket = connections.get(destroyed.id);
@@ -191,6 +208,41 @@ const handleAction = (player, action, socket) => {
     case "sellGoods":
       sellGoods(player, action.goodId, action.quantity);
       break;
+    case "requestBar":
+      sendTo(socket, {
+        type: "bar",
+        escortsForHire: player.planetId ? getEscortHireOffers(player.planetId) : [],
+        currentEscorts: player.escorts || []
+      });
+      return;
+    case "hireEscort":
+      hireEscort(player, action.shipId);
+      break;
+    case "escortCommand":
+      setEscortCommand(player, action.command, action.targetId || null);
+      break;
+    case "boardShip": {
+      const report = getBoardingData(player, action.targetId);
+      if (!report.ok) {
+        sendTo(socket, { type: "boardingResult", success: false, message: report.message });
+        shouldPersist = false;
+        shouldBroadcast = false;
+        return;
+      }
+      sendTo(socket, { type: "boarding", ...report.data });
+      shouldPersist = false;
+      shouldBroadcast = false;
+      return;
+    }
+    case "captureShip": {
+      const outcome = captureShip(player, action.targetId, action.decision);
+      sendTo(socket, {
+        type: "boardingResult",
+        success: outcome.ok,
+        message: outcome.message
+      });
+      break;
+    }
     case "requestMissions":
       sendTo(socket, {
         type: "missions",
@@ -323,6 +375,10 @@ wss.on("connection", (socket) => {
     if (playerId) {
       const existingPlayer = getPlayer(playerId);
       if (existingPlayer) {
+        (existingPlayer.escorts || []).forEach((escort) => {
+          removeAiShip(escort.id);
+        });
+        existingPlayer.escorts = [];
         persistPlayer(existingPlayer);
       }
       removePlayer(playerId);

@@ -5,7 +5,13 @@ const {
   tickAiShips,
   getAiShips,
   markShipHostileToPlayer,
-  getRoleCombatProfile
+  getRoleCombatProfile,
+  getAiShipById,
+  updateDisabledStatus,
+  createEscortShip,
+  assignShipAsEscort,
+  removeAiShip,
+  disableThresholds
 } = require("./ai");
 const {
   initialWorld,
@@ -22,6 +28,7 @@ const goodsById = new Map(initialWorld.goods.map((good) => [good.id, good]));
 const tradeInRate = 0.6;
 const shieldRegenRate = 0.08;
 const armorRegenRate = 0.04;
+const boardingRange = 60;
 
 const getSecondaryAmmoCount = (player, ammoId) =>
   Math.max(0, player.secondaryAmmo?.[ammoId] ?? 0);
@@ -82,7 +89,8 @@ const persistPlayer = (player) => {
     outfits: player.outfits,
     missions: player.missions,
     cargo: player.cargo,
-    log: player.log
+    log: player.log,
+    escorts: player.escorts
   });
 };
 
@@ -97,7 +105,62 @@ const applyDamageToTarget = (target, damage) => {
   if (remaining > 0) {
     target.hull = Math.max(0, target.hull - remaining);
   }
+  if (target.ai) {
+    updateDisabledStatus(target);
+  }
   return target.hull === 0;
+};
+
+const getEscortSummary = (escortShip) => ({
+  id: escortShip.id,
+  name: escortShip.name,
+  ship: escortShip.ship,
+  hired: Boolean(escortShip.ai.hired),
+  dailyRate: escortShip.ai.dailyRate || 0
+});
+
+const removeEscortFromPlayer = (player, escortId) => {
+  player.escorts = (player.escorts || []).filter((escort) => escort.id !== escortId);
+};
+
+const applyEscortDailyRate = (player, reason) => {
+  const hiredEscorts = (player.escorts || []).filter((escort) => escort.hired);
+  if (hiredEscorts.length === 0) {
+    return;
+  }
+  const totalRate = hiredEscorts.reduce((sum, escort) => sum + (escort.dailyRate || 0), 0);
+  if (totalRate <= 0) {
+    return;
+  }
+  if (player.credits >= totalRate) {
+    player.credits -= totalRate;
+    appendLog(
+      player,
+      `Paid ${totalRate} credits in escort wages (${reason}).`
+    );
+    return;
+  }
+  hiredEscorts.forEach((escort) => {
+    removeAiShip(escort.id);
+    removeEscortFromPlayer(player, escort.id);
+  });
+  appendLog(
+    player,
+    "Unable to cover escort wages. Hired escorts have departed."
+  );
+};
+
+const moveEscortsToPlayer = (player) => {
+  const escorts = getAiShips().filter((ship) => ship.ai.ownerId === player.id);
+  escorts.forEach((escort, index) => {
+    escort.systemId = player.systemId;
+    escort.planetId = null;
+    escort.x = player.x + Math.cos(index) * 40;
+    escort.y = player.y + Math.sin(index) * 40;
+    escort.vx = 0;
+    escort.vy = 0;
+    escort.ai.escortMode = escort.ai.escortMode || "follow";
+  });
 };
 
 const jumpSystem = (player, targetSystemId) => {
@@ -105,10 +168,12 @@ const jumpSystem = (player, targetSystemId) => {
     appendLog(player, "Hyperjump failed: system not in range.");
     return;
   }
+  applyEscortDailyRate(player, "jump");
   player.systemId = targetSystemId;
   player.planetId = null;
   player.x = 0;
   player.y = 0;
+  moveEscortsToPlayer(player);
   appendLog(player, `Jumped to ${targetSystemId}.`);
 };
 
@@ -129,6 +194,7 @@ const undock = (player) => {
     appendLog(player, "Already in open space.");
     return;
   }
+  applyEscortDailyRate(player, "departure");
   player.planetId = null;
   player.x = 0;
   player.y = 0;
@@ -213,6 +279,32 @@ const buyOutfit = (player, outfitId) => {
   appendLog(player, `Installed ${outfit.name}.`);
 };
 
+const applyShipToPlayer = (player, ship) => {
+  player.ship = {
+    id: ship.id,
+    name: ship.name,
+    hull: ship.hull,
+    shield: ship.shield,
+    cargo: ship.cargo,
+    fuel: ship.fuel,
+    hardpoints: ship.hardpoints,
+    secondaryHardpoints: ship.secondaryHardpoints
+  };
+  player.hull = ship.hull;
+  player.shield = ship.shield;
+  if (player.weapons.length > ship.hardpoints) {
+    player.weapons = player.weapons.slice(0, ship.hardpoints);
+    appendLog(player, "Hardpoints limited: some weapons were removed.");
+  }
+  if (player.secondaryWeapons.length > ship.secondaryHardpoints) {
+    player.secondaryWeapons = player.secondaryWeapons.slice(
+      0,
+      ship.secondaryHardpoints
+    );
+    appendLog(player, "Secondary racks limited: some weapons were removed.");
+  }
+};
+
 const buyShip = (player, shipId) => {
   if (!getDockedPlanetService(player, "shipyard")) {
     appendLog(player, "Shipyard service unavailable here.");
@@ -235,26 +327,7 @@ const buyShip = (player, shipId) => {
     return;
   }
   player.credits -= netCost;
-  player.ship = {
-    id: ship.id,
-    name: ship.name,
-    hull: ship.hull,
-    shield: ship.shield,
-    cargo: ship.cargo,
-    fuel: ship.fuel,
-    hardpoints: ship.hardpoints,
-    secondaryHardpoints: ship.secondaryHardpoints
-  };
-  player.hull = ship.hull;
-  player.shield = ship.shield;
-  if (player.weapons.length > ship.hardpoints) {
-    player.weapons = player.weapons.slice(0, ship.hardpoints);
-    appendLog(player, "Hardpoints limited: some weapons were removed.");
-  }
-  if (player.secondaryWeapons.length > ship.secondaryHardpoints) {
-    player.secondaryWeapons = player.secondaryWeapons.slice(0, ship.secondaryHardpoints);
-    appendLog(player, "Secondary racks limited: some weapons were removed.");
-  }
+  applyShipToPlayer(player, ship);
   appendLog(
     player,
     `Purchased ${ship.name}. Trade-in value: ${tradeInValue} credits.`
@@ -273,7 +346,7 @@ const acceptMission = (player, missionId) => {
     return;
   }
   const cargoUsed = getCargoUsed(player);
-  if (cargoUsed + mission.cargoSpace > player.ship.cargo) {
+  if (cargoUsed + mission.cargoSpace > getCargoCapacity(player)) {
     appendLog(player, "Insufficient cargo space for this mission.");
     return;
   }
@@ -329,7 +402,8 @@ const getPlayerState = (player) => ({
   outfits: player.outfits,
   missions: player.missions,
   cargo: player.cargo,
-  log: player.log
+  log: player.log,
+  escorts: player.escorts
 });
 
 const getWorldState = () => initialWorld;
@@ -364,7 +438,7 @@ const updatePosition = (player, { x, y, angle }) => {
 };
 
 const tickWorld = (deltaSeconds) => {
-  tickAiShips(deltaSeconds);
+  tickAiShips(deltaSeconds, Array.from(players.values()));
   const now = Date.now();
   const hitPlayers = [];
   const destroyedPlayers = [];
@@ -382,6 +456,9 @@ const tickWorld = (deltaSeconds) => {
   });
 
   getAiShips().forEach((ship) => {
+    if (ship.ai.ownerId || ship.ai.disabled) {
+      return;
+    }
     const hostileTo = ship.ai.hostileTo || new Set();
     if (hostileTo.size === 0) {
       return;
@@ -441,6 +518,76 @@ const tickWorld = (deltaSeconds) => {
     }
   });
 
+  getAiShips().forEach((ship) => {
+    if (!ship.ai.ownerId || ship.ai.disabled || ship.ai.escortMode !== "attack") {
+      return;
+    }
+    const owner = players.get(ship.ai.ownerId);
+    if (!owner || owner.systemId !== ship.systemId || owner.planetId) {
+      return;
+    }
+    const targetId = ship.ai.escortTargetId;
+    if (!targetId) {
+      return;
+    }
+    const targetPlayer = players.get(targetId);
+    const targetAi = getAiShips().find((entry) => entry.id === targetId);
+    const target = targetPlayer || targetAi;
+    if (!target || target.systemId !== ship.systemId || target.planetId) {
+      ship.ai.escortMode = "follow";
+      ship.ai.escortTargetId = null;
+      return;
+    }
+    const roleProfile = getRoleCombatProfile(ship.ai.role);
+    const distance = Math.hypot(ship.x - target.x, ship.y - target.y);
+    if (distance > roleProfile.range) {
+      return;
+    }
+    if (now - ship.ai.lastAttackAt < 1200) {
+      return;
+    }
+    const damage = Math.round(roleProfile.damage * (0.7 + Math.random() * 0.6));
+    const isDestroyed = applyDamageToTarget(target, damage);
+    if (targetPlayer) {
+      appendLog(targetPlayer, `${ship.name} hit you for ${damage} damage.`);
+      appendLog(owner, `Escort ${ship.name} hit ${targetPlayer.name} for ${damage}.`);
+    } else if (targetAi) {
+      markShipHostileToPlayer(targetAi.id, owner.id);
+      appendLog(owner, `Escort ${ship.name} hit ${targetAi.name} for ${damage}.`);
+    }
+    ship.ai.lastAttackAt = now;
+    aiShots.push({
+      shooterId: ship.id,
+      systemId: ship.systemId,
+      x: ship.x,
+      y: ship.y,
+      angle: ship.angle,
+      weapons: ["pulse_laser"],
+      targetId: target.id
+    });
+    if (isDestroyed) {
+      if (targetPlayer) {
+        destroyedPlayers.push({
+          id: targetPlayer.id,
+          name: targetPlayer.name,
+          systemId: targetPlayer.systemId,
+          x: targetPlayer.x,
+          y: targetPlayer.y
+        });
+        appendLog(targetPlayer, "Ship destroyed! Rescue crews will tow you back once you relog.");
+      } else if (targetAi) {
+        destroyedPlayers.push({
+          id: targetAi.id,
+          name: targetAi.name,
+          systemId: targetAi.systemId,
+          x: targetAi.x,
+          y: targetAi.y,
+          isAi: true
+        });
+      }
+    }
+  });
+
   return { hitPlayers, destroyedPlayers, aiShots };
 };
 
@@ -462,6 +609,11 @@ const getCargoUsed = (player) => {
     .reduce((sum, mission) => sum + (mission.cargoSpace || 0), 0);
   return cargoTotal + missionCargo;
 };
+
+const getEscortCargoCapacity = (player) =>
+  (player.escorts || []).reduce((sum, escort) => sum + (escort.ship?.cargo || 0), 0);
+
+const getCargoCapacity = (player) => (player.ship?.cargo || 0) + getEscortCargoCapacity(player);
 
 const upsertCargo = (player, goodId, quantity) => {
   const existing = player.cargo.find((entry) => entry.goodId === goodId);
@@ -487,7 +639,7 @@ const buyGoods = (player, goodId, quantity = 1) => {
   }
   const amount = Math.max(1, Math.min(50, Math.floor(quantity)));
   const cargoUsed = getCargoUsed(player);
-  if (cargoUsed + amount > player.ship.cargo) {
+  if (cargoUsed + amount > getCargoCapacity(player)) {
     appendLog(player, "Insufficient cargo space.");
     return;
   }
@@ -531,6 +683,195 @@ const sellGoods = (player, goodId, quantity = 1) => {
   upsertCargo(player, goodId, -amount);
   player.credits += totalPrice;
   appendLog(player, `Sold ${amount} × ${good.name}.`);
+};
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+const getEscortHireShips = () =>
+  initialWorld.ships.filter((ship) =>
+    ["wisp_runner", "bastion_guard", "ironclad"].includes(ship.id)
+  );
+
+const getEscortDailyRate = (ship) => Math.max(60, Math.round(ship.price * 0.02));
+
+const getEscortHireOffers = () => {
+  const pool = getEscortHireShips();
+  const offers = [];
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  shuffled.slice(0, 3).forEach((ship) => {
+    offers.push({
+      shipId: ship.id,
+      name: ship.name,
+      cargo: ship.cargo,
+      dailyRate: getEscortDailyRate(ship)
+    });
+  });
+  return offers;
+};
+
+const hireEscort = (player, shipId) => {
+  if (!player.planetId) {
+    appendLog(player, "Dock at a planet to hire escorts.");
+    return null;
+  }
+  const ship = shipById.get(shipId);
+  if (!ship) {
+    appendLog(player, "Escort unavailable.");
+    return null;
+  }
+  const dailyRate = getEscortDailyRate(ship);
+  if (player.credits < dailyRate) {
+    appendLog(player, "Insufficient credits to hire that escort.");
+    return null;
+  }
+  const formationIndex = (player.escorts || []).length;
+  const offsetAngle = Math.random() * Math.PI * 2;
+  const escort = createEscortShip({
+    ship,
+    systemId: player.systemId,
+    x: player.x + Math.cos(offsetAngle) * 60,
+    y: player.y + Math.sin(offsetAngle) * 60,
+    ownerId: player.id,
+    name: `${ship.name} Escort`,
+    role: "escort",
+    formationIndex,
+    hired: true,
+    dailyRate
+  });
+  if (!escort) {
+    appendLog(player, "Escort hiring failed.");
+    return null;
+  }
+  if (!player.escorts) {
+    player.escorts = [];
+  }
+  player.escorts.push({
+    ...getEscortSummary(escort),
+    mode: escort.ai.escortMode
+  });
+  appendLog(player, `Hired escort: ${escort.name} (${dailyRate} credits/day).`);
+  return escort;
+};
+
+const setEscortCommand = (player, command, targetId = null) => {
+  const escorts = player.escorts || [];
+  if (escorts.length === 0) {
+    appendLog(player, "No escorts available.");
+    return;
+  }
+  escorts.forEach((escort) => {
+    const escortShip = getAiShipById(escort.id);
+    if (!escortShip || escortShip.ai.ownerId !== player.id) {
+      return;
+    }
+    if (command === "attack" && targetId) {
+      escortShip.ai.escortMode = "attack";
+      escortShip.ai.escortTargetId = targetId;
+      escortShip.ai.holdX = null;
+      escortShip.ai.holdY = null;
+    } else if (command === "hold") {
+      escortShip.ai.escortMode = "hold";
+      escortShip.ai.escortTargetId = null;
+      escortShip.ai.holdX = escortShip.x;
+      escortShip.ai.holdY = escortShip.y;
+    } else {
+      escortShip.ai.escortMode = "follow";
+      escortShip.ai.escortTargetId = null;
+      escortShip.ai.holdX = null;
+      escortShip.ai.holdY = null;
+    }
+    escort.mode = escortShip.ai.escortMode;
+  });
+  const actionLabel =
+    command === "attack"
+      ? "Attack run acknowledged."
+      : command === "hold"
+        ? "Escorts holding position."
+        : "Escorts returning to formation.";
+  appendLog(player, actionLabel);
+};
+
+const getBoardableShip = (player, targetId) => {
+  const ship = getAiShipById(targetId);
+  if (!ship || ship.ai.ownerId) {
+    return null;
+  }
+  if (ship.systemId !== player.systemId || ship.planetId) {
+    return null;
+  }
+  if (!ship.ai.disabled) {
+    return null;
+  }
+  const distance = Math.hypot(ship.x - player.x, ship.y - player.y);
+  if (distance > boardingRange) {
+    return null;
+  }
+  return ship;
+};
+
+const getCaptureChance = (ship) => {
+  const range = disableThresholds.maxHull - disableThresholds.minHull;
+  const damageFactor = clamp(
+    (disableThresholds.maxHull - ship.hull) / range,
+    0,
+    1
+  );
+  return clamp(0.35 + damageFactor * 0.4, 0.2, 0.85);
+};
+
+const getBoardingData = (player, targetId) => {
+  const ship = getBoardableShip(player, targetId);
+  if (!ship) {
+    return { ok: false, message: "No disabled ship in boarding range." };
+  }
+  return {
+    ok: true,
+    data: {
+      id: ship.id,
+      name: ship.name,
+      ship: ship.ship,
+      cargo: ship.cargo || [],
+      credits: ship.credits || 0,
+      captureChance: getCaptureChance(ship)
+    }
+  };
+};
+
+const captureShip = (player, targetId, decision) => {
+  const ship = getBoardableShip(player, targetId);
+  if (!ship) {
+    return { ok: false, message: "Boarding target lost." };
+  }
+  const chance = getCaptureChance(ship);
+  if (Math.random() > chance) {
+    ship.ai.disabled = false;
+    ship.ai.state = "exit";
+    ship.ai.stateUntil = Date.now() + 7000;
+    ship.ai.targetX = ship.x + Math.cos(ship.angle) * 900;
+    ship.ai.targetY = ship.y + Math.sin(ship.angle) * 900;
+    markShipHostileToPlayer(ship.id, player.id);
+    return { ok: false, message: "Capture failed. Target re-engaging." };
+  }
+  if (decision === "takeover") {
+    applyShipToPlayer(player, ship.ship);
+    removeAiShip(ship.id);
+    removeEscortFromPlayer(player, ship.id);
+    appendLog(player, `Captured ${ship.name} and assumed control.`);
+    return { ok: true, message: "Ship captured. You are now at the helm." };
+  }
+  const formationIndex = (player.escorts || []).length;
+  assignShipAsEscort(ship, player.id, { formationIndex, hired: false, dailyRate: 0 });
+  ship.ai.disabled = false;
+  ship.ai.escortMode = "follow";
+  if (!player.escorts) {
+    player.escorts = [];
+  }
+  player.escorts.push({
+    ...getEscortSummary(ship),
+    mode: ship.ai.escortMode
+  });
+  appendLog(player, `Captured ${ship.name} and added it as an escort.`);
+  return { ok: true, message: "Ship captured and assigned as escort." };
 };
 
 const getWeaponDamage = (weaponIds) => {
@@ -759,5 +1100,12 @@ module.exports = {
   getMarketForPlanet,
   buyGoods,
   sellGoods,
-  getCargoUsed
+  getCargoUsed,
+  getCargoCapacity,
+  getEscortHireOffers,
+  hireEscort,
+  setEscortCommand,
+  getBoardingData,
+  captureShip,
+  removeEscortFromPlayer
 };
