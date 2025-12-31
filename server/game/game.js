@@ -31,6 +31,127 @@ const shieldRegenRate = 0.08;
 const armorRegenRate = 0.04;
 const boardingRange = 60;
 const tributeIntervalMs = 1000 * 60 * 60 * 24;
+const colonyIncomeIntervalMs = 1000 * 60 * 60 * 12;
+
+const buildFallbackStoryState = () => {
+  const baseArcs = (initialWorld.storyArcs || []).reduce((acc, arc) => {
+    acc[arc.id] = {
+      status: "inactive",
+      step: 0,
+      rank: 0,
+      pointOfNoReturnReached: false,
+      flags: {}
+    };
+    return acc;
+  }, {});
+  return {
+    arcLock: null,
+    arcs: baseArcs,
+    metrics: { honor: 0, corruption: 0 },
+    flags: {
+      illegalTech: false,
+      hypergateAccess: false,
+      duelAccess: false,
+      licenseWeapons: false,
+      psychicSystems: false,
+      bannedShipyards: false,
+      contrabandAccess: false,
+      exoticFuel: false,
+      forbiddenEngines: false,
+      neutralRep: false
+    },
+    visitedSystems: [],
+    visitedPlanets: [],
+    colonyIncomePerCycle: 0,
+    lastColonyIncomeAt: Date.now()
+  };
+};
+
+const ensureStoryState = (player) => {
+  if (!player.story) {
+    player.story = buildFallbackStoryState();
+    return;
+  }
+  const fallback = buildFallbackStoryState();
+  player.story.arcs = {
+    ...fallback.arcs,
+    ...(player.story.arcs || {})
+  };
+  player.story.metrics = {
+    ...fallback.metrics,
+    ...(player.story.metrics || {})
+  };
+  player.story.flags = {
+    ...fallback.flags,
+    ...(player.story.flags || {})
+  };
+  player.story.visitedSystems = player.story.visitedSystems || [];
+  player.story.visitedPlanets = player.story.visitedPlanets || [];
+  player.story.colonyIncomePerCycle = player.story.colonyIncomePerCycle ?? 0;
+  player.story.lastColonyIncomeAt =
+    player.story.lastColonyIncomeAt ?? Date.now();
+};
+
+const applyArcEffects = (player, effects) => {
+  if (!effects) {
+    return;
+  }
+  ensureStoryState(player);
+  if (typeof effects.rankDelta === "number") {
+    const arcId = player.story.arcLock;
+    if (arcId && player.story.arcs?.[arcId]) {
+      player.story.arcs[arcId].rank += effects.rankDelta;
+    }
+  }
+  if (typeof effects.honorDelta === "number") {
+    player.story.metrics.honor += effects.honorDelta;
+  }
+  if (typeof effects.corruptionDelta === "number") {
+    player.story.metrics.corruption += effects.corruptionDelta;
+  }
+  if (typeof effects.legalStatusDelta === "number") {
+    adjustLegalStatus(player, effects.legalStatusDelta, "Story arc consequence");
+  }
+  if (typeof effects.colonyIncomeDelta === "number") {
+    player.story.colonyIncomePerCycle = Math.max(
+      0,
+      (player.story.colonyIncomePerCycle || 0) + effects.colonyIncomeDelta
+    );
+  }
+  if (effects.unlockFlags) {
+    player.story.flags = {
+      ...player.story.flags,
+      ...effects.unlockFlags
+    };
+  }
+};
+
+const markArcProgress = (player, mission) => {
+  if (!mission.arcId) {
+    return;
+  }
+  ensureStoryState(player);
+  const arcState = player.story.arcs?.[mission.arcId];
+  if (!arcState) {
+    return;
+  }
+  if (arcState.status === "inactive") {
+    arcState.status = "active";
+  }
+  if (mission.arcCommitOnComplete) {
+    player.story.arcLock = mission.arcId;
+  }
+  if (typeof mission.arcAdvanceStep === "number") {
+    arcState.step += mission.arcAdvanceStep;
+  }
+  if (mission.arcPointOfNoReturn) {
+    arcState.pointOfNoReturnReached = true;
+  }
+  if (mission.arcTemplateType === "endgame_state") {
+    arcState.status = "completed";
+  }
+  applyArcEffects(player, mission.arcEffects);
+};
 
 const getSecondaryAmmoCount = (player, ammoId) =>
   Math.max(0, player.secondaryAmmo?.[ammoId] ?? 0);
@@ -289,10 +410,14 @@ const jumpSystem = (player, targetSystemId) => {
     return;
   }
   applyEscortDailyRate(player, "jump");
+  ensureStoryState(player);
   player.systemId = targetSystemId;
   player.planetId = null;
   player.x = 0;
   player.y = 0;
+  if (!player.story.visitedSystems.includes(targetSystemId)) {
+    player.story.visitedSystems.push(targetSystemId);
+  }
   moveEscortsToPlayer(player);
   appendLog(player, `Jumped to ${targetSystemId}.`);
 };
@@ -303,9 +428,13 @@ const dockPlanet = (player, planetId) => {
     appendLog(player, "Docking failed: planet not in system.");
     return;
   }
+  ensureStoryState(player);
   player.planetId = planetId;
   player.x = 0;
   player.y = 0;
+  if (!player.story.visitedPlanets.includes(planetId)) {
+    player.story.visitedPlanets.push(planetId);
+  }
   refillDefaultSecondaryAmmo(player, shipById.get(player.ship.id));
   appendLog(player, `Docked at ${planet.name}.`);
 };
@@ -558,6 +687,34 @@ const acceptMission = (player, missionId) => {
     appendLog(player, "Insufficient cargo space for this mission.");
     return;
   }
+  if (mission.arcId) {
+    ensureStoryState(player);
+    if (player.story.arcLock && player.story.arcLock !== mission.arcId) {
+      const lockedArc = player.story.arcs?.[player.story.arcLock];
+      if (mission.arcConflictBehavior === "betrayal" && !lockedArc?.pointOfNoReturnReached) {
+        if (lockedArc && lockedArc.status === "active") {
+          lockedArc.status = "betrayed";
+        }
+        player.story.arcLock = mission.arcId;
+        appendLog(
+          player,
+          "Betrayal committed. Previous arc has been abandoned."
+        );
+      } else {
+        appendLog(
+          player,
+          "This mission conflicts with your current story path."
+        );
+        return;
+      }
+    } else if (mission.arcCommitOnAccept) {
+      player.story.arcLock = mission.arcId;
+    }
+    const arcState = player.story.arcs?.[mission.arcId];
+    if (arcState && arcState.status === "inactive") {
+      arcState.status = "active";
+    }
+  }
   const expiresAt = mission.timeLimitMinutes
     ? Date.now() + mission.timeLimitMinutes * 60 * 1000
     : null;
@@ -574,7 +731,15 @@ const acceptMission = (player, missionId) => {
     expiresAt,
     targetRoles: mission.targetRoles || null,
     factionId: mission.factionId || null,
-    legalRisk: mission.legalRisk || "low"
+    legalRisk: mission.legalRisk || "low",
+    arcId: mission.arcId || null,
+    arcTemplateType: mission.arcTemplateType || null,
+    arcAdvanceStep: mission.arcAdvanceStep ?? null,
+    arcCommitOnComplete: Boolean(mission.arcCommitOnComplete),
+    arcConflictBehavior: mission.arcConflictBehavior || null,
+    arcPointOfNoReturn: Boolean(mission.arcPointOfNoReturn),
+    arcFailureResets: Boolean(mission.arcFailureResets),
+    arcEffects: mission.arcEffects || null
   });
   appendLog(player, `Accepted mission: ${mission.title}.`);
 };
@@ -590,6 +755,16 @@ const completeMissions = (player) => {
       failed += 1;
       if (mission.type === "smuggling") {
         adjustLegalStatus(player, 8, "Smuggling contract expired");
+      }
+      if (mission.arcId && mission.arcFailureResets) {
+        ensureStoryState(player);
+        const arcState = player.story.arcs?.[mission.arcId];
+        if (arcState) {
+          arcState.status = "failed";
+          if (player.story.arcLock === mission.arcId && !arcState.pointOfNoReturnReached) {
+            player.story.arcLock = null;
+          }
+        }
       }
       return;
     }
@@ -633,6 +808,9 @@ const completeMissions = (player) => {
           adjustReputation(player, systemFactionId, -20, "Local authorities enraged");
         }
       }
+      if (mission.arcId) {
+        markArcProgress(player, mission);
+      }
     });
     appendLog(player, `Completed ${completed} mission(s). Reward: ${reward} credits.`);
   }
@@ -669,7 +847,8 @@ const getPlayerState = (player) => ({
   reputation: player.reputation,
   legalStatus: player.legalStatus,
   combatRating: player.combatRating,
-  dominatedPlanets: player.dominatedPlanets
+  dominatedPlanets: player.dominatedPlanets,
+  story: player.story
 });
 
 const getWorldState = () => initialWorld;
@@ -737,6 +916,25 @@ const applyTributeIncome = (player, now) => {
   );
 };
 
+const applyColonyIncome = (player, now) => {
+  ensureStoryState(player);
+  const income = player.story.colonyIncomePerCycle || 0;
+  if (income <= 0) {
+    player.story.lastColonyIncomeAt = player.story.lastColonyIncomeAt || now;
+    return;
+  }
+  const last = player.story.lastColonyIncomeAt || now;
+  const elapsed = now - last;
+  if (elapsed < colonyIncomeIntervalMs) {
+    return;
+  }
+  const cycles = Math.floor(elapsed / colonyIncomeIntervalMs);
+  const payout = cycles * income;
+  player.credits += payout;
+  player.story.lastColonyIncomeAt = last + cycles * colonyIncomeIntervalMs;
+  appendLog(player, `Colony income received: ${payout} credits.`);
+};
+
 const tickWorld = (deltaSeconds) => {
   tickAiShips(deltaSeconds, Array.from(players.values()));
   const now = Date.now();
@@ -746,6 +944,7 @@ const tickWorld = (deltaSeconds) => {
 
   players.forEach((current) => {
     applyTributeIncome(current, now);
+    applyColonyIncome(current, now);
     if (current.shield < current.ship.shield) {
       const shieldGain = current.ship.shield * shieldRegenRate * deltaSeconds;
       current.shield = Math.min(current.ship.shield, current.shield + shieldGain);

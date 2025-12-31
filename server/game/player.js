@@ -1,6 +1,69 @@
-const { ships, factions } = require("./data");
+const { ships, factions, storyArcs } = require("./data");
 
 const starterShip = ships[0];
+
+const buildBaseStoryState = () => {
+  const baseArcs = storyArcs.reduce((acc, arc) => {
+    acc[arc.id] = {
+      status: "inactive",
+      step: 0,
+      rank: 0,
+      pointOfNoReturnReached: false,
+      flags: {}
+    };
+    return acc;
+  }, {});
+
+  return {
+    arcLock: null,
+    arcs: baseArcs,
+    metrics: {
+      honor: 0,
+      corruption: 0
+    },
+    flags: {
+      illegalTech: false,
+      hypergateAccess: false,
+      duelAccess: false,
+      licenseWeapons: false,
+      psychicSystems: false,
+      bannedShipyards: false,
+      contrabandAccess: false,
+      exoticFuel: false,
+      forbiddenEngines: false,
+      neutralRep: false
+    },
+    visitedSystems: [],
+    visitedPlanets: [],
+    colonyIncomePerCycle: 0,
+    lastColonyIncomeAt: Date.now()
+  };
+};
+
+const mergeStoryState = (baseStory, savedStory = {}) => {
+  return {
+    ...baseStory,
+    ...savedStory,
+    arcs: {
+      ...baseStory.arcs,
+      ...(savedStory.arcs || {})
+    },
+    metrics: {
+      ...baseStory.metrics,
+      ...(savedStory.metrics || {})
+    },
+    flags: {
+      ...baseStory.flags,
+      ...(savedStory.flags || {})
+    },
+    visitedSystems: savedStory.visitedSystems ?? baseStory.visitedSystems,
+    visitedPlanets: savedStory.visitedPlanets ?? baseStory.visitedPlanets,
+    colonyIncomePerCycle:
+      savedStory.colonyIncomePerCycle ?? baseStory.colonyIncomePerCycle,
+    lastColonyIncomeAt:
+      savedStory.lastColonyIncomeAt ?? baseStory.lastColonyIncomeAt
+  };
+};
 
 const applyDefaultSecondaryLoadout = (player, ship) => {
   if (ship.defaultSecondaryWeapons?.length) {
@@ -57,7 +120,8 @@ const createPlayer = ({ id, name, savedState = null }) => {
     legalStatus: 0,
     combatRating: 0,
     dominatedPlanets: [],
-    lastTributeAt: Date.now()
+    lastTributeAt: Date.now(),
+    story: buildBaseStoryState()
   };
 
   if (!savedState) {
@@ -70,6 +134,7 @@ const createPlayer = ({ id, name, savedState = null }) => {
     ...savedState,
     id,
     name,
+    story: mergeStoryState(basePlayer.story, savedState.story),
     ship: {
       ...basePlayer.ship,
       ...(savedState.ship || {})
