@@ -221,7 +221,15 @@ const sendAction = (payload) => {
 
 const formatCredits = (value) => `${value.toLocaleString()} cr`;
 
-const parseShipClassification = (shipName = "") => {
+const parseShipClassification = (ship = {}) => {
+  const shipName = ship?.name ?? "";
+  const shipClass = ship?.class ?? "";
+  if (shipClass) {
+    return {
+      className: shipClass,
+      typeName: shipName || "Unknown"
+    };
+  }
   const match = shipName.match(/^(.*)\((.*)\)\s*$/);
   if (match) {
     return {
@@ -1118,7 +1126,7 @@ const updateTargetInfo = () => {
     return;
   }
   const shipName = target.ship?.name ?? "Unknown Hull";
-  const { className, typeName } = parseShipClassification(shipName);
+  const { className, typeName } = parseShipClassification(target.ship);
   const shieldMax = target.ship?.shield ?? 0;
   const hullMax = target.ship?.hull ?? 0;
   const shieldValue = Math.max(0, target.shield ?? 0);

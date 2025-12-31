@@ -41,19 +41,64 @@ const systemTraffic = {
 };
 
 const shipRoles = {
-  shuttle: ["shuttle"],
-  courier: ["courier", "aurora_clipper"],
-  freighter: ["pioneer_hauler", "atlas_bulk", "caravel_super", "nomad_liner"],
-  fighter: ["sparrow_mk1", "sparrow_mk2", "vanguard"],
-  escort: ["wisp_runner", "bastion_guard", "ironclad"],
-  scout: ["ember_skiff"],
-  frigate: ["frigate"]
+  shuttle: [
+    "sd_passport",
+    "kesh_trailwaker",
+    "echo_seedling",
+    "lu_lantern",
+    "fh_patchliner",
+    "bf_ratchet",
+    "st_sporelight",
+    "oc_cinderling",
+    "neutral_frontier_skiff"
+  ],
+  courier: [
+    "sd_redoubt",
+    "kesh_hearthguard",
+    "echo_flowstate",
+    "lu_fluxline",
+    "fh_wayfinder",
+    "bf_ransacker",
+    "st_habitat_arc"
+  ],
+  freighter: [
+    "fh_holdmaster",
+    "st_eden_hauler",
+    "st_greenforge",
+    "st_genesis_crown",
+    "neutral_common_hauler"
+  ],
+  fighter: [
+    "sd_repulse",
+    "kesh_bloodwing",
+    "echo_mirage",
+    "lu_aetherwing",
+    "fh_crosswind",
+    "bf_spite",
+    "oc_glyphbite"
+  ],
+  escort: [
+    "sd_sentinel",
+    "kesh_warlance",
+    "fh_breakwater",
+    "bf_harbinger",
+    "oc_hollow_verse"
+  ],
+  scout: ["lu_fluxline", "echo_seedling", "fh_wayfinder"],
+  frigate: [
+    "sd_sentinel",
+    "kesh_warlance",
+    "echo_wellspring",
+    "lu_heliostat",
+    "bf_harbinger",
+    "oc_hollow_verse"
+  ]
 };
 
 const factionById = new Map(factions.map((faction) => [faction.id, faction]));
 
 const factionShipMix = {
-  free_traders: {
+  free_horizons_guild: {
     shuttle: 3,
     courier: 4,
     freighter: 6,
@@ -62,7 +107,7 @@ const factionShipMix = {
     scout: 2,
     frigate: 0
   },
-  sol_defense: {
+  solar_directorate: {
     shuttle: 1,
     courier: 3,
     freighter: 2,
@@ -71,7 +116,7 @@ const factionShipMix = {
     scout: 1,
     frigate: 2
   },
-  vega_combine: {
+  starseed_foundation: {
     shuttle: 2,
     courier: 4,
     freighter: 5,
@@ -80,7 +125,7 @@ const factionShipMix = {
     scout: 1,
     frigate: 1
   },
-  orion_regency: {
+  ironclad_clans: {
     shuttle: 1,
     courier: 3,
     freighter: 2,
@@ -89,7 +134,7 @@ const factionShipMix = {
     scout: 1,
     frigate: 2
   },
-  draco_syndicate: {
+  black_flag_syndicate: {
     shuttle: 0,
     courier: 2,
     freighter: 1,
@@ -98,7 +143,7 @@ const factionShipMix = {
     scout: 2,
     frigate: 1
   },
-  sirius_concord: {
+  luminari_compact: {
     shuttle: 1,
     courier: 3,
     freighter: 2,
@@ -107,14 +152,23 @@ const factionShipMix = {
     scout: 2,
     frigate: 1
   },
-  outer_rim_compact: {
+  echotrail_communion: {
     shuttle: 2,
     courier: 2,
-    freighter: 4,
+    freighter: 0,
     escort: 1,
-    fighter: 1,
+    fighter: 2,
     scout: 3,
-    frigate: 0
+    frigate: 1
+  },
+  obsidian_covenant: {
+    shuttle: 1,
+    courier: 1,
+    freighter: 0,
+    escort: 2,
+    fighter: 3,
+    scout: 1,
+    frigate: 2
   }
 };
 
@@ -146,7 +200,7 @@ const pickWeighted = (weights) => {
 };
 
 const pickShipForSystem = (system, factionId) => {
-  const baseMix = factionShipMix[factionId] || factionShipMix.free_traders;
+  const baseMix = factionShipMix[factionId] || factionShipMix.free_horizons_guild;
   const mix = { ...baseMix };
   if (system.status === "border") {
     mix.fighter = (mix.fighter ?? 0) + 1;
@@ -265,7 +319,7 @@ const getSystemFactionWeights = (system) => {
   (system.disputedWith || []).forEach((factionId) => {
     weights[factionId] = (weights[factionId] ?? 0) + 3;
   });
-  weights.free_traders = system.status === "border" ? 3 : 4;
+  weights.free_horizons_guild = system.status === "border" ? 3 : 4;
   return weights;
 };
 
@@ -386,7 +440,7 @@ const getAiBounty = (role, system, factionId) => {
     frigate: [95000, 135000]
   }[role] || [30000, 60000];
   const statusBonus = system?.status === "border" ? 1.15 : system?.status === "frontier" ? 1.25 : 1;
-  const pirateBonus = factionId === "draco_syndicate" ? 1.2 : 1;
+  const pirateBonus = factionId === "black_flag_syndicate" ? 1.2 : 1;
   return Math.round(randomRange(baseRange[0], baseRange[1]) * statusBonus * pirateBonus);
 };
 
@@ -550,7 +604,7 @@ const isHostile = (system, ship, other) => {
   if (!ship.factionId || !other.factionId) {
     return false;
   }
-  if (ship.factionId === "free_traders" || other.factionId === "free_traders") {
+  if (ship.factionId === "free_horizons_guild" || other.factionId === "free_horizons_guild") {
     return false;
   }
   if (ship.factionId === other.factionId) {

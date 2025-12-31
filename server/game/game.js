@@ -297,7 +297,7 @@ const awardBounty = (player, target) => {
   }
   player.combatRating = (player.combatRating ?? 0) + 1;
   const targetFactionId = target.factionId;
-  if (targetFactionId && targetFactionId !== "draco_syndicate") {
+  if (targetFactionId && targetFactionId !== "black_flag_syndicate") {
     adjustReputation(player, targetFactionId, -2, "Combat incident reported");
     adjustLegalStatus(player, 2, "Security notified of combat");
   }
@@ -1230,7 +1230,7 @@ const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 const getEscortHireShips = () =>
   initialWorld.ships.filter((ship) =>
-    ["wisp_runner", "bastion_guard", "ironclad"].includes(ship.id)
+    ["sd_sentinel", "kesh_warlance", "fh_breakwater"].includes(ship.id)
   );
 
 const getEscortDailyRate = (ship) => Math.max(2500, Math.round(ship.price * 0.06));

@@ -5,7 +5,7 @@ const systems = [
     x: 0,
     y: 0,
     links: ["deneb", "altair", "arcadia"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "core",
     traffic: "heavy"
   },
@@ -15,7 +15,7 @@ const systems = [
     x: 140,
     y: -40,
     links: ["sol", "helios", "riftwatch"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "core",
     traffic: "medium"
   },
@@ -25,7 +25,7 @@ const systems = [
     x: -120,
     y: -40,
     links: ["sol", "new_eden", "redoubt"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "core",
     traffic: "medium"
   },
@@ -35,7 +35,7 @@ const systems = [
     x: 80,
     y: 120,
     links: ["sol", "helios", "borealis_gate"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "core",
     traffic: "medium"
   },
@@ -45,7 +45,7 @@ const systems = [
     x: 200,
     y: 60,
     links: ["deneb", "arcadia", "lancer"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "core",
     traffic: "heavy"
   },
@@ -55,7 +55,7 @@ const systems = [
     x: -140,
     y: 120,
     links: ["altair", "cinder", "borealis_gate"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "core",
     traffic: "medium"
   },
@@ -65,10 +65,10 @@ const systems = [
     x: 0,
     y: 220,
     links: ["arcadia", "new_eden", "borealis", "windfall"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "border",
     traffic: "medium",
-    disputedWith: ["outer_rim_compact"]
+    disputedWith: ["echotrail_communion"]
   },
   {
     id: "cinder",
@@ -76,10 +76,10 @@ const systems = [
     x: -220,
     y: 140,
     links: ["new_eden", "vega", "bastion"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "border",
     traffic: "medium",
-    disputedWith: ["vega_combine"]
+    disputedWith: ["starseed_foundation"]
   },
   {
     id: "lancer",
@@ -87,10 +87,10 @@ const systems = [
     x: 220,
     y: 200,
     links: ["helios", "aurora", "arkady"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "border",
     traffic: "medium",
-    disputedWith: ["orion_regency"]
+    disputedWith: ["ironclad_clans"]
   },
   {
     id: "redoubt",
@@ -98,10 +98,10 @@ const systems = [
     x: -20,
     y: -200,
     links: ["altair", "sirius", "scar"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "border",
     traffic: "medium",
-    disputedWith: ["sirius_concord"]
+    disputedWith: ["luminari_compact"]
   },
   {
     id: "riftwatch",
@@ -109,10 +109,10 @@ const systems = [
     x: 200,
     y: -200,
     links: ["deneb", "crown", "duskfall"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "border",
     traffic: "medium",
-    disputedWith: ["orion_regency", "sirius_concord"]
+    disputedWith: ["ironclad_clans", "luminari_compact"]
   },
   {
     id: "scar",
@@ -120,10 +120,10 @@ const systems = [
     x: -160,
     y: -140,
     links: ["redoubt", "draco", "ember"],
-    factionId: "sol_defense",
+    factionId: "solar_directorate",
     status: "border",
     traffic: "light",
-    disputedWith: ["draco_syndicate", "sirius_concord"]
+    disputedWith: ["black_flag_syndicate", "luminari_compact"]
   },
   {
     id: "vega",
@@ -131,7 +131,7 @@ const systems = [
     x: -360,
     y: 120,
     links: ["cinder", "auriga", "windfall", "lyra"],
-    factionId: "vega_combine",
+    factionId: "starseed_foundation",
     status: "core",
     traffic: "heavy"
   },
@@ -141,7 +141,7 @@ const systems = [
     x: -420,
     y: 0,
     links: ["vega", "cygnus", "ember"],
-    factionId: "vega_combine",
+    factionId: "starseed_foundation",
     status: "core",
     traffic: "medium"
   },
@@ -151,7 +151,7 @@ const systems = [
     x: -480,
     y: 200,
     links: ["vega", "polaris", "cygnus"],
-    factionId: "vega_combine",
+    factionId: "starseed_foundation",
     status: "core",
     traffic: "medium"
   },
@@ -161,7 +161,7 @@ const systems = [
     x: -520,
     y: 80,
     links: ["auriga", "lyra", "polaris"],
-    factionId: "vega_combine",
+    factionId: "starseed_foundation",
     status: "core",
     traffic: "light"
   },
@@ -171,7 +171,7 @@ const systems = [
     x: -560,
     y: 260,
     links: ["lyra", "cygnus", "tundra"],
-    factionId: "vega_combine",
+    factionId: "starseed_foundation",
     status: "frontier",
     traffic: "light"
   },
@@ -181,10 +181,10 @@ const systems = [
     x: -340,
     y: 260,
     links: ["vega", "zenith", "borealis_gate"],
-    factionId: "vega_combine",
+    factionId: "starseed_foundation",
     status: "border",
     traffic: "medium",
-    disputedWith: ["outer_rim_compact"]
+    disputedWith: ["echotrail_communion"]
   },
   {
     id: "ember",
@@ -192,10 +192,10 @@ const systems = [
     x: -320,
     y: -80,
     links: ["auriga", "draco", "scar"],
-    factionId: "vega_combine",
+    factionId: "starseed_foundation",
     status: "border",
     traffic: "medium",
-    disputedWith: ["draco_syndicate", "sol_defense"]
+    disputedWith: ["black_flag_syndicate", "solar_directorate"]
   },
   {
     id: "draco",
@@ -203,7 +203,7 @@ const systems = [
     x: -260,
     y: -200,
     links: ["scar", "ember", "bastion", "obsidian"],
-    factionId: "draco_syndicate",
+    factionId: "black_flag_syndicate",
     status: "core",
     traffic: "medium"
   },
@@ -213,10 +213,10 @@ const systems = [
     x: -340,
     y: -140,
     links: ["draco", "fenrir", "cinder"],
-    factionId: "draco_syndicate",
+    factionId: "black_flag_syndicate",
     status: "border",
     traffic: "medium",
-    disputedWith: ["vega_combine", "sol_defense"]
+    disputedWith: ["starseed_foundation", "solar_directorate"]
   },
   {
     id: "fenrir",
@@ -224,7 +224,7 @@ const systems = [
     x: -380,
     y: -260,
     links: ["bastion", "azrael"],
-    factionId: "draco_syndicate",
+    factionId: "black_flag_syndicate",
     status: "core",
     traffic: "light"
   },
@@ -234,7 +234,7 @@ const systems = [
     x: -220,
     y: -320,
     links: ["fenrir", "obsidian", "numen"],
-    factionId: "draco_syndicate",
+    factionId: "black_flag_syndicate",
     status: "frontier",
     traffic: "light"
   },
@@ -244,7 +244,7 @@ const systems = [
     x: -120,
     y: -280,
     links: ["draco", "azrael", "helene"],
-    factionId: "draco_syndicate",
+    factionId: "obsidian_covenant",
     status: "core",
     traffic: "medium"
   },
@@ -254,7 +254,7 @@ const systems = [
     x: 20,
     y: -360,
     links: ["redoubt", "helene", "valkyr"],
-    factionId: "sirius_concord",
+    factionId: "luminari_compact",
     status: "core",
     traffic: "medium"
   },
@@ -264,7 +264,7 @@ const systems = [
     x: -120,
     y: -420,
     links: ["sirius", "obsidian", "numen"],
-    factionId: "sirius_concord",
+    factionId: "luminari_compact",
     status: "core",
     traffic: "light"
   },
@@ -274,7 +274,7 @@ const systems = [
     x: 200,
     y: -360,
     links: ["sirius", "mirage", "duskfall"],
-    factionId: "sirius_concord",
+    factionId: "luminari_compact",
     status: "core",
     traffic: "medium"
   },
@@ -284,7 +284,7 @@ const systems = [
     x: 120,
     y: -420,
     links: ["valkyr", "numen", "miranda"],
-    factionId: "sirius_concord",
+    factionId: "luminari_compact",
     status: "core",
     traffic: "light"
   },
@@ -294,7 +294,7 @@ const systems = [
     x: 0,
     y: -480,
     links: ["helene", "mirage", "azrael"],
-    factionId: "sirius_concord",
+    factionId: "luminari_compact",
     status: "frontier",
     traffic: "light"
   },
@@ -304,10 +304,10 @@ const systems = [
     x: 140,
     y: -280,
     links: ["valkyr", "riftwatch", "crown"],
-    factionId: "sirius_concord",
+    factionId: "luminari_compact",
     status: "border",
     traffic: "medium",
-    disputedWith: ["orion_regency", "sol_defense"]
+    disputedWith: ["ironclad_clans", "solar_directorate"]
   },
   {
     id: "orion",
@@ -315,7 +315,7 @@ const systems = [
     x: 360,
     y: -80,
     links: ["aurora", "castor", "crown"],
-    factionId: "orion_regency",
+    factionId: "ironclad_clans",
     status: "core",
     traffic: "heavy"
   },
@@ -325,7 +325,7 @@ const systems = [
     x: 420,
     y: 40,
     links: ["orion", "palatine", "aurora"],
-    factionId: "orion_regency",
+    factionId: "ironclad_clans",
     status: "core",
     traffic: "medium"
   },
@@ -335,7 +335,7 @@ const systems = [
     x: 520,
     y: -20,
     links: ["castor", "eridani", "drifts"],
-    factionId: "orion_regency",
+    factionId: "ironclad_clans",
     status: "core",
     traffic: "medium"
   },
@@ -345,7 +345,7 @@ const systems = [
     x: 480,
     y: -140,
     links: ["palatine", "miranda"],
-    factionId: "orion_regency",
+    factionId: "ironclad_clans",
     status: "core",
     traffic: "light"
   },
@@ -355,10 +355,10 @@ const systems = [
     x: 440,
     y: -260,
     links: ["eridani", "mirage", "crown"],
-    factionId: "orion_regency",
+    factionId: "ironclad_clans",
     status: "border",
     traffic: "medium",
-    disputedWith: ["sirius_concord"]
+    disputedWith: ["luminari_compact"]
   },
   {
     id: "aurora",
@@ -366,10 +366,10 @@ const systems = [
     x: 300,
     y: 40,
     links: ["orion", "castor", "lancer"],
-    factionId: "orion_regency",
+    factionId: "ironclad_clans",
     status: "border",
     traffic: "medium",
-    disputedWith: ["sol_defense"]
+    disputedWith: ["solar_directorate"]
   },
   {
     id: "crown",
@@ -377,10 +377,10 @@ const systems = [
     x: 300,
     y: -200,
     links: ["orion", "riftwatch", "miranda", "duskfall"],
-    factionId: "orion_regency",
+    factionId: "ironclad_clans",
     status: "border",
     traffic: "medium",
-    disputedWith: ["sirius_concord", "sol_defense"]
+    disputedWith: ["luminari_compact", "solar_directorate"]
   },
   {
     id: "borealis",
@@ -388,7 +388,7 @@ const systems = [
     x: 0,
     y: 360,
     links: ["borealis_gate", "kepler", "zenith"],
-    factionId: "outer_rim_compact",
+    factionId: "echotrail_communion",
     status: "core",
     traffic: "light"
   },
@@ -398,7 +398,7 @@ const systems = [
     x: 120,
     y: 420,
     links: ["borealis", "arkady", "drifts"],
-    factionId: "outer_rim_compact",
+    factionId: "echotrail_communion",
     status: "core",
     traffic: "light"
   },
@@ -408,7 +408,7 @@ const systems = [
     x: -80,
     y: 460,
     links: ["zenith", "tundra"],
-    factionId: "outer_rim_compact",
+    factionId: "echotrail_communion",
     status: "core",
     traffic: "light"
   },
@@ -418,10 +418,10 @@ const systems = [
     x: 200,
     y: 340,
     links: ["kepler", "lancer", "drifts"],
-    factionId: "outer_rim_compact",
+    factionId: "echotrail_communion",
     status: "border",
     traffic: "medium",
-    disputedWith: ["orion_regency", "sol_defense"]
+    disputedWith: ["ironclad_clans", "solar_directorate"]
   },
   {
     id: "zenith",
@@ -429,7 +429,7 @@ const systems = [
     x: -200,
     y: 360,
     links: ["borealis", "windfall", "luyten", "tundra"],
-    factionId: "outer_rim_compact",
+    factionId: "echotrail_communion",
     status: "core",
     traffic: "light"
   },
@@ -439,7 +439,7 @@ const systems = [
     x: 260,
     y: 440,
     links: ["kepler", "arkady", "palatine"],
-    factionId: "outer_rim_compact",
+    factionId: "echotrail_communion",
     status: "frontier",
     traffic: "light"
   },
@@ -449,7 +449,7 @@ const systems = [
     x: -260,
     y: 420,
     links: ["zenith", "polaris", "luyten"],
-    factionId: "outer_rim_compact",
+    factionId: "echotrail_communion",
     status: "frontier",
     traffic: "light"
   }
@@ -822,187 +822,7 @@ const planets = [
   }
 ];
 
-const ships = [
-  {
-    id: "shuttle",
-    name: "Drifter Shuttle",
-    hull: 80,
-    shield: 20,
-    cargo: 12,
-    fuel: 120,
-    hardpoints: 2,
-    secondaryHardpoints: 1,
-    price: 0
-  },
-  {
-    id: "courier",
-    name: "Wayfarer Courier",
-    hull: 140,
-    shield: 60,
-    cargo: 22,
-    fuel: 180,
-    hardpoints: 3,
-    secondaryHardpoints: 1,
-    price: 12000
-  },
-  {
-    id: "frigate",
-    name: "Frontier Frigate",
-    hull: 240,
-    shield: 110,
-    cargo: 30,
-    fuel: 200,
-    hardpoints: 4,
-    secondaryHardpoints: 2,
-    price: 30000,
-    defaultSecondaryWeapons: ["radar_missile_launcher"],
-    defaultSecondaryAmmo: { radar_missile: 6 }
-  },
-  {
-    id: "sparrow_mk1",
-    name: "Sparrow Mk I (Light Fighter)",
-    hull: 110,
-    shield: 40,
-    cargo: 6,
-    fuel: 140,
-    hardpoints: 2,
-    secondaryHardpoints: 1,
-    price: 9000,
-    defaultSecondaryWeapons: ["radar_missile_launcher"],
-    defaultSecondaryAmmo: { radar_missile: 4 }
-  },
-  {
-    id: "sparrow_mk2",
-    name: "Sparrow Mk II (Medium Fighter)",
-    hull: 150,
-    shield: 70,
-    cargo: 8,
-    fuel: 160,
-    hardpoints: 3,
-    secondaryHardpoints: 1,
-    price: 16000,
-    defaultSecondaryWeapons: ["radar_missile_launcher"],
-    defaultSecondaryAmmo: { radar_missile: 6 }
-  },
-  {
-    id: "vanguard",
-    name: "Vanguard Talon (Heavy Fighter)",
-    hull: 200,
-    shield: 110,
-    cargo: 10,
-    fuel: 180,
-    hardpoints: 4,
-    secondaryHardpoints: 2,
-    price: 26000,
-    defaultSecondaryWeapons: ["radar_missile_launcher"],
-    defaultSecondaryAmmo: { radar_missile: 8 }
-  },
-  {
-    id: "wisp_runner",
-    name: "Wisp Runner (Light Escort)",
-    hull: 170,
-    shield: 90,
-    cargo: 12,
-    fuel: 200,
-    hardpoints: 4,
-    secondaryHardpoints: 2,
-    price: 22000,
-    defaultSecondaryWeapons: ["radar_missile_launcher"],
-    defaultSecondaryAmmo: { radar_missile: 6 }
-  },
-  {
-    id: "bastion_guard",
-    name: "Bastion Guard (Medium Escort)",
-    hull: 260,
-    shield: 150,
-    cargo: 18,
-    fuel: 220,
-    hardpoints: 5,
-    secondaryHardpoints: 2,
-    price: 38000,
-    defaultSecondaryWeapons: ["radar_missile_launcher"],
-    defaultSecondaryAmmo: { radar_missile: 8 }
-  },
-  {
-    id: "ironclad",
-    name: "Ironclad Ward (Heavy Escort)",
-    hull: 340,
-    shield: 210,
-    cargo: 22,
-    fuel: 240,
-    hardpoints: 6,
-    secondaryHardpoints: 3,
-    price: 52000,
-    defaultSecondaryWeapons: ["radar_missile_launcher"],
-    defaultSecondaryAmmo: { radar_missile: 10 }
-  },
-  {
-    id: "pioneer_hauler",
-    name: "Pioneer Hauler (Small Freighter)",
-    hull: 200,
-    shield: 80,
-    cargo: 45,
-    fuel: 200,
-    hardpoints: 2,
-    secondaryHardpoints: 1,
-    price: 24000
-  },
-  {
-    id: "atlas_bulk",
-    name: "Atlas Bulk (Medium Freighter)",
-    hull: 280,
-    shield: 120,
-    cargo: 80,
-    fuel: 240,
-    hardpoints: 3,
-    secondaryHardpoints: 1,
-    price: 42000
-  },
-  {
-    id: "caravel_super",
-    name: "Caravel Super (Heavy Freighter)",
-    hull: 360,
-    shield: 160,
-    cargo: 120,
-    fuel: 260,
-    hardpoints: 4,
-    secondaryHardpoints: 2,
-    price: 65000
-  },
-  {
-    id: "nomad_liner",
-    name: "Nomad Liner (Passenger Freighter)",
-    hull: 240,
-    shield: 130,
-    cargo: 50,
-    fuel: 260,
-    hardpoints: 3,
-    secondaryHardpoints: 1,
-    price: 36000
-  },
-  {
-    id: "ember_skiff",
-    name: "Ember Skiff (Scout)",
-    hull: 120,
-    shield: 50,
-    cargo: 10,
-    fuel: 240,
-    hardpoints: 2,
-    secondaryHardpoints: 1,
-    price: 14000
-  },
-  {
-    id: "aurora_clipper",
-    name: "Aurora Clipper (Fast Trader)",
-    hull: 190,
-    shield: 90,
-    cargo: 32,
-    fuel: 260,
-    hardpoints: 3,
-    secondaryHardpoints: 1,
-    price: 28000
-  }
-];
+const ships = require("./ships.json");
 
 const weapons = [
   {
@@ -1151,7 +971,7 @@ const storyArcs = [
       "License-locked weapons",
       "Legal immunity"
     ],
-    primaryFactionId: "sol_defense",
+    primaryFactionId: "solar_directorate",
     pointOfNoReturnStep: 4
   },
   {
@@ -1161,7 +981,7 @@ const storyArcs = [
     startTriggers: ["Win clan duel", "Clan sponsorship received"],
     consequences: ["Unlock clan ranks", "Rival clans auto-hostile"],
     mechanics: ["Duel mode", "Honor score affects shops"],
-    primaryFactionId: "orion_regency",
+    primaryFactionId: "ironclad_clans",
     pointOfNoReturnStep: 3
   },
   {
@@ -1171,7 +991,7 @@ const storyArcs = [
     startTriggers: ["Contact Communion emissary", "Artifact encounter"],
     consequences: ["Psychic systems replace weapons", "Banned from most shipyards"],
     mechanics: ["Psychic abilities", "Isolation travel restrictions"],
-    primaryFactionId: "outer_rim_compact",
+    primaryFactionId: "echotrail_communion",
     pointOfNoReturnStep: 3
   },
   {
@@ -1181,7 +1001,7 @@ const storyArcs = [
     startTriggers: ["Aid stranded Luminari scientist"],
     consequences: ["Access hypergates", "Illegal tech in most jurisdictions"],
     mechanics: ["Hypergate travel", "Exotic fuels", "Contraband scan flags"],
-    primaryFactionId: "sirius_concord",
+    primaryFactionId: "luminari_compact",
     pointOfNoReturnStep: 3
   },
   {
@@ -1197,7 +1017,7 @@ const storyArcs = [
       "Flexible access without unique tech"
     ],
     mechanics: ["Contract chains", "Dynamic reputation neutrality"],
-    primaryFactionId: "free_traders",
+    primaryFactionId: "free_horizons_guild",
     pointOfNoReturnStep: 4
   },
   {
@@ -1213,7 +1033,7 @@ const storyArcs = [
       "Pursued by authorities"
     ],
     mechanics: ["Boarding boosts", "Auto-bounty increases"],
-    primaryFactionId: "draco_syndicate",
+    primaryFactionId: "black_flag_syndicate",
     pointOfNoReturnStep: 3
   },
   {
@@ -1229,7 +1049,7 @@ const storyArcs = [
       "Unlock new worlds"
     ],
     mechanics: ["Colony development", "Passive income streams"],
-    primaryFactionId: "vega_combine",
+    primaryFactionId: "starseed_foundation",
     pointOfNoReturnStep: 4
   },
   {
@@ -1245,7 +1065,7 @@ const storyArcs = [
       "Corruption meter and narrative risk"
     ],
     mechanics: ["Corruption meter", "Unstable gear risks"],
-    primaryFactionId: "outer_rim_compact",
+    primaryFactionId: "obsidian_covenant",
     pointOfNoReturnStep: 2
   }
 ];
@@ -2712,60 +2532,68 @@ const tradeRoutes = [
 
 const factions = [
   {
-    id: "free_traders",
-    name: "Free Traders Guild",
-    code: "FTG",
+    id: "solar_directorate",
+    name: "Solar Directorate",
+    code: "SD",
     description:
-      "Independent merchants and couriers who keep the trade lanes flowing regardless of politics.",
+      "A disciplined authority with modular fleets and legal enforcement across the core.",
     homeSystemId: "sol"
   },
   {
-    id: "sol_defense",
-    name: "Sol Defense Union",
-    code: "SDU",
+    id: "ironclad_clans",
+    name: "Ironclad Clans",
+    code: "KESH",
     description:
-      "An old military compact holding the Sol core, focused on stability and disciplined patrols.",
-    homeSystemId: "sol"
-  },
-  {
-    id: "vega_combine",
-    name: "Vega Combine",
-    code: "VGC",
-    description:
-      "Industrial trade houses clustered around Vega, leveraging cargo fleets and corporate security.",
-    homeSystemId: "vega"
-  },
-  {
-    id: "orion_regency",
-    name: "Orion Regency",
-    code: "ORG",
-    description:
-      "An aristocratic regime with elite escort wings guarding the eastern corridors.",
+      "Warrior clans who favor brutal hulls, honor duels, and boarding victories.",
     homeSystemId: "orion"
   },
   {
-    id: "draco_syndicate",
-    name: "Draco Syndicate",
-    code: "DRS",
+    id: "echotrail_communion",
+    name: "Echotrail Communion",
+    code: "ECHO",
     description:
-      "A shadow network of raiders and salvagers, thriving in volatile border zones.",
-    homeSystemId: "draco"
+      "Psychic bio-ship custodians whose vessels focus on shielding, disabling, and isolation.",
+    homeSystemId: "borealis"
   },
   {
-    id: "sirius_concord",
-    name: "Sirius Concord",
-    code: "SRC",
+    id: "luminari_compact",
+    name: "Luminari Compact",
+    code: "LU",
     description:
-      "A coalition of sanctuary systems known for fast response fleets and humanitarian convoys.",
+      "Hypertech isolationists relying on exotic drives, low signatures, and extreme mobility.",
     homeSystemId: "sirius"
   },
   {
-    id: "outer_rim_compact",
-    name: "Outer Rim Compact",
-    code: "ORC",
+    id: "free_horizons_guild",
+    name: "Free Horizons Guild",
+    code: "FH",
     description:
-      "Frontier cooperatives that barter passage and defense across the far northern rim.",
-    homeSystemId: "borealis"
+      "Independent captains who prize flexibility and modular ship upgrades.",
+    homeSystemId: "sol"
+  },
+  {
+    id: "black_flag_syndicate",
+    name: "Black Flag Syndicate",
+    code: "BF",
+    description:
+      "Underworld raiders who specialize in boarding actions and stolen hardware.",
+    homeSystemId: "draco"
+  },
+  {
+    id: "starseed_foundation",
+    name: "Starseed Foundation",
+    code: "ST",
+    description:
+      "Terraforming engineers running massive logistics fleets and colony infrastructure.",
+    homeSystemId: "vega"
+  },
+  {
+    id: "obsidian_covenant",
+    name: "Obsidian Covenant",
+    code: "OC",
+    description:
+      "A mystic cult wielding volatile void tech and corruption-charged weaponry.",
+    homeSystemId: "obsidian"
   }
 ];
 
