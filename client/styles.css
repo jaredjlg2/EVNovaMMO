@@ -440,17 +440,6 @@ body {
   gap: 12px;
 }
 
-.docked-nav {
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 10px;
-}
-
-.docked-back {
-  background: linear-gradient(160deg, rgba(20, 30, 54, 0.95), rgba(8, 12, 22, 0.98));
-  border: 1px solid rgba(90, 120, 190, 0.35);
-}
-
 .docked-menu {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -463,8 +452,60 @@ body {
   text-align: left;
 }
 
+.docked-menu button.active {
+  border-color: rgba(90, 160, 255, 0.8);
+  box-shadow: 0 0 18px rgba(79, 209, 255, 0.3);
+}
+
 .docked-section {
   margin-top: 14px;
+}
+
+.docked-modal {
+  z-index: 12;
+}
+
+.docked-modal-card {
+  width: min(760px, 92vw);
+  max-height: 82vh;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(18, 28, 52, 0.98), rgba(8, 12, 22, 0.98));
+  border: 1px solid rgba(90, 120, 190, 0.4);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 26px 80px rgba(4, 8, 20, 0.7);
+}
+
+.docked-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.docked-modal-header h3 {
+  margin: 0;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #cfe4ff;
+}
+
+.docked-modal-header button {
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.docked-modal-body {
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .docked-section-header {
