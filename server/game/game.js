@@ -454,22 +454,35 @@ const getPlayerState = (player) => ({
 
 const getWorldState = () => initialWorld;
 
+const buildPlayerStatus = (player) => ({
+  id: player.id,
+  name: player.name,
+  systemId: player.systemId,
+  planetId: player.planetId,
+  ship: player.ship,
+  x: player.x,
+  y: player.y,
+  angle: player.angle,
+  hull: player.hull,
+  shield: player.shield
+});
+
 const getSystemStatus = () =>
   [
-    ...Array.from(players.values()).map((player) => ({
-      id: player.id,
-      name: player.name,
-      systemId: player.systemId,
-      planetId: player.planetId,
-      ship: player.ship,
-      x: player.x,
-      y: player.y,
-      angle: player.angle,
-      hull: player.hull,
-      shield: player.shield
-    })),
+    ...Array.from(players.values()).map((player) => buildPlayerStatus(player)),
     ...getAiShipStatus()
   ];
+
+const getSystemStatusForSystem = (systemId) => {
+  if (!systemId) {
+    return getSystemStatus();
+  }
+  const playerStatus = Array.from(players.values())
+    .filter((player) => player.systemId === systemId)
+    .map((player) => buildPlayerStatus(player));
+  const aiStatus = getAiShipStatus().filter((ship) => ship.systemId === systemId);
+  return [...playerStatus, ...aiStatus];
+};
 
 const updatePosition = (player, { x, y, angle }) => {
   if (typeof x === "number") {
@@ -1223,6 +1236,7 @@ module.exports = {
   getPlayerState,
   getWorldState,
   getSystemStatus,
+  getSystemStatusForSystem,
   tickAiShips,
   tickWorld,
   updatePosition,

@@ -10,6 +10,7 @@ const {
   getPlayerState,
   getWorldState,
   getSystemStatus,
+  getSystemStatusForSystem,
   persistPlayer,
   updatePosition,
   fireWeapons,
@@ -60,7 +61,7 @@ const wss = new WebSocketServer({ server });
 const connections = new Map();
 const aiTickIntervalMs = 20;
 let lastAiTick = Date.now();
-const presenceBroadcastIntervalMs = 20;
+const presenceBroadcastIntervalMs = 40;
 let lastPresenceBroadcast = 0;
 const persistenceIntervalMs = 5000;
 
@@ -85,9 +86,19 @@ const broadcastPresence = (force = false) => {
     return;
   }
   lastPresenceBroadcast = now;
-  if (wss.clients.size > 0) {
-    broadcast({ type: "presence", players: getSystemStatus() });
+  if (connections.size === 0) {
+    return;
   }
+  connections.forEach((socket, playerId) => {
+    const player = getPlayer(playerId);
+    if (!player) {
+      return;
+    }
+    sendTo(socket, {
+      type: "presence",
+      players: getSystemStatusForSystem(player.systemId)
+    });
+  });
 };
 
 const handleDestroyedEntities = (destroyedList) => {
@@ -165,7 +176,7 @@ setInterval(() => {
       }
     });
   }
-  broadcastPresence(true);
+  broadcastPresence();
 }, aiTickIntervalMs);
 
 const handleAction = (player, action, socket) => {
