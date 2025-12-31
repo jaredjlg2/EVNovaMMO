@@ -604,10 +604,13 @@ const tickAiShips = (deltaSeconds, players = []) => {
         ship.ai.escortTargetId = null;
       }
       const ownerSpeed = getShipSpeed(owner.ship);
-      const escortMaxSpeed = Math.max(ownerSpeed + 60, 220);
+      const formationDistance = Math.hypot(formationX - ship.x, formationY - ship.y);
+      const escortMaxSpeed =
+        Math.max(ownerSpeed + 80, 240) + Math.min(200, Math.max(0, formationDistance - 60) * 1.5);
+      const escortResponsiveness = 4 + Math.min(4, formationDistance / 60);
       steerShip(ship, formationX, formationY, deltaSeconds, {
         maxSpeed: escortMaxSpeed,
-        responsiveness: 4
+        responsiveness: escortResponsiveness
       });
       return;
     }
