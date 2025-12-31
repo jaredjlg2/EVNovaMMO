@@ -37,6 +37,7 @@ const mapOverlayEl = document.getElementById("mapOverlay");
 const mapCanvas = document.getElementById("mapCanvas");
 const mapRouteEl = document.getElementById("mapRoute");
 const mapHintEl = document.getElementById("mapHint");
+const mapDetailsEl = document.getElementById("mapDetails");
 const closeMapBtn = document.getElementById("closeMapBtn");
 const clearRouteBtn = document.getElementById("clearRouteBtn");
 const missionLogOverlayEl = document.getElementById("missionLogOverlay");
@@ -86,6 +87,8 @@ let weaponStatusTimeout = null;
 let currentDockingTarget = null;
 let planetPositions = new Map();
 let mapOpen = false;
+let selectedMapSystemId = null;
+let mapSystemPositions = new Map();
 let routePlan = [];
 let presencePlayers = [];
 const presenceSnapshots = new Map();
@@ -468,6 +471,95 @@ const buildPlanetPositions = () => {
   });
 };
 
+const buildMapSystemPositions = () => {
+  mapSystemPositions = new Map();
+  if (!world) {
+    return;
+  }
+  const nodes = world.systems.map((system) => ({
+    id: system.id,
+    x: system.x,
+    y: system.y,
+    vx: 0,
+    vy: 0,
+    anchorX: system.x,
+    anchorY: system.y
+  }));
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const links = [];
+  const seen = new Set();
+  world.systems.forEach((system) => {
+    system.links.forEach((linkedId) => {
+      const key = [system.id, linkedId].sort().join("-");
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      const source = nodeById.get(system.id);
+      const target = nodeById.get(linkedId);
+      if (source && target) {
+        links.push({ source, target });
+      }
+    });
+  });
+
+  const iterations = 80;
+  const repulsionRadius = 150;
+  const repulsionStrength = 0.28;
+  const linkDistance = 200;
+  const linkStrength = 0.035;
+  const anchorStrength = 0.02;
+  const damping = 0.82;
+
+  for (let step = 0; step < iterations; step += 1) {
+    nodes.forEach((node) => {
+      let fx = 0;
+      let fy = 0;
+      nodes.forEach((other) => {
+        if (node === other) {
+          return;
+        }
+        const dx = node.x - other.x;
+        const dy = node.y - other.y;
+        const distance = Math.hypot(dx, dy) || 0.01;
+        if (distance < repulsionRadius) {
+          const push = ((repulsionRadius - distance) / repulsionRadius) * repulsionStrength;
+          fx += (dx / distance) * push * repulsionRadius;
+          fy += (dy / distance) * push * repulsionRadius;
+        }
+      });
+
+      const anchorDx = node.anchorX - node.x;
+      const anchorDy = node.anchorY - node.y;
+      fx += anchorDx * anchorStrength;
+      fy += anchorDy * anchorStrength;
+
+      node.vx = (node.vx + fx) * damping;
+      node.vy = (node.vy + fy) * damping;
+    });
+
+    links.forEach(({ source, target }) => {
+      const dx = target.x - source.x;
+      const dy = target.y - source.y;
+      const distance = Math.hypot(dx, dy) || 0.01;
+      const delta = (distance - linkDistance) * linkStrength;
+      const offsetX = (dx / distance) * delta;
+      const offsetY = (dy / distance) * delta;
+      source.vx += offsetX;
+      source.vy += offsetY;
+      target.vx -= offsetX;
+      target.vy -= offsetY;
+    });
+
+    nodes.forEach((node) => {
+      node.x += node.vx;
+      node.y += node.vy;
+    });
+  }
+
+  mapSystemPositions = new Map(nodes.map((node) => [node.id, { x: node.x, y: node.y }]));
+};
+
 const getPlanetsInSystem = (systemId) =>
   world?.planets.filter((planet) => planet.systemId === systemId) ?? [];
 
@@ -482,6 +574,17 @@ const getPlanetById = (planetId) => world?.planets.find((planet) => planet.id ==
 
 const getFactionById = (factionId) =>
   world?.factions.find((faction) => faction.id === factionId) ?? null;
+
+const formatSystemLabel = (value) => {
+  if (!value) {
+    return "Unknown";
+  }
+  return value
+    .toString()
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
 
 const getMissionDestinationSystemId = (mission) => {
   if (!mission || !world) {
@@ -545,7 +648,12 @@ const setMapOpen = (nextState) => {
   mapOpen = typeof nextState === "boolean" ? nextState : !mapOpen;
   mapOverlayEl.classList.toggle("hidden", !mapOpen);
   if (mapOpen) {
+    if (!selectedMapSystemId) {
+      const currentSystem = getCurrentSystem();
+      selectedMapSystemId = currentSystem?.id ?? null;
+    }
     focusMapOnCurrentSystem({ resetZoom: true });
+    renderMapDetails();
     renderMap();
   }
 };
@@ -685,13 +793,53 @@ const updateMapRoute = () => {
   mapHintEl.textContent = "Press J when you're far enough from the core to jump. Drag to pan, scroll to zoom.";
 };
 
+const renderMapDetails = () => {
+  if (!mapDetailsEl) {
+    return;
+  }
+  if (!world || !selectedMapSystemId) {
+    mapDetailsEl.innerHTML = "<p class=\"hud-hint\">Select a system to view details.</p>";
+    return;
+  }
+  const system = getSystemById(selectedMapSystemId);
+  if (!system) {
+    mapDetailsEl.innerHTML = "<p class=\"hud-hint\">System data unavailable.</p>";
+    return;
+  }
+  const faction = getFactionById(system.factionId);
+  const planets = getPlanetsInSystem(system.id);
+  const tagLabel = system.tags?.length
+    ? system.tags.map((tag) => formatSystemLabel(tag)).join(", ")
+    : "None";
+  const disputed = system.disputedWith?.length
+    ? system.disputedWith.map((tag) => formatSystemLabel(tag)).join(", ")
+    : "None";
+  mapDetailsEl.innerHTML = `
+    <div class="map-detail-card">
+      <h4>${system.name}</h4>
+      <p>Faction: ${faction?.name ?? "Independent"}</p>
+      <p>Zone: ${formatSystemLabel(system.zoneType)}</p>
+      <p>Status: ${formatSystemLabel(system.status)}</p>
+      <p>Security: ${system.securityLevel ?? "Unknown"} · Traffic: ${formatSystemLabel(
+        system.traffic
+      )}</p>
+      <p>Planets: ${planets.length} · Routes: ${system.links?.length ?? 0}</p>
+      <p>Disputed: ${disputed}</p>
+      <p>Tags: ${tagLabel}</p>
+    </div>
+  `;
+};
+
 const computeMapLayout = () => {
   if (!world) {
     return null;
   }
   const padding = 60;
-  const xs = world.systems.map((system) => system.x);
-  const ys = world.systems.map((system) => system.y);
+  const positions = world.systems.map(
+    (system) => mapSystemPositions.get(system.id) ?? system
+  );
+  const xs = positions.map((system) => system.x);
+  const ys = positions.map((system) => system.y);
   const minX = Math.min(...xs);
   const maxX = Math.max(...xs);
   const minY = Math.min(...ys);
@@ -713,10 +861,19 @@ const computeMapLayout = () => {
   };
 };
 
-const systemToMap = (system, layout) => ({
-  x: system.x * layout.scale + layout.offsetX,
-  y: system.y * layout.scale + layout.offsetY
-});
+const systemToMap = (system, layout) => {
+  const mapPosition = mapSystemPositions.get(system.id) ?? system;
+  return {
+    x: mapPosition.x * layout.scale + layout.offsetX,
+    y: mapPosition.y * layout.scale + layout.offsetY
+  };
+};
+
+const getLinkCurveOffset = (key, distance) => {
+  const seed = key.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const direction = seed % 2 === 0 ? 1 : -1;
+  return direction * Math.min(32, distance * 0.18);
+};
 
 const renderMap = () => {
   if (!mapOpen || !world) {
@@ -737,6 +894,8 @@ const renderMap = () => {
     return;
   }
   const linkSet = new Set();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
   world.systems.forEach((system) => {
     system.links.forEach((linkedId) => {
       const key = [system.id, linkedId].sort().join("-");
@@ -750,11 +909,17 @@ const renderMap = () => {
       }
       const start = systemToMap(system, layout);
       const end = systemToMap(linkedSystem, layout);
-      ctx.strokeStyle = "rgba(120, 160, 255, 0.35)";
-      ctx.lineWidth = 1;
+      const distance = Math.hypot(end.x - start.x, end.y - start.y) || 1;
+      const offset = getLinkCurveOffset(key, distance);
+      const normalX = -(end.y - start.y) / distance;
+      const normalY = (end.x - start.x) / distance;
+      const controlX = (start.x + end.x) / 2 + normalX * offset;
+      const controlY = (start.y + end.y) / 2 + normalY * offset;
+      ctx.strokeStyle = "rgba(120, 160, 255, 0.28)";
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(start.x, start.y);
-      ctx.lineTo(end.x, end.y);
+      ctx.quadraticCurveTo(controlX, controlY, end.x, end.y);
       ctx.stroke();
     });
   });
@@ -789,10 +954,18 @@ const renderMap = () => {
     const point = systemToMap(system, layout);
     const isCurrent = currentSystem && system.id === currentSystem.id;
     const isInRoute = routePlan.includes(system.id);
+    const isSelected = selectedMapSystemId === system.id;
     ctx.fillStyle = isCurrent ? "#ffd37a" : isInRoute ? "#8bd4ff" : "#5a7ad8";
     ctx.beginPath();
     ctx.arc(point.x, point.y, isCurrent ? 8 : 6, 0, Math.PI * 2);
     ctx.fill();
+    if (isSelected) {
+      ctx.strokeStyle = "rgba(255, 211, 122, 0.75)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, 11, 0, Math.PI * 2);
+      ctx.stroke();
+    }
     ctx.fillStyle = "rgba(230, 236, 255, 0.85)";
     ctx.font = "12px Inter, sans-serif";
     ctx.fillText(system.name, point.x + 10, point.y - 8);
@@ -849,6 +1022,8 @@ const handleMapClick = (event) => {
     return Math.hypot(point.x - clickX, point.y - clickY) <= hitRadius;
   });
   if (hitSystem) {
+    selectedMapSystemId = hitSystem.id;
+    renderMapDetails();
     updateRoutePlan(hitSystem.id);
   }
 };
@@ -2536,6 +2711,7 @@ const refreshUi = () => {
   updateSecondaryStatus();
   updateMapRoute();
   if (mapOpen) {
+    renderMapDetails();
     renderMap();
   }
 
@@ -2660,6 +2836,7 @@ const connect = () => {
       saveStoredPilot(player.name);
       hideLoginOverlay();
       buildPlanetPositions();
+      buildMapSystemPositions();
       refreshUi();
       return;
     }
