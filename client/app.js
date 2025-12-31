@@ -760,6 +760,35 @@ const setCommsOpen = (nextState, target = null) => {
   }
 };
 
+const canPlotRouteBetween = (startId, targetId) => {
+  if (!world || !startId || !targetId) {
+    return false;
+  }
+  if (startId === targetId) {
+    return true;
+  }
+  const visited = new Set([startId]);
+  const queue = [startId];
+  while (queue.length) {
+    const currentId = queue.shift();
+    const system = getSystemById(currentId);
+    if (!system?.links) {
+      continue;
+    }
+    for (const linkId of system.links) {
+      if (visited.has(linkId)) {
+        continue;
+      }
+      if (linkId === targetId) {
+        return true;
+      }
+      visited.add(linkId);
+      queue.push(linkId);
+    }
+  }
+  return false;
+};
+
 const updateRoutePlan = (systemId) => {
   if (!systemId) {
     return;
@@ -768,6 +797,19 @@ const updateRoutePlan = (systemId) => {
   if (existingIndex >= 0) {
     routePlan = routePlan.slice(0, existingIndex + 1);
   } else {
+    const currentSystem = getCurrentSystem();
+    const startSystemId = routePlan.length > 0 ? routePlan[routePlan.length - 1] : currentSystem?.id;
+    if (!startSystemId) {
+      return;
+    }
+    if (!canPlotRouteBetween(startSystemId, systemId)) {
+      if (mapHintEl) {
+        const startName = getSystemById(startSystemId)?.name ?? "current system";
+        const targetName = getSystemById(systemId)?.name ?? systemId;
+        mapHintEl.textContent = `No route available from ${startName} to ${targetName}.`;
+      }
+      return;
+    }
     routePlan = [...routePlan, systemId];
   }
   updateMapRoute();
