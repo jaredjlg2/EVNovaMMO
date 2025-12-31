@@ -54,7 +54,7 @@
           <p id="secondaryStatus" class="hud-emphasis"></p>
           <p class="hud-hint">
             ↑ to boost · A/D or ←/→ to turn · Space = primary fire · Shift = secondary fire · W = cycle secondary ·
-            Tab = cycle targets · R = lock nearest hostile · L to dock · M for map · J to jump · I for mission log
+            Tab = cycle targets · R = lock nearest hostile · L to dock · M for map · J to jump · I for mission log · Y for comms
           </p>
         </section>
         <section class="hud-section hidden" id="dockedPanel">
@@ -154,7 +154,30 @@
           </div>
           <button id="closeMissionLogBtn" type="button">Close (I)</button>
         </div>
-        <div id="missionLogList" class="list"></div>
+        <div class="mission-log-section">
+          <h3>Escort Roster</h3>
+          <div id="missionLogEscortList" class="list"></div>
+        </div>
+        <div class="mission-log-section">
+          <h3>Active Missions</h3>
+          <div id="missionLogList" class="list"></div>
+        </div>
+      </div>
+    </div>
+    <div id="commsOverlay" class="overlay hidden comms-overlay">
+      <div class="comms-card">
+        <div class="comms-header">
+          <div>
+            <h2 id="commsTargetName">Open Channel</h2>
+            <p id="commsTargetHint" class="hud-hint"></p>
+          </div>
+          <button id="closeCommsBtn" type="button">Close (Y)</button>
+        </div>
+        <div id="commsLog" class="list"></div>
+        <div class="comms-input">
+          <input id="commsInput" type="text" placeholder="Type a message..." autocomplete="off" />
+          <button id="commsSendBtn" type="button">Send</button>
+        </div>
       </div>
     </div>
     <div id="boardingOverlay" class="overlay hidden boarding-overlay">

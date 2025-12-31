@@ -150,6 +150,18 @@ body {
   box-shadow: 0 24px 70px rgba(4, 8, 20, 0.7);
 }
 
+.mission-log-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mission-log-section h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #d5defc;
+}
+
 .boarding-card {
   width: min(520px, 92vw);
   max-height: 80vh;
@@ -198,8 +210,8 @@ body {
   font-size: 13px;
 }
 
-.mission-log-card .list {
-  max-height: 60vh;
+.mission-log-section .list {
+  max-height: 24vh;
   overflow-y: auto;
   padding-right: 6px;
 }
@@ -208,6 +220,81 @@ body {
   color: #9fb1e6;
   font-size: 13px;
   margin: 0;
+}
+
+.comms-overlay {
+  z-index: 9;
+}
+
+.comms-card {
+  width: min(560px, 92vw);
+  max-height: 82vh;
+  overflow: hidden;
+  background: #111a34;
+  border: 1px solid #25345e;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 24px 70px rgba(4, 8, 20, 0.7);
+}
+
+.comms-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.comms-header h2 {
+  margin: 0 0 6px;
+}
+
+.comms-card .list {
+  max-height: 46vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.comms-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comms-message span {
+  font-size: 12px;
+  color: #9fb1e6;
+}
+
+.comms-message p {
+  margin: 0;
+}
+
+.comms-message.outgoing p {
+  color: #e4ecff;
+}
+
+.comms-message.incoming p {
+  color: #9fd6ff;
+}
+
+.comms-input {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.comms-input input {
+  flex: 1;
+  min-width: 220px;
+  background: #0f1730;
+  border: 1px solid #2a3b66;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #e4ecff;
+  font-size: 14px;
 }
 
 .map-header {
