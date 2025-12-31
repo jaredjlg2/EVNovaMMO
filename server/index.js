@@ -150,7 +150,13 @@ const handleAction = (player, action, socket) => {
       jumpSystem(player, action.systemId);
       break;
     case "dock":
-      dockPlanet(player, action.planetId);
+      {
+        const previousPlanetId = player.planetId;
+        dockPlanet(player, action.planetId);
+        if (player.planetId && player.planetId !== previousPlanetId) {
+          completeMissions(player);
+        }
+      }
       break;
     case "undock":
       undock(player);

@@ -33,6 +33,9 @@ const mapRouteEl = document.getElementById("mapRoute");
 const mapHintEl = document.getElementById("mapHint");
 const closeMapBtn = document.getElementById("closeMapBtn");
 const clearRouteBtn = document.getElementById("clearRouteBtn");
+const missionLogOverlayEl = document.getElementById("missionLogOverlay");
+const missionLogListEl = document.getElementById("missionLogList");
+const closeMissionLogBtn = document.getElementById("closeMissionLogBtn");
 
 const loginOverlayEl = document.getElementById("loginOverlay");
 const loginFormEl = document.getElementById("loginForm");
@@ -69,6 +72,7 @@ let marketGoods = [];
 let activeDockedSection = null;
 let lastDockedPlanetId = null;
 let targetLockId = null;
+let missionLogOpen = false;
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
@@ -341,6 +345,17 @@ const setMapOpen = (nextState) => {
   mapOverlayEl.classList.toggle("hidden", !mapOpen);
   if (mapOpen) {
     renderMap();
+  }
+};
+
+const setMissionLogOpen = (nextState) => {
+  if (!missionLogOverlayEl) {
+    return;
+  }
+  missionLogOpen = typeof nextState === "boolean" ? nextState : !missionLogOpen;
+  missionLogOverlayEl.classList.toggle("hidden", !missionLogOpen);
+  if (missionLogOpen) {
+    renderMissionLog();
   }
 };
 
@@ -1608,6 +1623,36 @@ const renderLog = () => {
   });
 };
 
+const renderMissionLog = () => {
+  if (!missionLogListEl) {
+    return;
+  }
+  if (!player || !world) {
+    missionLogListEl.innerHTML = "<p class=\"mission-log-empty\">Log in to view missions.</p>";
+    return;
+  }
+  const activeMissions = (player.missions || []).filter(
+    (mission) => mission.status === "active"
+  );
+  if (activeMissions.length === 0) {
+    missionLogListEl.innerHTML = "<p class=\"mission-log-empty\">No active missions.</p>";
+    return;
+  }
+  missionLogListEl.innerHTML = "";
+  activeMissions.forEach((mission) => {
+    const planet = getPlanetById(mission.toPlanetId);
+    const system = planet ? getSystemById(planet.systemId) : null;
+    const card = document.createElement("div");
+    card.className = "list-item";
+    card.innerHTML = `
+      <h4>${mission.title}</h4>
+      <p>Destination: ${system?.name ?? "Unknown System"} · ${planet?.name ?? "Unknown Planet"}</p>
+      <p>Reward: ${formatCredits(mission.reward)}</p>
+    `;
+    missionLogListEl.appendChild(card);
+  });
+};
+
 const renderDockedInfo = () => {
   if (!player || !world) {
     return;
@@ -1690,6 +1735,7 @@ const refreshUi = () => {
   renderShip();
   renderDockedInfo();
   renderLog();
+  renderMissionLog();
   updateMapRoute();
   if (mapOpen) {
     renderMap();
@@ -1790,6 +1836,7 @@ const connect = () => {
       projectiles.length = 0;
       explosions.length = 0;
       targetLockId = null;
+      setMissionLogOpen(false);
       showLoginOverlay(payload.message || "");
       return;
     }
@@ -1912,6 +1959,11 @@ window.addEventListener("keydown", (event) => {
     setMapOpen();
     return;
   }
+  if (event.key === "i" || event.key === "I") {
+    event.preventDefault();
+    setMissionLogOpen();
+    return;
+  }
   if (event.key === "Tab") {
     event.preventDefault();
     if (!mapOpen && !event.repeat) {
@@ -1979,6 +2031,9 @@ window.addEventListener("resize", () => {
 
 mapCanvas.addEventListener("click", handleMapClick);
 closeMapBtn.addEventListener("click", () => setMapOpen(false));
+if (closeMissionLogBtn) {
+  closeMissionLogBtn.addEventListener("click", () => setMissionLogOpen(false));
+}
 clearRouteBtn.addEventListener("click", () => {
   routePlan = [];
   updateMapRoute();
