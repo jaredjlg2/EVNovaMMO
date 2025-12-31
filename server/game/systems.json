@@ -1,0 +1,3399 @@
+[
+  {
+    "id": "sol",
+    "name": "Sol",
+    "x": 0,
+    "y": 0,
+    "links": [
+      "deneb",
+      "altair",
+      "arcadia",
+      "sd_01",
+      "sd_08",
+      "fh_05"
+    ],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy",
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "deneb",
+    "name": "Deneb",
+    "x": 140,
+    "y": -40,
+    "links": [
+      "sol",
+      "helios",
+      "riftwatch",
+      "sd_02",
+      "sd_09",
+      "rift_pass"
+    ],
+    "factionId": "solar_directorate",
+    "status": "border",
+    "traffic": "medium",
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "luminari_compact"
+    ]
+  },
+  {
+    "id": "altair",
+    "name": "Altair",
+    "x": -120,
+    "y": -40,
+    "links": [
+      "sol",
+      "new_eden",
+      "redoubt",
+      "sd_03",
+      "sd_10",
+      "embergate"
+    ],
+    "factionId": "solar_directorate",
+    "status": "border",
+    "traffic": "medium",
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "ironclad_clans"
+    ]
+  },
+  {
+    "id": "arcadia",
+    "name": "Arcadia",
+    "x": 80,
+    "y": 120,
+    "links": [
+      "sol",
+      "helios",
+      "borealis_gate",
+      "sd_04",
+      "sd_11",
+      "fh_02"
+    ],
+    "factionId": "free_horizons_guild",
+    "status": "core",
+    "traffic": "medium",
+    "ownerFaction": "FREE_HORIZONS",
+    "securityLevel": 2,
+    "zoneType": "HUB",
+    "tags": [
+      "TRADE_HUB"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "helios",
+    "name": "Helios",
+    "x": 200,
+    "y": 60,
+    "links": [
+      "deneb",
+      "arcadia",
+      "lancer",
+      "sd_05",
+      "sd_12",
+      "fh_04"
+    ],
+    "factionId": "free_horizons_guild",
+    "status": "core",
+    "traffic": "medium",
+    "ownerFaction": "FREE_HORIZONS",
+    "securityLevel": 2,
+    "zoneType": "HUB",
+    "tags": [
+      "TRADE_HUB",
+      "HYPERGATE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "new_eden",
+    "name": "New Eden",
+    "x": -140,
+    "y": 120,
+    "links": [
+      "altair",
+      "cinder",
+      "borealis_gate",
+      "sd_06",
+      "sd_13",
+      "fh_01",
+      "fh_06"
+    ],
+    "factionId": "free_horizons_guild",
+    "status": "core",
+    "traffic": "medium",
+    "ownerFaction": "FREE_HORIZONS",
+    "securityLevel": 2,
+    "zoneType": "HUB",
+    "tags": [
+      "TRADE_HUB"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "borealis_gate",
+    "name": "Borealis Gate",
+    "x": 0,
+    "y": 220,
+    "links": [
+      "arcadia",
+      "new_eden",
+      "borealis",
+      "windfall",
+      "sd_07",
+      "sd_14",
+      "fh_03"
+    ],
+    "factionId": "free_horizons_guild",
+    "status": "core",
+    "traffic": "medium",
+    "disputedWith": [
+      "echotrail_communion"
+    ],
+    "ownerFaction": "FREE_HORIZONS",
+    "securityLevel": 2,
+    "zoneType": "HUB",
+    "tags": [
+      "TRADE_HUB",
+      "HYPERGATE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "cinder",
+    "name": "Cinder",
+    "x": -220,
+    "y": 140,
+    "links": [
+      "new_eden",
+      "vega",
+      "bastion",
+      "st_05",
+      "st_10"
+    ],
+    "factionId": "solar_directorate",
+    "status": "border",
+    "traffic": "medium",
+    "disputedWith": [
+      "starseed_foundation"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 2,
+    "zoneType": "BORDER",
+    "tags": [
+      "CULT_SITE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "lancer",
+    "name": "Lancer",
+    "x": 220,
+    "y": 200,
+    "links": [
+      "helios",
+      "aurora",
+      "arkady"
+    ],
+    "factionId": "solar_directorate",
+    "status": "border",
+    "traffic": "medium",
+    "disputedWith": [
+      "ironclad_clans"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 2,
+    "zoneType": "BORDER",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "redoubt",
+    "name": "Redoubt",
+    "x": -20,
+    "y": -200,
+    "links": [
+      "altair",
+      "sirius",
+      "scar"
+    ],
+    "factionId": "solar_directorate",
+    "status": "border",
+    "traffic": "medium",
+    "disputedWith": [
+      "luminari_compact"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 2,
+    "zoneType": "BORDER",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "riftwatch",
+    "name": "Riftwall",
+    "x": 200,
+    "y": -200,
+    "links": [
+      "deneb",
+      "crown",
+      "duskfall",
+      "lu_07",
+      "rift_pass",
+      "dusk_bridge"
+    ],
+    "factionId": "luminari_compact",
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "ironclad_clans",
+      "solar_directorate"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "scar",
+    "name": "Scar",
+    "x": -160,
+    "y": -140,
+    "links": [
+      "redoubt",
+      "draco",
+      "ember",
+      "oc_03",
+      "scarveil"
+    ],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light",
+    "disputedWith": [
+      "black_flag_syndicate",
+      "luminari_compact",
+      "obsidian_covenant"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CONFLICT_ZONE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "vega",
+    "name": "Vega",
+    "x": -360,
+    "y": 120,
+    "links": [
+      "cinder",
+      "auriga",
+      "windfall",
+      "lyra",
+      "st_01",
+      "st_06",
+      "st_11",
+      "vega_hook"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "border",
+    "traffic": "light",
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "black_flag_syndicate"
+    ]
+  },
+  {
+    "id": "auriga",
+    "name": "Auriga",
+    "x": -420,
+    "y": 0,
+    "links": [
+      "vega",
+      "cygnus",
+      "ember",
+      "st_02",
+      "st_07",
+      "st_12"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "border",
+    "traffic": "medium",
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "solar_directorate"
+    ]
+  },
+  {
+    "id": "lyra",
+    "name": "Lyra",
+    "x": -480,
+    "y": 200,
+    "links": [
+      "vega",
+      "polaris",
+      "cygnus",
+      "bf_06",
+      "bf_12"
+    ],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE",
+      "PIRATE_MARKET"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "cygnus",
+    "name": "Cygnus",
+    "x": -520,
+    "y": 80,
+    "links": [
+      "auriga",
+      "lyra",
+      "polaris",
+      "st_03",
+      "st_08"
+    ],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "COLONY_CANDIDATE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "polaris",
+    "name": "Polaris",
+    "x": -560,
+    "y": 260,
+    "links": [
+      "lyra",
+      "cygnus",
+      "tundra",
+      "bf_05",
+      "bf_11",
+      "windfall_cut",
+      "vega_hook"
+    ],
+    "factionId": "black_flag_syndicate",
+    "status": "border",
+    "traffic": "light",
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 0,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "PIRATE_BASE",
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "ironclad_clans"
+    ]
+  },
+  {
+    "id": "windfall",
+    "name": "Windfall",
+    "x": -340,
+    "y": 260,
+    "links": [
+      "vega",
+      "zenith",
+      "borealis_gate",
+      "st_04",
+      "st_09",
+      "windfall_cut"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "echotrail_communion",
+      "black_flag_syndicate"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "ember",
+    "name": "Ember",
+    "x": -320,
+    "y": -80,
+    "links": [
+      "auriga",
+      "draco",
+      "scar",
+      "bf_04",
+      "bf_10",
+      "embergate",
+      "bastion_cross"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "border",
+    "traffic": "medium",
+    "disputedWith": [
+      "black_flag_syndicate",
+      "solar_directorate"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "draco",
+    "name": "Draco",
+    "x": -260,
+    "y": -200,
+    "links": [
+      "scar",
+      "ember",
+      "bastion",
+      "obsidian",
+      "bf_01",
+      "bf_07"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium",
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "bastion",
+    "name": "Bastion",
+    "x": -340,
+    "y": -140,
+    "links": [
+      "draco",
+      "fenrir",
+      "cinder",
+      "bf_02",
+      "bf_08",
+      "bastion_cross"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "border",
+    "traffic": "medium",
+    "disputedWith": [
+      "starseed_foundation",
+      "solar_directorate"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "fenrir",
+    "name": "Fenrir",
+    "x": -380,
+    "y": -260,
+    "links": [
+      "bastion",
+      "azrael",
+      "bf_03",
+      "bf_09"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium",
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "azrael",
+    "name": "Azrael",
+    "x": -220,
+    "y": -320,
+    "links": [
+      "fenrir",
+      "obsidian",
+      "numen",
+      "oc_02",
+      "azrael_shroud"
+    ],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CONFLICT_ZONE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "obsidian_covenant"
+    ]
+  },
+  {
+    "id": "obsidian",
+    "name": "Obsidian",
+    "x": -120,
+    "y": -280,
+    "links": [
+      "draco",
+      "azrael",
+      "helene",
+      "oc_01",
+      "oc_06",
+      "scarveil"
+    ],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CULT_SITE",
+      "CONFLICT_ZONE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "obsidian_covenant"
+    ]
+  },
+  {
+    "id": "sirius",
+    "name": "Sirius",
+    "x": 20,
+    "y": -360,
+    "links": [
+      "redoubt",
+      "helene",
+      "valkyr",
+      "lu_01",
+      "lu_08"
+    ],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium",
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "helene",
+    "name": "Helene",
+    "x": -120,
+    "y": -420,
+    "links": [
+      "sirius",
+      "obsidian",
+      "numen",
+      "lu_02",
+      "lu_09",
+      "oc_05"
+    ],
+    "factionId": "luminari_compact",
+    "status": "border",
+    "traffic": "light",
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "valkyr",
+    "name": "Valkyr",
+    "x": 200,
+    "y": -360,
+    "links": [
+      "sirius",
+      "mirage",
+      "duskfall",
+      "lu_03",
+      "lu_10",
+      "dusk_bridge"
+    ],
+    "factionId": "luminari_compact",
+    "status": "border",
+    "traffic": "medium",
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "solar_directorate"
+    ]
+  },
+  {
+    "id": "mirage",
+    "name": "Mirage",
+    "x": 120,
+    "y": -420,
+    "links": [
+      "valkyr",
+      "numen",
+      "miranda",
+      "lu_04",
+      "lu_11"
+    ],
+    "factionId": "luminari_compact",
+    "status": "border",
+    "traffic": "medium",
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "solar_directorate"
+    ]
+  },
+  {
+    "id": "numen",
+    "name": "Numen",
+    "x": 0,
+    "y": -480,
+    "links": [
+      "helene",
+      "mirage",
+      "azrael",
+      "lu_05",
+      "lu_12",
+      "oc_04",
+      "azrael_shroud"
+    ],
+    "factionId": "luminari_compact",
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CULT_SITE",
+      "CONFLICT_ZONE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "echotrail_communion",
+      "obsidian_covenant"
+    ]
+  },
+  {
+    "id": "duskfall",
+    "name": "Duskfall",
+    "x": 140,
+    "y": -280,
+    "links": [
+      "valkyr",
+      "riftwatch",
+      "crown",
+      "lu_06",
+      "dusk_bridge"
+    ],
+    "factionId": "luminari_compact",
+    "status": "border",
+    "traffic": "medium",
+    "disputedWith": [
+      "ironclad_clans",
+      "solar_directorate"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "orion",
+    "name": "Orion",
+    "x": 360,
+    "y": -80,
+    "links": [
+      "aurora",
+      "castor",
+      "crown",
+      "ic_01",
+      "ic_07"
+    ],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "castor",
+    "name": "Castor",
+    "x": 420,
+    "y": 40,
+    "links": [
+      "orion",
+      "palatine",
+      "aurora",
+      "ic_02",
+      "ic_08"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium",
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "COLONY_CANDIDATE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "palatine",
+    "name": "Palatine",
+    "x": 520,
+    "y": -20,
+    "links": [
+      "castor",
+      "eridani",
+      "drifts",
+      "ic_03",
+      "ic_09"
+    ],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE",
+      "PIRATE_MARKET"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "eridani",
+    "name": "Eridani",
+    "x": 480,
+    "y": -140,
+    "links": [
+      "palatine",
+      "miranda",
+      "ic_04",
+      "ic_10"
+    ],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE",
+      "PIRATE_MARKET"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "miranda",
+    "name": "Miranda",
+    "x": 440,
+    "y": -260,
+    "links": [
+      "eridani",
+      "mirage",
+      "crown"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "luminari_compact"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "COLONY_CANDIDATE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "aurora",
+    "name": "Aurora",
+    "x": 300,
+    "y": 40,
+    "links": [
+      "orion",
+      "castor",
+      "lancer",
+      "ic_05",
+      "ic_11"
+    ],
+    "factionId": "ironclad_clans",
+    "status": "border",
+    "traffic": "medium",
+    "disputedWith": [
+      "solar_directorate"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "BORDER",
+    "tags": [
+      "COLONY_CANDIDATE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "crown",
+    "name": "Crown",
+    "x": 300,
+    "y": -200,
+    "links": [
+      "orion",
+      "riftwatch",
+      "miranda",
+      "duskfall",
+      "ic_06",
+      "ic_12"
+    ],
+    "factionId": "luminari_compact",
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "solar_directorate"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "borealis",
+    "name": "Borealis",
+    "x": 0,
+    "y": 360,
+    "links": [
+      "borealis_gate",
+      "kepler",
+      "zenith",
+      "ec_01",
+      "ec_07",
+      "borealis_rift",
+      "driftspur"
+    ],
+    "factionId": "solar_directorate",
+    "status": "border",
+    "traffic": "light",
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "COLONY_CANDIDATE",
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "black_flag_syndicate"
+    ]
+  },
+  {
+    "id": "kepler",
+    "name": "Kepler",
+    "x": 120,
+    "y": 420,
+    "links": [
+      "borealis",
+      "arkady",
+      "drifts",
+      "ec_02",
+      "ec_08"
+    ],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy",
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [],
+    "storyHooks": []
+  },
+  {
+    "id": "luyten",
+    "name": "Luyten",
+    "x": -80,
+    "y": 460,
+    "links": [
+      "zenith",
+      "tundra",
+      "ec_03",
+      "ec_09",
+      "nt_03",
+      "nt_06",
+      "nt_09",
+      "nt_12"
+    ],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "arkady",
+    "name": "Arkady",
+    "x": 200,
+    "y": 340,
+    "links": [
+      "kepler",
+      "lancer",
+      "drifts",
+      "ec_06",
+      "borealis_rift"
+    ],
+    "factionId": "black_flag_syndicate",
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "ironclad_clans",
+      "solar_directorate"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 0,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "PIRATE_BASE",
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "zenith",
+    "name": "Zenith",
+    "x": -200,
+    "y": 360,
+    "links": [
+      "borealis",
+      "windfall",
+      "luyten",
+      "tundra",
+      "ec_04",
+      "ec_10",
+      "nt_02",
+      "nt_05",
+      "nt_08",
+      "nt_11"
+    ],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "drifts",
+    "name": "Drifts",
+    "x": 260,
+    "y": 440,
+    "links": [
+      "kepler",
+      "arkady",
+      "palatine",
+      "driftspur"
+    ],
+    "factionId": "black_flag_syndicate",
+    "status": "border",
+    "traffic": "light",
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 0,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "PIRATE_BASE",
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "disputedWith": [
+      "solar_directorate"
+    ]
+  },
+  {
+    "id": "tundra",
+    "name": "Tundra",
+    "x": -260,
+    "y": 420,
+    "links": [
+      "zenith",
+      "polaris",
+      "luyten",
+      "ec_05",
+      "nt_01",
+      "nt_04",
+      "nt_07",
+      "nt_10"
+    ],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light",
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": []
+  },
+  {
+    "id": "sd_01",
+    "name": "Solaria 01",
+    "x": -90,
+    "y": -170,
+    "links": [
+      "sol",
+      "sd_02"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_02",
+    "name": "Solaria 02",
+    "x": -30,
+    "y": -170,
+    "links": [
+      "deneb",
+      "sd_01",
+      "sd_03"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_03",
+    "name": "Solaria 03",
+    "x": 30,
+    "y": -170,
+    "links": [
+      "altair",
+      "sd_02",
+      "sd_04"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_04",
+    "name": "Solaria 04",
+    "x": 90,
+    "y": -170,
+    "links": [
+      "arcadia",
+      "sd_03",
+      "sd_05"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_05",
+    "name": "Solaria 05",
+    "x": -90,
+    "y": -110,
+    "links": [
+      "helios",
+      "sd_04",
+      "sd_06"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_06",
+    "name": "Solaria 06",
+    "x": -30,
+    "y": -110,
+    "links": [
+      "new_eden",
+      "sd_05",
+      "sd_07"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_07",
+    "name": "Solaria 07",
+    "x": 30,
+    "y": -110,
+    "links": [
+      "borealis_gate",
+      "sd_06",
+      "sd_08"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_08",
+    "name": "Solaria 08",
+    "x": 90,
+    "y": -110,
+    "links": [
+      "sol",
+      "sd_07",
+      "sd_09"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_09",
+    "name": "Solaria 09",
+    "x": -90,
+    "y": -50,
+    "links": [
+      "deneb",
+      "sd_08",
+      "sd_10"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_10",
+    "name": "Solaria 10",
+    "x": -30,
+    "y": -50,
+    "links": [
+      "altair",
+      "sd_09",
+      "sd_11"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_11",
+    "name": "Solaria 11",
+    "x": 30,
+    "y": -50,
+    "links": [
+      "arcadia",
+      "sd_10",
+      "sd_12"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_12",
+    "name": "Solaria 12",
+    "x": 90,
+    "y": -50,
+    "links": [
+      "helios",
+      "sd_11",
+      "sd_13"
+    ],
+    "ownerFaction": "SOLAR_DIRECTORATE",
+    "securityLevel": 3,
+    "zoneType": "CORE",
+    "tags": [
+      "DIRECTORATE_CORE"
+    ],
+    "storyHooks": [],
+    "factionId": "solar_directorate",
+    "status": "core",
+    "traffic": "heavy"
+  },
+  {
+    "id": "sd_13",
+    "name": "Solaria 13",
+    "x": -90,
+    "y": 10,
+    "links": [
+      "new_eden",
+      "sd_12",
+      "sd_14"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DIRECTORATE_CORE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "sd_14",
+    "name": "Solaria 14",
+    "x": -30,
+    "y": 10,
+    "links": [
+      "borealis_gate",
+      "sd_13"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DIRECTORATE_CORE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ic_01",
+    "name": "Anvil 01",
+    "x": 275,
+    "y": -125,
+    "links": [
+      "orion",
+      "ic_02"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_02",
+    "name": "Anvil 02",
+    "x": 345,
+    "y": -125,
+    "links": [
+      "castor",
+      "ic_01",
+      "ic_03"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_03",
+    "name": "Anvil 03",
+    "x": 415,
+    "y": -125,
+    "links": [
+      "palatine",
+      "ic_02",
+      "ic_04"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_04",
+    "name": "Anvil 04",
+    "x": 485,
+    "y": -125,
+    "links": [
+      "eridani",
+      "ic_03",
+      "ic_05"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_05",
+    "name": "Anvil 05",
+    "x": 275,
+    "y": -55,
+    "links": [
+      "aurora",
+      "ic_04",
+      "ic_06"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_06",
+    "name": "Anvil 06",
+    "x": 345,
+    "y": -55,
+    "links": [
+      "crown",
+      "ic_05",
+      "ic_07"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_07",
+    "name": "Anvil 07",
+    "x": 415,
+    "y": -55,
+    "links": [
+      "orion",
+      "ic_06",
+      "ic_08"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_08",
+    "name": "Anvil 08",
+    "x": 485,
+    "y": -55,
+    "links": [
+      "castor",
+      "ic_07",
+      "ic_09"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_09",
+    "name": "Anvil 09",
+    "x": 275,
+    "y": 15,
+    "links": [
+      "palatine",
+      "ic_08",
+      "ic_10"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_10",
+    "name": "Anvil 10",
+    "x": 345,
+    "y": 15,
+    "links": [
+      "eridani",
+      "ic_09",
+      "ic_11"
+    ],
+    "ownerFaction": "IRONCLAD_CLANS",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "FORGE_WORLD"
+    ],
+    "storyHooks": [],
+    "factionId": "ironclad_clans",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "ic_11",
+    "name": "Anvil 11",
+    "x": 415,
+    "y": 15,
+    "links": [
+      "aurora",
+      "ic_10",
+      "ic_12"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "FORGE_WORLD",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ic_12",
+    "name": "Anvil 12",
+    "x": 485,
+    "y": 15,
+    "links": [
+      "crown",
+      "ic_11"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "FORGE_WORLD",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "lu_01",
+    "name": "Prism 01",
+    "x": 35,
+    "y": -625,
+    "links": [
+      "sirius",
+      "lu_02"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_02",
+    "name": "Prism 02",
+    "x": 105,
+    "y": -625,
+    "links": [
+      "helene",
+      "lu_01",
+      "lu_03"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_03",
+    "name": "Prism 03",
+    "x": 175,
+    "y": -625,
+    "links": [
+      "valkyr",
+      "lu_02",
+      "lu_04"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_04",
+    "name": "Prism 04",
+    "x": 245,
+    "y": -625,
+    "links": [
+      "mirage",
+      "lu_03",
+      "lu_05"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_05",
+    "name": "Prism 05",
+    "x": 35,
+    "y": -555,
+    "links": [
+      "numen",
+      "lu_04",
+      "lu_06"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_06",
+    "name": "Prism 06",
+    "x": 105,
+    "y": -555,
+    "links": [
+      "duskfall",
+      "lu_05",
+      "lu_07"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_07",
+    "name": "Prism 07",
+    "x": 175,
+    "y": -555,
+    "links": [
+      "riftwatch",
+      "lu_06",
+      "lu_08"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_08",
+    "name": "Prism 08",
+    "x": 245,
+    "y": -555,
+    "links": [
+      "sirius",
+      "lu_07",
+      "lu_09"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_09",
+    "name": "Prism 09",
+    "x": 35,
+    "y": -485,
+    "links": [
+      "helene",
+      "lu_08",
+      "lu_10"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_10",
+    "name": "Prism 10",
+    "x": 105,
+    "y": -485,
+    "links": [
+      "valkyr",
+      "lu_09",
+      "lu_11"
+    ],
+    "ownerFaction": "LUMINARI",
+    "securityLevel": 2,
+    "zoneType": "CORE",
+    "tags": [
+      "SENSOR_SPIRE"
+    ],
+    "storyHooks": [],
+    "factionId": "luminari_compact",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "lu_11",
+    "name": "Prism 11",
+    "x": 175,
+    "y": -485,
+    "links": [
+      "mirage",
+      "lu_10",
+      "lu_12"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "SENSOR_SPIRE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "lu_12",
+    "name": "Prism 12",
+    "x": 245,
+    "y": -485,
+    "links": [
+      "numen",
+      "lu_11"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "SENSOR_SPIRE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_01",
+    "name": "Echo 01",
+    "x": -157.5,
+    "y": 242.5,
+    "links": [
+      "borealis",
+      "ec_02"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_02",
+    "name": "Echo 02",
+    "x": -92.5,
+    "y": 242.5,
+    "links": [
+      "kepler",
+      "ec_01",
+      "ec_03"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_03",
+    "name": "Echo 03",
+    "x": -27.5,
+    "y": 242.5,
+    "links": [
+      "luyten",
+      "ec_02",
+      "ec_04"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_04",
+    "name": "Echo 04",
+    "x": 37.5,
+    "y": 242.5,
+    "links": [
+      "zenith",
+      "ec_03",
+      "ec_05"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_05",
+    "name": "Echo 05",
+    "x": -157.5,
+    "y": 307.5,
+    "links": [
+      "tundra",
+      "ec_04",
+      "ec_06"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_06",
+    "name": "Echo 06",
+    "x": -92.5,
+    "y": 307.5,
+    "links": [
+      "arkady",
+      "ec_05",
+      "ec_07"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_07",
+    "name": "Echo 07",
+    "x": -27.5,
+    "y": 307.5,
+    "links": [
+      "borealis",
+      "ec_06",
+      "ec_08"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_08",
+    "name": "Echo 08",
+    "x": 37.5,
+    "y": 307.5,
+    "links": [
+      "kepler",
+      "ec_07",
+      "ec_09"
+    ],
+    "ownerFaction": "ECHOTRAIL",
+    "securityLevel": 1,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "echotrail_communion",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_09",
+    "name": "Echo 09",
+    "x": -157.5,
+    "y": 372.5,
+    "links": [
+      "luyten",
+      "ec_08",
+      "ec_10"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PSYCHIC_ANOMALY",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "ec_10",
+    "name": "Echo 10",
+    "x": -92.5,
+    "y": 372.5,
+    "links": [
+      "zenith",
+      "ec_09"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PSYCHIC_ANOMALY",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_01",
+    "name": "Corsair 01",
+    "x": -525,
+    "y": -245,
+    "links": [
+      "draco",
+      "bf_02"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_02",
+    "name": "Corsair 02",
+    "x": -455,
+    "y": -245,
+    "links": [
+      "bastion",
+      "bf_01",
+      "bf_03"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_03",
+    "name": "Corsair 03",
+    "x": -385,
+    "y": -245,
+    "links": [
+      "fenrir",
+      "bf_02",
+      "bf_04"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_04",
+    "name": "Corsair 04",
+    "x": -315,
+    "y": -245,
+    "links": [
+      "ember",
+      "bf_03",
+      "bf_05"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_05",
+    "name": "Corsair 05",
+    "x": -525,
+    "y": -175,
+    "links": [
+      "polaris",
+      "bf_04",
+      "bf_06"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_06",
+    "name": "Corsair 06",
+    "x": -455,
+    "y": -175,
+    "links": [
+      "lyra",
+      "bf_05",
+      "bf_07"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_07",
+    "name": "Corsair 07",
+    "x": -385,
+    "y": -175,
+    "links": [
+      "draco",
+      "bf_06",
+      "bf_08"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_08",
+    "name": "Corsair 08",
+    "x": -315,
+    "y": -175,
+    "links": [
+      "bastion",
+      "bf_07",
+      "bf_09"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_09",
+    "name": "Corsair 09",
+    "x": -525,
+    "y": -105,
+    "links": [
+      "fenrir",
+      "bf_08",
+      "bf_10"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_10",
+    "name": "Corsair 10",
+    "x": -455,
+    "y": -105,
+    "links": [
+      "ember",
+      "bf_09",
+      "bf_11"
+    ],
+    "ownerFaction": "BLACK_FLAG",
+    "securityLevel": 1,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE"
+    ],
+    "storyHooks": [],
+    "factionId": "black_flag_syndicate",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_11",
+    "name": "Corsair 11",
+    "x": -385,
+    "y": -105,
+    "links": [
+      "polaris",
+      "bf_10",
+      "bf_12"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "bf_12",
+    "name": "Corsair 12",
+    "x": -315,
+    "y": -105,
+    "links": [
+      "lyra",
+      "bf_11"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "PIRATE_BASE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "st_01",
+    "name": "Verdant 01",
+    "x": -645,
+    "y": -65,
+    "links": [
+      "vega",
+      "st_02"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_02",
+    "name": "Verdant 02",
+    "x": -575,
+    "y": -65,
+    "links": [
+      "auriga",
+      "st_01",
+      "st_03"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_03",
+    "name": "Verdant 03",
+    "x": -505,
+    "y": -65,
+    "links": [
+      "cygnus",
+      "st_02",
+      "st_04"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_04",
+    "name": "Verdant 04",
+    "x": -435,
+    "y": -65,
+    "links": [
+      "windfall",
+      "st_03",
+      "st_05"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_05",
+    "name": "Verdant 05",
+    "x": -645,
+    "y": 5,
+    "links": [
+      "cinder",
+      "st_04",
+      "st_06"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_06",
+    "name": "Verdant 06",
+    "x": -575,
+    "y": 5,
+    "links": [
+      "vega",
+      "st_05",
+      "st_07"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_07",
+    "name": "Verdant 07",
+    "x": -505,
+    "y": 5,
+    "links": [
+      "auriga",
+      "st_06",
+      "st_08"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_08",
+    "name": "Verdant 08",
+    "x": -435,
+    "y": 5,
+    "links": [
+      "cygnus",
+      "st_07",
+      "st_09"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_09",
+    "name": "Verdant 09",
+    "x": -645,
+    "y": 75,
+    "links": [
+      "windfall",
+      "st_08",
+      "st_10"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_10",
+    "name": "Verdant 10",
+    "x": -575,
+    "y": 75,
+    "links": [
+      "cinder",
+      "st_09",
+      "st_11"
+    ],
+    "ownerFaction": "STARSEED",
+    "securityLevel": 1,
+    "zoneType": "BORDER",
+    "tags": [
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": "starseed_foundation",
+    "status": "border",
+    "traffic": "light"
+  },
+  {
+    "id": "st_11",
+    "name": "Verdant 11",
+    "x": -505,
+    "y": 75,
+    "links": [
+      "vega",
+      "st_10",
+      "st_12"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER",
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "st_12",
+    "name": "Verdant 12",
+    "x": -435,
+    "y": 75,
+    "links": [
+      "auriga",
+      "st_11"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER",
+      "TERRAFORMING_SITE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "fh_01",
+    "name": "Haven 01",
+    "x": -2.5,
+    "y": 77.5,
+    "links": [
+      "new_eden",
+      "fh_02"
+    ],
+    "ownerFaction": "FREE_HORIZONS",
+    "securityLevel": 2,
+    "zoneType": "HUB",
+    "tags": [
+      "TRADE_HUB",
+      "HYPERGATE"
+    ],
+    "storyHooks": [],
+    "factionId": "free_horizons_guild",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "fh_02",
+    "name": "Haven 02",
+    "x": 52.5,
+    "y": 77.5,
+    "links": [
+      "arcadia",
+      "fh_01",
+      "fh_03"
+    ],
+    "ownerFaction": "FREE_HORIZONS",
+    "securityLevel": 2,
+    "zoneType": "HUB",
+    "tags": [
+      "TRADE_HUB",
+      "HYPERGATE"
+    ],
+    "storyHooks": [],
+    "factionId": "free_horizons_guild",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "fh_03",
+    "name": "Haven 03",
+    "x": 107.5,
+    "y": 77.5,
+    "links": [
+      "borealis_gate",
+      "fh_02",
+      "fh_04"
+    ],
+    "ownerFaction": "FREE_HORIZONS",
+    "securityLevel": 2,
+    "zoneType": "HUB",
+    "tags": [
+      "TRADE_HUB",
+      "HYPERGATE"
+    ],
+    "storyHooks": [],
+    "factionId": "free_horizons_guild",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "fh_04",
+    "name": "Haven 04",
+    "x": 162.5,
+    "y": 77.5,
+    "links": [
+      "helios",
+      "fh_03",
+      "fh_05"
+    ],
+    "ownerFaction": "FREE_HORIZONS",
+    "securityLevel": 2,
+    "zoneType": "HUB",
+    "tags": [
+      "TRADE_HUB",
+      "HYPERGATE"
+    ],
+    "storyHooks": [],
+    "factionId": "free_horizons_guild",
+    "status": "core",
+    "traffic": "medium"
+  },
+  {
+    "id": "fh_05",
+    "name": "Haven 05",
+    "x": -2.5,
+    "y": 132.5,
+    "links": [
+      "sol",
+      "fh_04",
+      "fh_06"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "TRADE_HUB",
+      "HYPERGATE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "fh_06",
+    "name": "Haven 06",
+    "x": 52.5,
+    "y": 132.5,
+    "links": [
+      "new_eden",
+      "fh_05"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "TRADE_HUB",
+      "HYPERGATE",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "oc_01",
+    "name": "Umbral 01",
+    "x": -230,
+    "y": -450,
+    "links": [
+      "obsidian",
+      "oc_02"
+    ],
+    "ownerFaction": "OBSIDIAN_COVENANT",
+    "securityLevel": 0,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CULT_SITE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "obsidian_covenant",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "oc_02",
+    "name": "Umbral 02",
+    "x": -170,
+    "y": -450,
+    "links": [
+      "azrael",
+      "oc_01",
+      "oc_03"
+    ],
+    "ownerFaction": "OBSIDIAN_COVENANT",
+    "securityLevel": 0,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CULT_SITE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "obsidian_covenant",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "oc_03",
+    "name": "Umbral 03",
+    "x": -110,
+    "y": -450,
+    "links": [
+      "scar",
+      "oc_02",
+      "oc_04"
+    ],
+    "ownerFaction": "OBSIDIAN_COVENANT",
+    "securityLevel": 0,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CULT_SITE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "obsidian_covenant",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "oc_04",
+    "name": "Umbral 04",
+    "x": -50,
+    "y": -450,
+    "links": [
+      "numen",
+      "oc_03",
+      "oc_05"
+    ],
+    "ownerFaction": "OBSIDIAN_COVENANT",
+    "securityLevel": 0,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CULT_SITE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": "obsidian_covenant",
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "oc_05",
+    "name": "Umbral 05",
+    "x": -230,
+    "y": -390,
+    "links": [
+      "helene",
+      "oc_04",
+      "oc_06"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "CULT_SITE",
+      "PSYCHIC_ANOMALY",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "oc_06",
+    "name": "Umbral 06",
+    "x": -170,
+    "y": -390,
+    "links": [
+      "obsidian",
+      "oc_05"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "CULT_SITE",
+      "PSYCHIC_ANOMALY",
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_01",
+    "name": "Outreach 01",
+    "x": -345,
+    "y": 415,
+    "links": [
+      "tundra",
+      "nt_02"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_02",
+    "name": "Outreach 02",
+    "x": -275,
+    "y": 415,
+    "links": [
+      "zenith",
+      "nt_01",
+      "nt_03"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_03",
+    "name": "Outreach 03",
+    "x": -205,
+    "y": 415,
+    "links": [
+      "luyten",
+      "nt_02",
+      "nt_04"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_04",
+    "name": "Outreach 04",
+    "x": -135,
+    "y": 415,
+    "links": [
+      "tundra",
+      "nt_03",
+      "nt_05"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_05",
+    "name": "Outreach 05",
+    "x": -345,
+    "y": 485,
+    "links": [
+      "zenith",
+      "nt_04",
+      "nt_06"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_06",
+    "name": "Outreach 06",
+    "x": -275,
+    "y": 485,
+    "links": [
+      "luyten",
+      "nt_05",
+      "nt_07"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_07",
+    "name": "Outreach 07",
+    "x": -205,
+    "y": 485,
+    "links": [
+      "tundra",
+      "nt_06",
+      "nt_08"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_08",
+    "name": "Outreach 08",
+    "x": -135,
+    "y": 485,
+    "links": [
+      "zenith",
+      "nt_07",
+      "nt_09"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_09",
+    "name": "Outreach 09",
+    "x": -345,
+    "y": 555,
+    "links": [
+      "luyten",
+      "nt_08",
+      "nt_10"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_10",
+    "name": "Outreach 10",
+    "x": -275,
+    "y": 555,
+    "links": [
+      "tundra",
+      "nt_09",
+      "nt_11"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_11",
+    "name": "Outreach 11",
+    "x": -205,
+    "y": 555,
+    "links": [
+      "zenith",
+      "nt_10",
+      "nt_12"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "nt_12",
+    "name": "Outreach 12",
+    "x": -135,
+    "y": 555,
+    "links": [
+      "luyten",
+      "nt_11"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "NEUTRAL_WILD",
+    "tags": [
+      "DEEP_BACKWATER"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light"
+  },
+  {
+    "id": "embergate",
+    "name": "Embergate",
+    "x": -240,
+    "y": -20,
+    "links": [
+      "altair",
+      "ember"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "solar_directorate",
+      "ironclad_clans"
+    ]
+  },
+  {
+    "id": "bastion_cross",
+    "name": "Bastion Cross",
+    "x": -300,
+    "y": -100,
+    "links": [
+      "ember",
+      "bastion"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "solar_directorate",
+      "ironclad_clans"
+    ]
+  },
+  {
+    "id": "rift_pass",
+    "name": "Rift Pass",
+    "x": 160,
+    "y": -120,
+    "links": [
+      "deneb",
+      "riftwatch"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 2,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "border",
+    "traffic": "medium",
+    "disputedWith": [
+      "solar_directorate",
+      "luminari_compact"
+    ]
+  },
+  {
+    "id": "dusk_bridge",
+    "name": "Dusk Bridge",
+    "x": 220,
+    "y": -300,
+    "links": [
+      "riftwatch",
+      "duskfall",
+      "valkyr"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "solar_directorate",
+      "luminari_compact"
+    ]
+  },
+  {
+    "id": "borealis_rift",
+    "name": "Borealis Rift",
+    "x": 60,
+    "y": 300,
+    "links": [
+      "borealis",
+      "arkady"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "solar_directorate",
+      "black_flag_syndicate"
+    ]
+  },
+  {
+    "id": "driftspur",
+    "name": "Driftspur",
+    "x": 200,
+    "y": 380,
+    "links": [
+      "borealis",
+      "drifts"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 1,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "solar_directorate",
+      "black_flag_syndicate"
+    ]
+  },
+  {
+    "id": "windfall_cut",
+    "name": "Windfall Cut",
+    "x": -420,
+    "y": 300,
+    "links": [
+      "windfall",
+      "polaris"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "ironclad_clans",
+      "black_flag_syndicate"
+    ]
+  },
+  {
+    "id": "vega_hook",
+    "name": "Vega Hook",
+    "x": -460,
+    "y": 160,
+    "links": [
+      "vega",
+      "polaris"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "CONFLICT",
+    "tags": [
+      "CONFLICT_ZONE"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "border",
+    "traffic": "light",
+    "disputedWith": [
+      "ironclad_clans",
+      "black_flag_syndicate"
+    ]
+  },
+  {
+    "id": "scarveil",
+    "name": "Scarveil",
+    "x": -140,
+    "y": -220,
+    "links": [
+      "scar",
+      "obsidian"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CONFLICT_ZONE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light",
+    "disputedWith": [
+      "echotrail_communion",
+      "obsidian_covenant"
+    ]
+  },
+  {
+    "id": "azrael_shroud",
+    "name": "Azrael Shroud",
+    "x": -180,
+    "y": -360,
+    "links": [
+      "azrael",
+      "numen"
+    ],
+    "ownerFaction": "NEUTRAL",
+    "securityLevel": 0,
+    "zoneType": "STORY_UNIQUE",
+    "tags": [
+      "CONFLICT_ZONE",
+      "PSYCHIC_ANOMALY"
+    ],
+    "storyHooks": [],
+    "factionId": null,
+    "status": "frontier",
+    "traffic": "light",
+    "disputedWith": [
+      "echotrail_communion",
+      "obsidian_covenant"
+    ]
+  }
+]
