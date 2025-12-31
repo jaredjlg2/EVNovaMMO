@@ -191,7 +191,7 @@ const getShipSpeed = (ship) => {
   return Math.max(80, Math.min(180, base));
 };
 
-const steerShip = (ship, targetX, targetY, deltaSeconds) => {
+const steerShip = (ship, targetX, targetY, deltaSeconds, options = {}) => {
   const dx = targetX - ship.x;
   const dy = targetY - ship.y;
   const distance = Math.hypot(dx, dy);
@@ -200,11 +200,11 @@ const steerShip = (ship, targetX, targetY, deltaSeconds) => {
     ship.vy *= 0.9;
     return distance;
   }
-  const maxSpeed = getShipSpeed(ship.ship);
+  const maxSpeed = options.maxSpeed ?? getShipSpeed(ship.ship);
   const desiredSpeed = Math.min(maxSpeed, distance * 0.6);
   const desiredVx = (dx / distance) * desiredSpeed;
   const desiredVy = (dy / distance) * desiredSpeed;
-  const responsiveness = 2.8;
+  const responsiveness = options.responsiveness ?? 2.8;
   const adjust = Math.min(1, responsiveness * deltaSeconds);
   ship.vx += (desiredVx - ship.vx) * adjust;
   ship.vy += (desiredVy - ship.vy) * adjust;
@@ -565,8 +565,13 @@ const tickAiShips = (deltaSeconds, players = []) => {
         return;
       }
       const formationIndex = ship.ai.formationIndex ?? 0;
-      const formationAngle = owner.angle + Math.PI + formationIndex * (Math.PI / 3);
-      const formationRadius = 60 + formationIndex * 4;
+      const wingIndex = Math.floor((formationIndex + 1) / 2);
+      const wingSide =
+        formationIndex === 0 ? 0 : formationIndex % 2 === 1 ? -1 : 1;
+      const angleOffset =
+        wingSide === 0 ? 0 : wingSide * (Math.PI / 10) * Math.max(1, wingIndex);
+      const formationAngle = owner.angle + Math.PI + angleOffset;
+      const formationRadius = 36 + wingIndex * 8;
       const formationX = owner.x + Math.cos(formationAngle) * formationRadius;
       const formationY = owner.y + Math.sin(formationAngle) * formationRadius;
       if (ship.ai.escortMode === "hold") {
@@ -587,7 +592,12 @@ const tickAiShips = (deltaSeconds, players = []) => {
         ship.ai.escortMode = "follow";
         ship.ai.escortTargetId = null;
       }
-      steerShip(ship, formationX, formationY, deltaSeconds);
+      const ownerSpeed = getShipSpeed(owner.ship);
+      const escortMaxSpeed = Math.max(ownerSpeed + 60, 220);
+      steerShip(ship, formationX, formationY, deltaSeconds, {
+        maxSpeed: escortMaxSpeed,
+        responsiveness: 4
+      });
       return;
     }
 
