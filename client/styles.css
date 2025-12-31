@@ -150,6 +150,37 @@ body {
   box-shadow: 0 24px 70px rgba(4, 8, 20, 0.7);
 }
 
+.boarding-card {
+  width: min(520px, 92vw);
+  max-height: 80vh;
+  overflow: hidden;
+  background: #111a34;
+  border: 1px solid #25345e;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 24px 70px rgba(4, 8, 20, 0.7);
+}
+
+.boarding-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.boarding-header h2 {
+  margin: 0 0 6px;
+}
+
+.boarding-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .mission-log-header {
   display: flex;
   align-items: flex-start;

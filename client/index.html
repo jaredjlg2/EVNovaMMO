@@ -111,6 +111,10 @@
             <div class="hud-list">
               <span>Order a drink, hear rumors, or just take in the atmosphere.</span>
             </div>
+            <p class="hud-hint">Escort contracts</p>
+            <div id="barEscortList" class="list"></div>
+            <p class="hud-hint">Active escorts</p>
+            <div id="barEscortRoster" class="list"></div>
           </div>
         </section>
         <section class="hud-section">
@@ -151,6 +155,24 @@
           <button id="closeMissionLogBtn" type="button">Close (I)</button>
         </div>
         <div id="missionLogList" class="list"></div>
+      </div>
+    </div>
+    <div id="boardingOverlay" class="overlay hidden boarding-overlay">
+      <div class="boarding-card">
+        <div class="boarding-header">
+          <div>
+            <h2>Boarding Action</h2>
+            <p id="boardingTargetName" class="hud-hint"></p>
+          </div>
+          <button id="boardingCloseBtn" type="button">Close</button>
+        </div>
+        <div id="boardingStatus" class="hud-hint"></div>
+        <div id="boardingInfo" class="hud-list"></div>
+        <div id="boardingCargo" class="list"></div>
+        <div class="boarding-actions">
+          <button id="boardingTakeoverBtn" type="button">Capture & Take Over</button>
+          <button id="boardingEscortBtn" type="button">Capture & Escort</button>
+        </div>
       </div>
     </div>
     <script src="app.js"></script>

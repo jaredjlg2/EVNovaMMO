@@ -1,4 +1,4 @@
-const { systems, planets, ships, factions } = require("./data");
+const { systems, planets, ships, factions, goods } = require("./data");
 
 const aiShips = new Map();
 const shipById = new Map(ships.map((ship) => [ship.id, ship]));
@@ -300,6 +300,8 @@ const spawnAiShip = (systemId) => {
     hull: ship.hull,
     shield: ship.shield,
     factionId,
+    cargo: randomCargoManifest(ship.cargo),
+    credits: Math.floor(randomRange(120, 620)),
     ai: {
       state: "approach",
       role,
@@ -309,7 +311,16 @@ const spawnAiShip = (systemId) => {
       stateUntil: 0,
       nextWaypointAt: 0,
       lastAttackAt: 0,
-      hostileTo: new Set()
+      hostileTo: new Set(),
+      disabled: false,
+      ownerId: null,
+      escortMode: "follow",
+      escortTargetId: null,
+      formationIndex: 0,
+      holdX: null,
+      holdY: null,
+      hired: false,
+      dailyRate: 0
     }
   };
   aiShips.set(shipId, newShip);
@@ -334,6 +345,30 @@ const updateTrafficTargets = (now) => {
 const getSystemTarget = (systemId) =>
   systemTrafficTargets.get(systemId)?.targetCount ?? trafficLevels.light.min;
 
+const disableThresholds = {
+  minHull: 2,
+  maxHull: 30
+};
+
+const randomCargoManifest = (cargoCapacity) => {
+  if (!cargoCapacity || goods.length === 0) {
+    return [];
+  }
+  const selectionCount = Math.max(1, Math.min(3, Math.floor(Math.random() * 3) + 1));
+  const manifest = [];
+  const chosen = new Set();
+  for (let i = 0; i < selectionCount; i += 1) {
+    const good = goods[Math.floor(Math.random() * goods.length)];
+    if (!good || chosen.has(good.id)) {
+      continue;
+    }
+    chosen.add(good.id);
+    const quantity = Math.max(1, Math.floor(Math.random() * Math.min(8, cargoCapacity)));
+    manifest.push({ goodId: good.id, quantity });
+  }
+  return manifest;
+};
+
 const applyDamage = (ship, damage) => {
   const shieldDamage = Math.min(ship.shield, damage);
   ship.shield = Math.max(0, ship.shield - shieldDamage);
@@ -341,6 +376,7 @@ const applyDamage = (ship, damage) => {
   if (remaining > 0) {
     ship.hull = Math.max(0, ship.hull - remaining);
   }
+  updateDisabledStatus(ship);
 };
 
 const markShipHostileToPlayer = (shipId, playerId) => {
@@ -355,10 +391,109 @@ const markShipHostileToPlayer = (shipId, playerId) => {
   return ship;
 };
 
+const updateDisabledStatus = (ship) => {
+  if (!ship?.ai) {
+    return;
+  }
+  if (ship.hull <= 0) {
+    ship.ai.disabled = false;
+    return;
+  }
+  const disabledNow =
+    ship.shield <= 0 &&
+    ship.hull < disableThresholds.maxHull &&
+    ship.hull > disableThresholds.minHull;
+  if (disabledNow) {
+    ship.ai.disabled = true;
+  }
+};
+
 const getAiShips = () => Array.from(aiShips.values());
 
+const getAiShipById = (shipId) => aiShips.get(shipId);
+
+const createEscortShip = ({
+  ship,
+  systemId,
+  x,
+  y,
+  ownerId,
+  name,
+  role,
+  formationIndex = 0,
+  hired = true,
+  dailyRate = 0
+}) => {
+  if (!ship || !systemId || !ownerId) {
+    return null;
+  }
+  const shipId = `escort-${Math.random().toString(36).slice(2, 9)}`;
+  const newShip = {
+    id: shipId,
+    name: name || ship.name,
+    systemId,
+    planetId: null,
+    x: typeof x === "number" ? x : 0,
+    y: typeof y === "number" ? y : 0,
+    vx: 0,
+    vy: 0,
+    angle: Math.random() * Math.PI * 2,
+    ship,
+    hull: ship.hull,
+    shield: ship.shield,
+    factionId: null,
+    cargo: [],
+    credits: 0,
+    ai: {
+      state: "escort",
+      role: role || "escort",
+      targetPlanetId: null,
+      targetX: 0,
+      targetY: 0,
+      stateUntil: 0,
+      nextWaypointAt: 0,
+      lastAttackAt: 0,
+      hostileTo: new Set(),
+      disabled: false,
+      ownerId,
+      escortMode: "follow",
+      escortTargetId: null,
+      formationIndex,
+      holdX: null,
+      holdY: null,
+      hired,
+      dailyRate
+    }
+  };
+  aiShips.set(shipId, newShip);
+  return newShip;
+};
+
+const assignShipAsEscort = (
+  ship,
+  ownerId,
+  { formationIndex = 0, hired = false, dailyRate = 0 } = {}
+) => {
+  if (!ship || !ship.ai) {
+    return null;
+  }
+  ship.ai.ownerId = ownerId;
+  ship.ai.escortMode = "follow";
+  ship.ai.escortTargetId = null;
+  ship.ai.formationIndex = formationIndex;
+  ship.ai.holdX = null;
+  ship.ai.holdY = null;
+  ship.ai.hired = hired;
+  ship.ai.dailyRate = dailyRate;
+  ship.ai.hostileTo = new Set();
+  ship.ai.disabled = false;
+  return ship;
+};
+
 const removeAiShip = (shipId) => {
+  const ship = aiShips.get(shipId);
   aiShips.delete(shipId);
+  return ship || null;
 };
 
 const getRoleCombatProfile = (role) =>
@@ -395,13 +530,14 @@ const findHostileTarget = (system, ship, candidates) => {
   return closest;
 };
 
-const tickAiShips = (deltaSeconds) => {
+const tickAiShips = (deltaSeconds, players = []) => {
   const now = Date.now();
   updateTrafficTargets(now);
+  const playersById = new Map(players.map((player) => [player.id, player]));
 
   systems.forEach((system) => {
     const currentCount = Array.from(aiShips.values()).filter(
-      (ship) => ship.systemId === system.id
+      (ship) => ship.systemId === system.id && !ship.ai.ownerId
     ).length;
     const targetCount = getSystemTarget(system.id);
     const needed = targetCount - currentCount;
@@ -412,6 +548,55 @@ const tickAiShips = (deltaSeconds) => {
   });
 
   Array.from(aiShips.values()).forEach((ship) => {
+    if (ship.ai.ownerId) {
+      const owner = playersById.get(ship.ai.ownerId);
+      if (!owner) {
+        aiShips.delete(ship.id);
+        return;
+      }
+      if (ship.ai.disabled) {
+        ship.vx = 0;
+        ship.vy = 0;
+        return;
+      }
+      if (owner.systemId !== ship.systemId || owner.planetId) {
+        ship.vx *= 0.9;
+        ship.vy *= 0.9;
+        return;
+      }
+      const formationIndex = ship.ai.formationIndex ?? 0;
+      const formationAngle = owner.angle + Math.PI + formationIndex * (Math.PI / 3);
+      const formationRadius = 60 + formationIndex * 4;
+      const formationX = owner.x + Math.cos(formationAngle) * formationRadius;
+      const formationY = owner.y + Math.sin(formationAngle) * formationRadius;
+      if (ship.ai.escortMode === "hold") {
+        if (ship.ai.holdX == null || ship.ai.holdY == null) {
+          ship.ai.holdX = ship.x;
+          ship.ai.holdY = ship.y;
+        }
+        steerShip(ship, ship.ai.holdX, ship.ai.holdY, deltaSeconds);
+        return;
+      }
+      if (ship.ai.escortMode === "attack" && ship.ai.escortTargetId) {
+        const target =
+          playersById.get(ship.ai.escortTargetId) || aiShips.get(ship.ai.escortTargetId);
+        if (target && target.systemId === ship.systemId && !target.planetId) {
+          steerShip(ship, target.x, target.y, deltaSeconds);
+          return;
+        }
+        ship.ai.escortMode = "follow";
+        ship.ai.escortTargetId = null;
+      }
+      steerShip(ship, formationX, formationY, deltaSeconds);
+      return;
+    }
+
+    if (ship.ai.disabled) {
+      ship.vx = 0;
+      ship.vy = 0;
+      return;
+    }
+
     const planetPosition = ship.ai.targetPlanetId
       ? planetPositions.get(ship.ai.targetPlanetId)
       : null;
@@ -477,6 +662,9 @@ const tickAiShips = (deltaSeconds) => {
 
   const shipsBySystem = new Map();
   Array.from(aiShips.values()).forEach((ship) => {
+    if (ship.ai.ownerId || ship.ai.disabled) {
+      return;
+    }
     if (!shipsBySystem.has(ship.systemId)) {
       shipsBySystem.set(ship.systemId, []);
     }
@@ -527,14 +715,22 @@ const getAiShipStatus = () =>
     shield: ship.shield,
     factionId: ship.factionId,
     isAi: true,
-    hostileTo: Array.from(ship.ai.hostileTo || [])
+    hostileTo: Array.from(ship.ai.hostileTo || []),
+    disabled: Boolean(ship.ai.disabled),
+    escortOwnerId: ship.ai.ownerId || null,
+    escortMode: ship.ai.escortMode || null
   }));
 
 module.exports = {
   tickAiShips,
   getAiShipStatus,
   getAiShips,
+  getAiShipById,
   markShipHostileToPlayer,
   removeAiShip,
-  getRoleCombatProfile
+  getRoleCombatProfile,
+  updateDisabledStatus,
+  createEscortShip,
+  assignShipAsEscort,
+  disableThresholds
 };

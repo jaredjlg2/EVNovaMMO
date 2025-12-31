@@ -30,7 +30,8 @@ const createPlayer = ({ id, name, savedState = null }) => {
     outfits: [],
     missions: [],
     cargo: [],
-    log: ["Welcome to the frontier, Captain."]
+    log: ["Welcome to the frontier, Captain."],
+    escorts: []
   };
 
   if (!savedState) {
@@ -53,7 +54,8 @@ const createPlayer = ({ id, name, savedState = null }) => {
     secondaryAmmo: savedState.secondaryAmmo ?? basePlayer.secondaryAmmo,
     outfits: savedState.outfits ?? basePlayer.outfits,
     missions: savedState.missions ?? basePlayer.missions,
-    cargo: savedState.cargo ?? basePlayer.cargo
+    cargo: savedState.cargo ?? basePlayer.cargo,
+    escorts: savedState.escorts ?? basePlayer.escorts
   };
 };
 

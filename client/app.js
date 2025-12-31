@@ -22,6 +22,8 @@ const dockedMenuShipyardBtn = document.getElementById("dockedMenuShipyard");
 const dockedMenuBarBtn = document.getElementById("dockedMenuBar");
 const cargoSummaryEl = document.getElementById("cargoSummary");
 const tradeListEl = document.getElementById("tradeList");
+const barEscortListEl = document.getElementById("barEscortList");
+const barEscortRosterEl = document.getElementById("barEscortRoster");
 const logEl = document.getElementById("log");
 const flightCanvas = document.getElementById("flightCanvas");
 const flightStatusEl = document.getElementById("flightStatus");
@@ -37,6 +39,14 @@ const clearRouteBtn = document.getElementById("clearRouteBtn");
 const missionLogOverlayEl = document.getElementById("missionLogOverlay");
 const missionLogListEl = document.getElementById("missionLogList");
 const closeMissionLogBtn = document.getElementById("closeMissionLogBtn");
+const boardingOverlayEl = document.getElementById("boardingOverlay");
+const boardingTargetNameEl = document.getElementById("boardingTargetName");
+const boardingStatusEl = document.getElementById("boardingStatus");
+const boardingInfoEl = document.getElementById("boardingInfo");
+const boardingCargoEl = document.getElementById("boardingCargo");
+const boardingCloseBtn = document.getElementById("boardingCloseBtn");
+const boardingTakeoverBtn = document.getElementById("boardingTakeoverBtn");
+const boardingEscortBtn = document.getElementById("boardingEscortBtn");
 
 const loginOverlayEl = document.getElementById("loginOverlay");
 const loginFormEl = document.getElementById("loginForm");
@@ -75,6 +85,8 @@ let lastDockedPlanetId = null;
 let targetLockId = null;
 let missionLogOpen = false;
 let selectedSecondaryIndex = 0;
+let boardingData = null;
+let currentBoardingTarget = null;
 const mapView = {
   zoom: 1,
   panX: 0,
@@ -88,6 +100,7 @@ const mapView = {
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
 const dockingRange = 70;
+const boardingRange = 60;
 const jumpMinimumDistance = 240;
 const jumpArrivalDistance = 360;
 const jumpArrivalSpeed = 180;
@@ -303,7 +316,10 @@ const getCargoUsed = () => {
   return cargoTotal + missionCargo;
 };
 
-const getCargoCapacity = () => player?.ship?.cargo ?? 0;
+const getEscortCargoCapacity = () =>
+  (player?.escorts || []).reduce((sum, escort) => sum + (escort.ship?.cargo || 0), 0);
+
+const getCargoCapacity = () => (player?.ship?.cargo ?? 0) + getEscortCargoCapacity();
 
 const getCargoManifest = () => {
   if (!player || !world) {
@@ -950,6 +966,9 @@ const isHostileTarget = (other) => {
   if (!player) {
     return false;
   }
+  if (other.escortOwnerId === player.id) {
+    return false;
+  }
   return other.isAi ? (other.hostileTo || []).includes(player.id) : true;
 };
 
@@ -985,6 +1004,11 @@ const updateTargetInfo = () => {
   const shieldValue = Math.max(0, target.shield ?? 0);
   const hullValue = Math.max(0, target.hull ?? 0);
   const distance = Math.round(Math.hypot(target.x - flightState.x, target.y - flightState.y));
+  const statusLine = target.disabled
+    ? "<span>Status: Disabled</span>"
+    : target.escortOwnerId
+      ? "<span>Status: Escort</span>"
+      : "";
   targetInfoEl.innerHTML = `
     <span><strong>${target.name ?? "Unknown Pilot"}</strong></span>
     <span>Ship class: ${className}</span>
@@ -992,6 +1016,7 @@ const updateTargetInfo = () => {
     <span>Shields: ${Math.round(shieldValue)} / ${shieldMax}</span>
     <span>Armor: ${Math.round(hullValue)} / ${hullMax}</span>
     <span>Range: ${distance} u</span>
+    ${statusLine}
   `;
 };
 
@@ -1345,8 +1370,7 @@ const updateFlight = (deltaSeconds) => {
 const updateDockingTarget = () => {
   if (!player || !world || player.planetId) {
     currentDockingTarget = null;
-    dockPromptEl.textContent = "";
-    return;
+    return "";
   }
   const planets = getPlanetsInSystem(player.systemId);
   let closest = null;
@@ -1362,16 +1386,35 @@ const updateDockingTarget = () => {
   });
   currentDockingTarget = closest;
   if (!closest) {
-    dockPromptEl.textContent = "";
-    return;
+    return "";
   }
   if (closest.distance <= dockingRange) {
-    dockPromptEl.textContent = `Press L to dock at ${closest.planet.name}.`;
-  } else {
-    dockPromptEl.textContent = `Nearest planet: ${closest.planet.name} · ${Math.round(
-      closest.distance
-    )} u`;
+    return `Press L to dock at ${closest.planet.name}.`;
   }
+  return `Nearest planet: ${closest.planet.name} · ${Math.round(closest.distance)} u`;
+};
+
+const updateBoardingTarget = () => {
+  if (!player || !world || player.planetId) {
+    currentBoardingTarget = null;
+    return "";
+  }
+  const targets = getVisiblePlayers().filter(
+    (other) => other.isAi && other.disabled && !other.escortOwnerId
+  );
+  let closest = null;
+  targets.forEach((target) => {
+    const distance = Math.hypot(target.x - flightState.x, target.y - flightState.y);
+    if (!closest || distance < closest.distance) {
+      closest = { target, distance };
+    }
+  });
+  if (!closest || closest.distance > boardingRange) {
+    currentBoardingTarget = null;
+    return "";
+  }
+  currentBoardingTarget = closest.target;
+  return `Press B to board disabled ${closest.target.name}.`;
 };
 
 const renderMiniMap = () => {
@@ -1663,7 +1706,9 @@ const renderFlight = (now) => {
     } else {
       flightStatusEl.textContent = `Cruising · Velocity ${speed} u/s`;
     }
-    updateDockingTarget();
+    const boardingPrompt = updateBoardingTarget();
+    const dockingPrompt = updateDockingTarget();
+    dockPromptEl.textContent = boardingPrompt || dockingPrompt;
   }
 
   if (mapOpen) {
@@ -1684,6 +1729,8 @@ const renderShip = () => {
   const { ship } = player;
   const cargoUsed = getCargoUsed();
   const cargoCapacity = getCargoCapacity();
+  const escortCapacity = getEscortCargoCapacity();
+  const escortCapacity = getEscortCargoCapacity();
   const shieldMax = ship.shield || 0;
   const hullMax = ship.hull || 0;
   const shieldValue = Math.max(0, player.shield || 0);
@@ -1712,9 +1759,12 @@ const renderShip = () => {
         </div>
       </div>
     </div>
-    <span>Cargo: ${cargoUsed}/${cargoCapacity} · Fuel: ${ship.fuel}</span>
+    <span>Cargo: ${cargoUsed}/${cargoCapacity}${
+      escortCapacity ? ` (escorts +${escortCapacity})` : ""
+    } · Fuel: ${ship.fuel}</span>
     <span>Hardpoints: ${player.weapons.length}/${ship.hardpoints}</span>
     <span>Secondary Racks: ${player.secondaryWeapons.length}/${ship.secondaryHardpoints}</span>
+    <span>Escorts: ${(player.escorts || []).length}</span>
   `;
 };
 
@@ -1828,7 +1878,9 @@ const renderMarket = (market) => {
       : "No cargo loaded.";
   cargoSummaryEl.innerHTML = `
     <span><strong>Cargo Hold</strong></span>
-    <span>Used: ${cargoUsed}/${cargoCapacity}</span>
+    <span>Used: ${cargoUsed}/${cargoCapacity}${
+      escortCapacity ? ` (escorts +${escortCapacity})` : ""
+    }</span>
     <span>${manifestText}</span>
   `;
   tradeListEl.innerHTML = "";
@@ -2009,6 +2061,104 @@ const renderDockedInfo = () => {
   `;
 };
 
+const renderBar = (escortsForHire = [], currentEscorts = []) => {
+  if (!barEscortListEl || !barEscortRosterEl) {
+    return;
+  }
+  if (!player || !player.planetId) {
+    barEscortListEl.innerHTML = "<p>Dock to browse escort contracts.</p>";
+    barEscortRosterEl.innerHTML = "<p>Dock to view escort roster.</p>";
+    return;
+  }
+  if (escortsForHire.length === 0) {
+    barEscortListEl.innerHTML = "<p>No escorts available right now.</p>";
+  } else {
+    barEscortListEl.innerHTML = "";
+    escortsForHire.forEach((offer) => {
+      const card = document.createElement("div");
+      card.className = "list-item";
+      card.innerHTML = `
+        <h4>${offer.name}</h4>
+        <p>Cargo: ${offer.cargo} · Daily rate: ${formatCredits(offer.dailyRate)}</p>
+      `;
+      const hireBtn = document.createElement("button");
+      hireBtn.textContent = "Hire";
+      hireBtn.disabled = player.credits < offer.dailyRate;
+      hireBtn.addEventListener("click", () => {
+        sendAction({ type: "hireEscort", shipId: offer.shipId });
+      });
+      card.appendChild(hireBtn);
+      barEscortListEl.appendChild(card);
+    });
+  }
+
+  if (!currentEscorts.length) {
+    barEscortRosterEl.innerHTML = "<p>No escorts currently under contract.</p>";
+    return;
+  }
+  barEscortRosterEl.innerHTML = "";
+  currentEscorts.forEach((escort) => {
+    const card = document.createElement("div");
+    card.className = "list-item";
+    const rateLine = escort.hired
+      ? `Daily rate: ${formatCredits(escort.dailyRate || 0)}`
+      : "Captured escort · No daily rate";
+    card.innerHTML = `
+      <h4>${escort.name}</h4>
+      <p>Cargo: ${escort.ship?.cargo ?? 0} · ${rateLine}</p>
+      <p>Status: ${escort.mode || "follow"}</p>
+    `;
+    barEscortRosterEl.appendChild(card);
+  });
+};
+
+const showBoardingOverlay = (data) => {
+  if (!boardingOverlayEl) {
+    return;
+  }
+  boardingData = data;
+  if (boardingTargetNameEl) {
+    boardingTargetNameEl.textContent = data.name || "Unknown vessel";
+  }
+  if (boardingStatusEl) {
+    boardingStatusEl.textContent = "";
+  }
+  if (boardingInfoEl) {
+    const chancePercent = Math.round((data.captureChance || 0) * 100);
+    boardingInfoEl.innerHTML = `
+      <span>Credits on board: ${formatCredits(data.credits || 0)}</span>
+      <span>Capture chance: ${chancePercent}%</span>
+    `;
+  }
+  if (boardingCargoEl) {
+    const goodsById = new Map((world?.goods || []).map((good) => [good.id, good]));
+    if (!data.cargo || data.cargo.length === 0) {
+      boardingCargoEl.innerHTML = "<p>No cargo manifest detected.</p>";
+    } else {
+      boardingCargoEl.innerHTML = "";
+      data.cargo.forEach((entry) => {
+        const card = document.createElement("div");
+        card.className = "list-item";
+        const goodName = goodsById.get(entry.goodId)?.name ?? entry.goodId;
+        card.innerHTML = `
+          <h4>${goodName}</h4>
+          <p>Quantity: ${entry.quantity}</p>
+        `;
+        boardingCargoEl.appendChild(card);
+      });
+    }
+  }
+  boardingOverlayEl.classList.remove("hidden");
+};
+
+const hideBoardingOverlay = () => {
+  if (!boardingOverlayEl) {
+    return;
+  }
+  boardingOverlayEl.classList.add("hidden");
+  boardingData = null;
+};
+
 const setDockedSection = (section) => {
   activeDockedSection = section;
   if (dockedMenuEl) {
@@ -2021,6 +2171,9 @@ const setDockedSection = (section) => {
     const isActive = el.dataset.section === section;
     el.classList.toggle("hidden", !isActive);
   });
+  if (section === "bar") {
+    sendAction({ type: "requestBar" });
+  }
 };
 
 const updateDockedMenuAvailability = (planet) => {
@@ -2060,6 +2213,9 @@ const updateDockedMenuAvailability = (planet) => {
 const refreshUi = () => {
   if (!player) {
     return;
+  }
+  if (player.planetId) {
+    hideBoardingOverlay();
   }
   pilotNameDisplayEl.textContent = player.name ? `Pilot: ${player.name}` : "";
   creditsEl.textContent = formatCredits(player.credits);
@@ -2110,6 +2266,9 @@ const refreshUi = () => {
     } else {
       shipListEl.innerHTML = "<p>Shipyard access unavailable here.</p>";
     }
+    if (activeDockedSection === "bar") {
+      sendAction({ type: "requestBar" });
+    }
   } else {
     setDockedSection(null);
     lastDockedPlanetId = null;
@@ -2126,6 +2285,7 @@ const refreshUi = () => {
     tradeListEl.innerHTML = "<p>Dock to access trading services.</p>";
     availableMissions = [];
     highlightedMissionId = null;
+    renderBar();
   }
 };
 
@@ -2154,6 +2314,7 @@ const connect = () => {
     presencePlayers = [];
     presenceSnapshots.clear();
     targetLockId = null;
+    hideBoardingOverlay();
     pilotNameDisplayEl.textContent = "";
     showLoginOverlay("Connection lost. Please reconnect.");
   });
@@ -2168,6 +2329,7 @@ const connect = () => {
       projectiles.length = 0;
       explosions.length = 0;
       targetLockId = null;
+      hideBoardingOverlay();
       setMissionLogOpen(false);
       showLoginOverlay(payload.message || "");
       return;
@@ -2236,6 +2398,7 @@ const connect = () => {
         projectiles.length = 0;
         explosions.length = 0;
         targetLockId = null;
+        hideBoardingOverlay();
         showLoginOverlay("Ship destroyed. Re-login to respawn.");
       }
     }
@@ -2244,6 +2407,20 @@ const connect = () => {
     }
     if (payload.type === "market") {
       renderMarket(payload.market || []);
+    }
+    if (payload.type === "bar") {
+      renderBar(payload.escortsForHire || [], payload.currentEscorts || []);
+    }
+    if (payload.type === "boarding") {
+      showBoardingOverlay(payload);
+    }
+    if (payload.type === "boardingResult") {
+      if (boardingStatusEl) {
+        boardingStatusEl.textContent = payload.message || "";
+      }
+      if (payload.success) {
+        hideBoardingOverlay();
+      }
     }
   });
 };
@@ -2289,6 +2466,30 @@ loginFormEl.addEventListener("submit", (event) => {
   sendAction({ type: "login", name });
 });
 
+if (boardingCloseBtn) {
+  boardingCloseBtn.addEventListener("click", () => {
+    hideBoardingOverlay();
+  });
+}
+
+if (boardingTakeoverBtn) {
+  boardingTakeoverBtn.addEventListener("click", () => {
+    if (!boardingData) {
+      return;
+    }
+    sendAction({ type: "captureShip", targetId: boardingData.id, decision: "takeover" });
+  });
+}
+
+if (boardingEscortBtn) {
+  boardingEscortBtn.addEventListener("click", () => {
+    if (!boardingData) {
+      return;
+    }
+    sendAction({ type: "captureShip", targetId: boardingData.id, decision: "escort" });
+  });
+}
+
 window.addEventListener("keydown", (event) => {
   if (event.key === "m" || event.key === "M") {
     event.preventDefault();
@@ -2322,6 +2523,42 @@ window.addEventListener("keydown", (event) => {
     return;
   }
   if (mapOpen) {
+    return;
+  }
+  if (event.key === "b" || event.key === "B") {
+    event.preventDefault();
+    if (!event.repeat) {
+      if (currentBoardingTarget) {
+        sendAction({ type: "boardShip", targetId: currentBoardingTarget.id });
+      } else {
+        setWeaponStatus("No disabled ship in boarding range.");
+      }
+    }
+    return;
+  }
+  if (event.key === "f" || event.key === "F") {
+    event.preventDefault();
+    if (!event.repeat) {
+      if (targetLockId) {
+        sendAction({ type: "escortCommand", command: "attack", targetId: targetLockId });
+      } else {
+        setWeaponStatus("No target locked for escorts.");
+      }
+    }
+    return;
+  }
+  if (event.key === "c" || event.key === "C") {
+    event.preventDefault();
+    if (!event.repeat) {
+      sendAction({ type: "escortCommand", command: "follow" });
+    }
+    return;
+  }
+  if (event.key === "v" || event.key === "V") {
+    event.preventDefault();
+    if (!event.repeat) {
+      sendAction({ type: "escortCommand", command: "hold" });
+    }
     return;
   }
   if (event.code === "Space") {
