@@ -80,9 +80,15 @@ const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
 const dockingRange = 70;
 const jumpMinimumDistance = 240;
+const jumpArrivalDistance = 360;
+const jumpArrivalSpeed = 180;
+const jumpAcceleration = 720;
+const jumpTurnRate = 7.5;
+const jumpMaxSpeed = 520;
 const miniMapRange = 520;
 const jumpDurations = {
-  spool: 0.6,
+  align: 0.3,
+  burn: 0.35,
   flash: 0.25,
   cooldown: 0.35
 };
@@ -103,7 +109,10 @@ const jumpState = {
   active: false,
   phase: "idle",
   startedAt: 0,
-  targetSystemId: null
+  targetSystemId: null,
+  headingX: 0,
+  headingY: 0,
+  targetAngle: 0
 };
 
 const weaponStyles = {
@@ -349,6 +358,17 @@ const hideLoginOverlay = () => {
 };
 
 const wrapOffset = (value, size) => ((value % size) + size) % size;
+
+const normalizeAngle = (angle) => {
+  let normalized = angle;
+  while (normalized > Math.PI) {
+    normalized -= Math.PI * 2;
+  }
+  while (normalized < -Math.PI) {
+    normalized += Math.PI * 2;
+  }
+  return normalized;
+};
 
 const resizeFlightCanvas = () => {
   const { clientWidth, clientHeight } = flightCanvas;
@@ -1080,10 +1100,26 @@ const renderShipIcon = (ctx, shipId, angle, options = {}) => {
 };
 
 const startJumpSequence = (targetSystemId) => {
+  const currentSystem = getCurrentSystem();
+  const targetSystem = getSystemById(targetSystemId);
+  let headingX = Math.cos(flightState.angle);
+  let headingY = Math.sin(flightState.angle);
+  if (currentSystem && targetSystem) {
+    const dx = targetSystem.x - currentSystem.x;
+    const dy = targetSystem.y - currentSystem.y;
+    const distance = Math.hypot(dx, dy);
+    if (distance > 0) {
+      headingX = dx / distance;
+      headingY = dy / distance;
+    }
+  }
   jumpState.active = true;
-  jumpState.phase = "spool";
+  jumpState.phase = "align";
   jumpState.startedAt = performance.now();
   jumpState.targetSystemId = targetSystemId;
+  jumpState.headingX = headingX;
+  jumpState.headingY = headingY;
+  jumpState.targetAngle = Math.atan2(headingY, headingX);
   setWeaponStatus("Hyperjump charging...");
 };
 
@@ -1092,7 +1128,10 @@ const updateJumpSequence = (now) => {
     return;
   }
   const elapsed = (now - jumpState.startedAt) / 1000;
-  if (jumpState.phase === "spool" && elapsed >= jumpDurations.spool) {
+  if (jumpState.phase === "align" && elapsed >= jumpDurations.align) {
+    jumpState.phase = "burn";
+    jumpState.startedAt = now;
+  } else if (jumpState.phase === "burn" && elapsed >= jumpDurations.burn) {
     jumpState.phase = "flash";
     jumpState.startedAt = now;
     if (jumpState.targetSystemId) {
@@ -1102,10 +1141,11 @@ const updateJumpSequence = (now) => {
       routePlan = routePlan.slice(1);
     }
     updateMapRoute();
-    flightState.x = 0;
-    flightState.y = 0;
-    flightState.vx = 0;
-    flightState.vy = 0;
+    flightState.x = -jumpState.headingX * jumpArrivalDistance;
+    flightState.y = -jumpState.headingY * jumpArrivalDistance;
+    flightState.vx = jumpState.headingX * jumpArrivalSpeed;
+    flightState.vy = jumpState.headingY * jumpArrivalSpeed;
+    flightState.angle = jumpState.targetAngle;
   } else if (jumpState.phase === "flash" && elapsed >= jumpDurations.flash) {
     jumpState.phase = "cooldown";
     jumpState.startedAt = now;
@@ -1113,6 +1153,9 @@ const updateJumpSequence = (now) => {
     jumpState.active = false;
     jumpState.phase = "idle";
     jumpState.targetSystemId = null;
+    jumpState.headingX = 0;
+    jumpState.headingY = 0;
+    jumpState.targetAngle = flightState.angle;
   }
 };
 
@@ -1158,11 +1201,32 @@ const updateFlight = (deltaSeconds) => {
   }
   const docked = Boolean(player.planetId);
   const isJumping = jumpState.active && jumpState.phase !== "cooldown";
-  const acceleration = docked || isJumping ? 0 : 220;
+  const acceleration = docked ? 0 : 220;
   const maxSpeed = docked ? 0 : 280;
-  const turnRate = docked || isJumping ? 0 : 2.6;
+  const turnRate = docked ? 0 : 2.6;
 
-  if (!docked && !isJumping) {
+  if (docked) {
+    flightState.vx = 0;
+    flightState.vy = 0;
+  } else if (isJumping) {
+    const angleDelta = normalizeAngle(jumpState.targetAngle - flightState.angle);
+    const maxTurn = jumpTurnRate * deltaSeconds;
+    if (Math.abs(angleDelta) <= maxTurn) {
+      flightState.angle = jumpState.targetAngle;
+    } else {
+      flightState.angle += Math.sign(angleDelta) * maxTurn;
+    }
+    if (jumpState.phase === "burn") {
+      flightState.vx += Math.cos(flightState.angle) * jumpAcceleration * deltaSeconds;
+      flightState.vy += Math.sin(flightState.angle) * jumpAcceleration * deltaSeconds;
+    }
+    const jumpSpeed = Math.hypot(flightState.vx, flightState.vy);
+    if (jumpSpeed > jumpMaxSpeed) {
+      const scale = jumpMaxSpeed / jumpSpeed;
+      flightState.vx *= scale;
+      flightState.vy *= scale;
+    }
+  } else {
     const turningLeft = keysPressed.has("ArrowLeft") || keysPressed.has("a");
     const turningRight = keysPressed.has("ArrowRight") || keysPressed.has("d");
     const turnDirection = Number(turningRight) - Number(turningLeft);
@@ -1177,16 +1241,13 @@ const updateFlight = (deltaSeconds) => {
     }
   }
 
-  const speed = Math.hypot(flightState.vx, flightState.vy);
-  if (speed > maxSpeed && maxSpeed > 0) {
-    const scale = maxSpeed / speed;
-    flightState.vx *= scale;
-    flightState.vy *= scale;
-  }
-
-  if (docked) {
-    flightState.vx = 0;
-    flightState.vy = 0;
+  if (!docked && !isJumping) {
+    const speed = Math.hypot(flightState.vx, flightState.vy);
+    if (speed > maxSpeed && maxSpeed > 0) {
+      const scale = maxSpeed / speed;
+      flightState.vx *= scale;
+      flightState.vy *= scale;
+    }
   }
 
   flightState.x += flightState.vx * deltaSeconds;
@@ -1369,13 +1430,13 @@ const renderFlight = (now) => {
 
   if (jumpState.active) {
     const elapsed = (now - jumpState.startedAt) / 1000;
-    const spoolIntensity =
-      jumpState.phase === "spool" ? Math.min(elapsed / jumpDurations.spool, 1) : 1;
-    ctx.strokeStyle = `rgba(210, 230, 255, ${0.5 * spoolIntensity})`;
+    const chargeProgress =
+      jumpState.phase === "align" ? Math.min(elapsed / jumpDurations.align, 1) : 1;
+    ctx.strokeStyle = `rgba(210, 230, 255, ${0.5 * chargeProgress})`;
     ctx.lineWidth = 1.2;
     for (let i = 0; i < 40; i += 1) {
       const angle = (Math.PI * 2 * i) / 40;
-      const length = 40 + 120 * spoolIntensity;
+      const length = 40 + 120 * chargeProgress;
       ctx.beginPath();
       ctx.moveTo(centerX + Math.cos(angle) * 10, centerY + Math.sin(angle) * 10);
       ctx.lineTo(centerX + Math.cos(angle) * length, centerY + Math.sin(angle) * length);
