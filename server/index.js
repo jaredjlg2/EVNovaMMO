@@ -12,6 +12,7 @@ const {
   persistPlayer,
   updatePosition,
   fireWeapons,
+  fireSecondaryWeapon,
   tickWorld,
   jumpSystem,
   dockPlanet,
@@ -204,10 +205,8 @@ const handleAction = (player, action, socket) => {
       shouldPersist = hitReport.hits.length > 0;
       break;
     case "fireSecondary":
-      hitReport = fireWeapons(player, action, player.secondaryWeapons, {
-        allowFallback: false
-      });
-      shouldPersist = hitReport.hits.length > 0;
+      hitReport = fireSecondaryWeapon(player, action);
+      shouldPersist = hitReport.fired || hitReport.hits.length > 0;
       break;
     default:
       break;
@@ -222,7 +221,10 @@ const handleAction = (player, action, socket) => {
     player: getPlayerState(player)
   });
 
-  if (action.type === "fire" || action.type === "fireSecondary") {
+  if (
+    (action.type === "fire" || action.type === "fireSecondary") &&
+    hitReport.weaponsFired.length > 0
+  ) {
     broadcast({
       type: "fire",
       shooterId: player.id,
@@ -230,7 +232,8 @@ const handleAction = (player, action, socket) => {
       x: player.x,
       y: player.y,
       angle: player.angle,
-      weapons: hitReport.weaponsFired
+      weapons: hitReport.weaponsFired,
+      targetId: hitReport.targetId || null
     });
   }
 

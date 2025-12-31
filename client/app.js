@@ -27,6 +27,7 @@ const flightCanvas = document.getElementById("flightCanvas");
 const flightStatusEl = document.getElementById("flightStatus");
 const dockPromptEl = document.getElementById("dockPrompt");
 const weaponStatusEl = document.getElementById("weaponStatus");
+const secondaryStatusEl = document.getElementById("secondaryStatus");
 const mapOverlayEl = document.getElementById("mapOverlay");
 const mapCanvas = document.getElementById("mapCanvas");
 const mapRouteEl = document.getElementById("mapRoute");
@@ -73,6 +74,7 @@ let activeDockedSection = null;
 let lastDockedPlanetId = null;
 let targetLockId = null;
 let missionLogOpen = false;
+let selectedSecondaryIndex = 0;
 
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
@@ -109,6 +111,7 @@ const weaponStyles = {
   ion_blaster: { color: "#7ad8ff", glow: "rgba(180, 240, 255, 0.9)", width: 2, length: 16 },
   rail_cannon: { color: "#ffd37a", glow: "rgba(255, 231, 176, 0.95)", width: 3, length: 22 },
   sting_missile: { color: "#ff8b5c", glow: "rgba(255, 160, 120, 0.95)", width: 3, length: 26 },
+  radar_missile: { color: "#f4ff7a", glow: "rgba(240, 255, 170, 0.95)", width: 3, length: 24 },
   viper_rockets: { color: "#9cff8f", glow: "rgba(170, 255, 190, 0.9)", width: 3, length: 24 },
   thunder_torpedo: { color: "#b39cff", glow: "rgba(190, 170, 255, 0.9)", width: 4, length: 28 }
 };
@@ -189,6 +192,83 @@ const getShipTradeInValue = () => {
   return Math.round(currentShip.price * 0.6);
 };
 
+const getWeaponById = (weaponId) => {
+  if (!world || !weaponId) {
+    return null;
+  }
+  return world.weapons.find((weapon) => weapon.id === weaponId) || null;
+};
+
+const getSecondaryWeaponOptions = () => {
+  if (!player) {
+    return [];
+  }
+  const seen = new Set();
+  return player.secondaryWeapons.filter((weaponId) => {
+    if (seen.has(weaponId)) {
+      return false;
+    }
+    seen.add(weaponId);
+    return true;
+  });
+};
+
+const getSelectedSecondaryWeaponId = () => {
+  const options = getSecondaryWeaponOptions();
+  if (options.length === 0) {
+    return null;
+  }
+  if (selectedSecondaryIndex >= options.length) {
+    selectedSecondaryIndex = 0;
+  }
+  return options[selectedSecondaryIndex];
+};
+
+const getSecondaryAmmoCount = (ammoId) =>
+  Math.max(0, player?.secondaryAmmo?.[ammoId] ?? 0);
+
+const updateSecondaryStatus = () => {
+  if (!secondaryStatusEl) {
+    return;
+  }
+  if (!player || !world || !isLoggedIn) {
+    secondaryStatusEl.textContent = "";
+    return;
+  }
+  const selectedId = getSelectedSecondaryWeaponId();
+  if (!selectedId) {
+    secondaryStatusEl.textContent = "Secondary: None";
+    return;
+  }
+  const weapon = getWeaponById(selectedId);
+  if (!weapon) {
+    secondaryStatusEl.textContent = "Secondary: Offline";
+    return;
+  }
+  let status = `Secondary: ${weapon.name}`;
+  if (weapon.ammoType) {
+    const ammoWeapon = getWeaponById(weapon.ammoType);
+    const ammoName = ammoWeapon?.name || "Ammo";
+    const ammoCount = getSecondaryAmmoCount(weapon.ammoType);
+    status += ` · ${ammoName}: ${ammoCount}`;
+  }
+  secondaryStatusEl.textContent = status;
+};
+
+const cycleSecondaryWeapon = () => {
+  if (!player || !isLoggedIn) {
+    return;
+  }
+  const options = getSecondaryWeaponOptions();
+  if (options.length === 0) {
+    setWeaponStatus("No secondary weapons installed.");
+    updateSecondaryStatus();
+    return;
+  }
+  selectedSecondaryIndex = (selectedSecondaryIndex + 1) % options.length;
+  updateSecondaryStatus();
+};
+
 const getCargoUsed = () => {
   if (!player) {
     return 0;
@@ -258,6 +338,9 @@ const showLoginOverlay = (message = "") => {
   loginOverlayEl.classList.remove("hidden");
   loginErrorEl.textContent = message;
   flightStatusEl.textContent = "Awaiting login…";
+  if (secondaryStatusEl) {
+    secondaryStatusEl.textContent = "";
+  }
   renderPilotHints();
 };
 
@@ -558,7 +641,7 @@ const spawnProjectiles = (
   angle,
   weaponIds,
   ownerId = null,
-  { allowFallback = true } = {}
+  { allowFallback = true, targetId = null } = {}
 ) => {
   const resolvedWeapons = weaponIds.length > 0 ? weaponIds : allowFallback ? ["pulse_laser"] : [];
   if (resolvedWeapons.length === 0) {
@@ -572,19 +655,28 @@ const spawnProjectiles = (
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
   resolvedWeapons.forEach((weaponId, index) => {
+    const weapon = getWeaponById(weaponId);
     const style = weaponStyles[weaponId] || weaponStyles.pulse_laser;
+    const speed = weapon?.projectileSpeed ?? 520;
+    const life = weapon?.projectileLife ?? 0.8;
+    const turnRate = weapon?.turnRate ?? 0;
+    const isHoming = Boolean(weapon?.homing && targetId);
     const lateral = lateralOffsets[index];
     const spawnX = originX + cos * forwardOffset - sin * lateral;
     const spawnY = originY + sin * forwardOffset + cos * lateral;
     projectiles.push({
       x: spawnX,
       y: spawnY,
-      vx: cos * 520,
-      vy: sin * 520,
-      life: 0.8,
+      vx: cos * speed,
+      vy: sin * speed,
+      life,
       angle,
       style,
-      ownerId
+      ownerId,
+      speed,
+      turnRate,
+      homing: isHoming,
+      targetId: isHoming ? targetId : null
     });
   });
 };
@@ -623,20 +715,47 @@ const fireSecondaryWeapons = () => {
   if (!player || !isLoggedIn || player.planetId) {
     return false;
   }
-  if (!player.secondaryWeapons || player.secondaryWeapons.length === 0) {
+  const selectedWeaponId = getSelectedSecondaryWeaponId();
+  if (!selectedWeaponId) {
     setWeaponStatus("No secondary weapons installed.");
     return false;
   }
-  const weaponIds = player.secondaryWeapons;
-  spawnProjectiles(flightState.x, flightState.y, flightState.angle, weaponIds, player.id, {
-    allowFallback: false
-  });
+  const weapon = getWeaponById(selectedWeaponId);
+  if (!weapon) {
+    setWeaponStatus("Secondary weapon offline.");
+    return false;
+  }
+  if (weapon.requiresLock && !targetLockId) {
+    setWeaponStatus("No target lock for radar missiles.");
+    return false;
+  }
+  if (weapon.ammoType) {
+    const ammoCount = getSecondaryAmmoCount(weapon.ammoType);
+    if (ammoCount <= 0) {
+      setWeaponStatus(`${weapon.name} out of ammo.`);
+      return false;
+    }
+  }
+  const projectileId = weapon.projectileId || weapon.ammoType || selectedWeaponId;
+  spawnProjectiles(
+    flightState.x,
+    flightState.y,
+    flightState.angle,
+    [projectileId],
+    player.id,
+    {
+      allowFallback: false,
+      targetId: weapon.requiresLock ? targetLockId : null
+    }
+  );
   sendAction({
     type: "fireSecondary",
     x: flightState.x,
     y: flightState.y,
     angle: flightState.angle,
-    systemId: player.systemId
+    systemId: player.systemId,
+    secondaryWeaponId: selectedWeaponId,
+    targetId: weapon.requiresLock ? targetLockId : null
   });
   return true;
 };
@@ -827,6 +946,19 @@ const updateProjectiles = (deltaSeconds) => {
   const targets = getProjectileTargets();
   for (let i = projectiles.length - 1; i >= 0; i -= 1) {
     const projectile = projectiles[i];
+    if (projectile.homing && projectile.targetId) {
+      const target = targets.find((entry) => entry.id === projectile.targetId);
+      if (target) {
+        const desiredAngle = Math.atan2(target.y - projectile.y, target.x - projectile.x);
+        const turnSpeed = projectile.turnRate ?? 0;
+        projectile.angle = turnSpeed
+          ? lerpAngle(projectile.angle, desiredAngle, Math.min(1, turnSpeed * deltaSeconds))
+          : desiredAngle;
+        const speed = projectile.speed ?? Math.hypot(projectile.vx, projectile.vy);
+        projectile.vx = Math.cos(projectile.angle) * speed;
+        projectile.vy = Math.sin(projectile.angle) * speed;
+      }
+    }
     projectile.x += projectile.vx * deltaSeconds;
     projectile.y += projectile.vy * deltaSeconds;
     projectile.life -= deltaSeconds;
@@ -849,6 +981,14 @@ const updateProjectiles = (deltaSeconds) => {
       }
     }
     if (projectile.life <= 0 || hitTarget) {
+      if (projectile.life <= 0 && projectile.homing) {
+        spawnExplosion(projectile.x, projectile.y, {
+          maxLife: 0.3,
+          maxRadius: 20,
+          color: "#ffe97a",
+          glow: "#ffc65f"
+        });
+      }
       projectiles.splice(i, 1);
     }
   }
@@ -1030,7 +1170,7 @@ const updateFlight = (deltaSeconds) => {
       flightState.angle += turnDirection * turnRate * deltaSeconds;
     }
 
-    const boosting = keysPressed.has("ArrowUp") || keysPressed.has("w");
+    const boosting = keysPressed.has("ArrowUp");
     if (boosting) {
       flightState.vx += Math.cos(flightState.angle) * acceleration * deltaSeconds;
       flightState.vy += Math.sin(flightState.angle) * acceleration * deltaSeconds;
@@ -1402,17 +1542,25 @@ const renderWeapons = () => {
   weaponListEl.innerHTML = "";
   secondaryWeaponListEl.innerHTML = "";
   world.weapons.forEach((weapon) => {
-    const isSecondary = weapon.slotType === "secondary";
+    const isSecondary = weapon.slotType === "secondary" || weapon.slotType === "secondaryAmmo";
+    const isAmmo = weapon.slotType === "secondaryAmmo";
     const installed = isSecondary
-      ? player.secondaryWeapons.filter((id) => id === weapon.id).length
+      ? isAmmo
+        ? getSecondaryAmmoCount(weapon.id)
+        : player.secondaryWeapons.filter((id) => id === weapon.id).length
       : player.weapons.filter((id) => id === weapon.id).length;
+    const installedLabel = isAmmo ? "Ammo" : "Installed";
+    const ammoForLabel = weapon.ammoFor
+      ? getWeaponById(weapon.ammoFor)?.name || "Launcher"
+      : "";
     const card = document.createElement("div");
     card.className = "list-item";
     card.innerHTML = `
       <h4>${weapon.name}</h4>
       <p>Damage: ${weapon.damage} · Energy: ${weapon.energyCost}</p>
       <p>${formatCredits(weapon.price)}</p>
-      <p>Installed: ${installed}</p>
+      ${weapon.ammoFor ? `<p>Ammo for: ${ammoForLabel}</p>` : ""}
+      <p>${installedLabel}: ${installed}</p>
     `;
     const buyBtn = document.createElement("button");
     buyBtn.textContent = "Buy";
@@ -1736,6 +1884,7 @@ const refreshUi = () => {
   renderDockedInfo();
   renderLog();
   renderMissionLog();
+  updateSecondaryStatus();
   updateMapRoute();
   if (mapOpen) {
     renderMap();
@@ -1848,6 +1997,7 @@ const connect = () => {
       world = payload.world;
       loadShipSprites(world?.ships || []);
       player = payload.player;
+      selectedSecondaryIndex = 0;
       updatePresencePlayers(payload.players || []);
       isLoggedIn = true;
       saveStoredPilot(player.name);
@@ -1883,7 +2033,10 @@ const connect = () => {
       }
       const weaponIds = Array.isArray(payload.weapons) ? payload.weapons : [];
       const ownerId = payload.shooterId || null;
-      spawnProjectiles(originX, originY, angle, weaponIds, ownerId, { allowFallback: false });
+      spawnProjectiles(originX, originY, angle, weaponIds, ownerId, {
+        allowFallback: false,
+        targetId: payload.targetId || null
+      });
     }
     if (payload.type === "destroyed") {
       if (payload.systemId && player?.systemId !== payload.systemId) {
@@ -1978,6 +2131,13 @@ window.addEventListener("keydown", (event) => {
     }
     return;
   }
+  if (event.key === "w" || event.key === "W") {
+    event.preventDefault();
+    if (!mapOpen && !event.repeat) {
+      cycleSecondaryWeapon();
+    }
+    return;
+  }
   if (mapOpen) {
     return;
   }
@@ -2012,7 +2172,7 @@ window.addEventListener("keydown", (event) => {
     }
     return;
   }
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(event.key)) {
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "a", "s", "d"].includes(event.key)) {
     keysPressed.add(event.key);
     event.preventDefault();
   }
