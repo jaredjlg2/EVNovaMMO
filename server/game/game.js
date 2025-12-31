@@ -963,6 +963,7 @@ const captureShip = (player, targetId, decision) => {
     ...getEscortSummary(ship),
     mode: ship.ai.escortMode
   });
+  moveEscortsToPlayer(player);
   appendLog(player, `Captured ${ship.name} and added it as an escort.`);
   return { ok: true, message: "Ship captured and assigned as escort." };
 };
