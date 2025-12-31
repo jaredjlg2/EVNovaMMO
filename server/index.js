@@ -33,7 +33,8 @@ const {
   getBoardingData,
   stealBoardingLoot,
   captureShip,
-  removeEscortFromPlayer
+  removeEscortFromPlayer,
+  releaseEscort
 } = require("./game/game");
 const { removeAiShip } = require("./game/ai");
 
@@ -222,6 +223,36 @@ const handleAction = (player, action, socket) => {
     case "escortCommand":
       setEscortCommand(player, action.command, action.targetId || null);
       break;
+    case "releaseEscort":
+      releaseEscort(player, action.escortId);
+      break;
+    case "commsMessage": {
+      const targetId = action.targetId;
+      const message = `${action.message || ""}`.trim();
+      if (!targetId || !message) {
+        shouldPersist = false;
+        shouldBroadcast = false;
+        return;
+      }
+      const targetPlayer = getPlayer(targetId);
+      if (!targetPlayer) {
+        shouldPersist = false;
+        shouldBroadcast = false;
+        return;
+      }
+      const targetSocket = connections.get(targetId);
+      if (targetSocket) {
+        sendTo(targetSocket, {
+          type: "commsMessage",
+          fromId: player.id,
+          fromName: player.name,
+          message
+        });
+      }
+      shouldPersist = false;
+      shouldBroadcast = false;
+      break;
+    }
     case "boardShip": {
       const report = getBoardingData(player, action.targetId);
       if (!report.ok) {

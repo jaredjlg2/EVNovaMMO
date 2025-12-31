@@ -38,7 +38,15 @@ const closeMapBtn = document.getElementById("closeMapBtn");
 const clearRouteBtn = document.getElementById("clearRouteBtn");
 const missionLogOverlayEl = document.getElementById("missionLogOverlay");
 const missionLogListEl = document.getElementById("missionLogList");
+const missionLogEscortListEl = document.getElementById("missionLogEscortList");
 const closeMissionLogBtn = document.getElementById("closeMissionLogBtn");
+const commsOverlayEl = document.getElementById("commsOverlay");
+const commsTargetNameEl = document.getElementById("commsTargetName");
+const commsTargetHintEl = document.getElementById("commsTargetHint");
+const commsLogEl = document.getElementById("commsLog");
+const commsInputEl = document.getElementById("commsInput");
+const commsSendBtn = document.getElementById("commsSendBtn");
+const closeCommsBtn = document.getElementById("closeCommsBtn");
 const boardingOverlayEl = document.getElementById("boardingOverlay");
 const boardingTargetNameEl = document.getElementById("boardingTargetName");
 const boardingStatusEl = document.getElementById("boardingStatus");
@@ -89,6 +97,11 @@ let missionLogOpen = false;
 let selectedSecondaryIndex = 0;
 let boardingData = null;
 let currentBoardingTarget = null;
+let commsOpen = false;
+let commsTargetId = null;
+let commsTargetIsAi = false;
+let commsTargetName = "";
+const commsThreads = new Map();
 const mapView = {
   zoom: 1,
   panX: 0,
@@ -120,6 +133,15 @@ const mapZoom = {
   min: 0.6,
   max: 2.6
 };
+
+const commsAiResponses = [
+  "Signal steady. State your business, pilot.",
+  "We read you. Maintain your course.",
+  "Keep your distance and we won't have trouble.",
+  "Static bursts over the channel. Say again?",
+  "Acknowledged. Safe travels.",
+  "No response beyond carrier noise..."
+];
 
 const flightState = {
   x: 0,
@@ -491,6 +513,97 @@ const setMissionLogOpen = (nextState) => {
   missionLogOverlayEl.classList.toggle("hidden", !missionLogOpen);
   if (missionLogOpen) {
     renderMissionLog();
+  }
+};
+
+const getCommsThread = (targetId) => {
+  if (!commsThreads.has(targetId)) {
+    commsThreads.set(targetId, []);
+  }
+  return commsThreads.get(targetId);
+};
+
+const renderCommsLog = () => {
+  if (!commsLogEl || !commsTargetId) {
+    return;
+  }
+  const thread = getCommsThread(commsTargetId);
+  if (thread.length === 0) {
+    commsLogEl.innerHTML = "<p class=\"mission-log-empty\">No transmissions yet.</p>";
+    return;
+  }
+  commsLogEl.innerHTML = "";
+  thread.forEach((message) => {
+    const card = document.createElement("div");
+    card.className = `list-item comms-message ${message.incoming ? "incoming" : "outgoing"}`;
+    card.innerHTML = `
+      <span>${message.sender}</span>
+      <p>${message.text}</p>
+    `;
+    commsLogEl.appendChild(card);
+  });
+  commsLogEl.scrollTop = commsLogEl.scrollHeight;
+};
+
+const addCommsMessage = (targetId, message) => {
+  const thread = getCommsThread(targetId);
+  thread.push(message);
+  if (commsOpen && commsTargetId === targetId) {
+    renderCommsLog();
+  }
+};
+
+const addAiCommsReply = () => {
+  const reply = commsAiResponses[Math.floor(Math.random() * commsAiResponses.length)];
+  addCommsMessage(commsTargetId, {
+    sender: commsTargetName || "Unknown Contact",
+    text: reply,
+    incoming: true
+  });
+};
+
+const setCommsOpen = (nextState, target = null) => {
+  if (!commsOverlayEl) {
+    return;
+  }
+  const nextOpen = typeof nextState === "boolean" ? nextState : !commsOpen;
+  commsOpen = nextOpen;
+  commsOverlayEl.classList.toggle("hidden", !commsOpen);
+  if (!commsOpen) {
+    commsTargetId = null;
+    commsTargetIsAi = false;
+    commsTargetName = "";
+    return;
+  }
+  if (!target) {
+    return;
+  }
+  commsTargetId = target.id;
+  commsTargetIsAi = Boolean(target.isAi);
+  commsTargetName = target.name ?? "Unknown Contact";
+  if (commsTargetNameEl) {
+    commsTargetNameEl.textContent = `Channel: ${commsTargetName}`;
+  }
+  if (commsTargetHintEl) {
+    commsTargetHintEl.textContent = commsTargetIsAi
+      ? "Automated pilot chatter incoming."
+      : "Direct comms open. Messages are private.";
+  }
+  const thread = getCommsThread(commsTargetId);
+  if (thread.length === 0) {
+    addCommsMessage(commsTargetId, {
+      sender: "Channel",
+      text: `Link established with ${commsTargetName}.`,
+      incoming: true
+    });
+    if (commsTargetIsAi) {
+      addAiCommsReply();
+    }
+  } else {
+    renderCommsLog();
+  }
+  if (commsInputEl) {
+    commsInputEl.focus();
   }
 };
 
@@ -2008,11 +2121,13 @@ const renderLog = () => {
 };
 
 const renderMissionLog = () => {
-  if (!missionLogListEl) {
+  if (!missionLogListEl || !missionLogEscortListEl) {
     return;
   }
   if (!player || !world) {
     missionLogListEl.innerHTML = "<p class=\"mission-log-empty\">Log in to view missions.</p>";
+    missionLogEscortListEl.innerHTML =
+      "<p class=\"mission-log-empty\">Log in to view escorts.</p>";
     return;
   }
   const activeMissions = (player.missions || []).filter(
@@ -2020,20 +2135,47 @@ const renderMissionLog = () => {
   );
   if (activeMissions.length === 0) {
     missionLogListEl.innerHTML = "<p class=\"mission-log-empty\">No active missions.</p>";
+  } else {
+    missionLogListEl.innerHTML = "";
+    activeMissions.forEach((mission) => {
+      const planet = getPlanetById(mission.toPlanetId);
+      const system = planet ? getSystemById(planet.systemId) : null;
+      const card = document.createElement("div");
+      card.className = "list-item";
+      card.innerHTML = `
+        <h4>${mission.title}</h4>
+        <p>Destination: ${system?.name ?? "Unknown System"} · ${planet?.name ?? "Unknown Planet"}</p>
+        <p>Reward: ${formatCredits(mission.reward)}</p>
+      `;
+      missionLogListEl.appendChild(card);
+    });
+  }
+
+  const escorts = player.escorts || [];
+  if (escorts.length === 0) {
+    missionLogEscortListEl.innerHTML =
+      "<p class=\"mission-log-empty\">No escorts under contract.</p>";
     return;
   }
-  missionLogListEl.innerHTML = "";
-  activeMissions.forEach((mission) => {
-    const planet = getPlanetById(mission.toPlanetId);
-    const system = planet ? getSystemById(planet.systemId) : null;
+  missionLogEscortListEl.innerHTML = "";
+  escorts.forEach((escort) => {
     const card = document.createElement("div");
     card.className = "list-item";
+    const rateLine = escort.hired
+      ? `Daily rate: ${formatCredits(escort.dailyRate || 0)}`
+      : "Captured escort · No daily rate";
     card.innerHTML = `
-      <h4>${mission.title}</h4>
-      <p>Destination: ${system?.name ?? "Unknown System"} · ${planet?.name ?? "Unknown Planet"}</p>
-      <p>Reward: ${formatCredits(mission.reward)}</p>
+      <h4>${escort.name}</h4>
+      <p>Cargo: ${escort.ship?.cargo ?? 0} · ${rateLine}</p>
+      <p>Status: ${escort.mode || "follow"}</p>
     `;
-    missionLogListEl.appendChild(card);
+    const releaseBtn = document.createElement("button");
+    releaseBtn.textContent = "Release";
+    releaseBtn.addEventListener("click", () => {
+      sendAction({ type: "releaseEscort", escortId: escort.id });
+    });
+    card.appendChild(releaseBtn);
+    missionLogEscortListEl.appendChild(card);
   });
 };
 
@@ -2111,6 +2253,25 @@ const renderBar = (escortsForHire = [], currentEscorts = []) => {
     `;
     barEscortRosterEl.appendChild(card);
   });
+};
+
+const sendCommsMessage = () => {
+  if (!commsTargetId || !commsInputEl) {
+    return;
+  }
+  const message = commsInputEl.value.trim();
+  if (!message) {
+    return;
+  }
+  addCommsMessage(commsTargetId, { sender: "You", text: message, incoming: false });
+  commsInputEl.value = "";
+  if (commsTargetIsAi) {
+    setTimeout(() => {
+      addAiCommsReply();
+    }, 200);
+    return;
+  }
+  sendAction({ type: "commsMessage", targetId: commsTargetId, message });
 };
 
 const updateBoardingActions = (data) => {
@@ -2344,6 +2505,7 @@ const connect = () => {
     presenceSnapshots.clear();
     targetLockId = null;
     hideBoardingOverlay();
+    setCommsOpen(false);
     pilotNameDisplayEl.textContent = "";
     showLoginOverlay("Connection lost. Please reconnect.");
   });
@@ -2360,6 +2522,7 @@ const connect = () => {
       targetLockId = null;
       hideBoardingOverlay();
       setMissionLogOpen(false);
+      setCommsOpen(false);
       showLoginOverlay(payload.message || "");
       return;
     }
@@ -2428,6 +2591,7 @@ const connect = () => {
         explosions.length = 0;
         targetLockId = null;
         hideBoardingOverlay();
+        setCommsOpen(false);
         showLoginOverlay("Ship destroyed. Re-login to respawn.");
       }
     }
@@ -2456,6 +2620,17 @@ const connect = () => {
       }
       if (payload.closeBoarding || payload.success) {
         hideBoardingOverlay();
+      }
+    }
+    if (payload.type === "commsMessage") {
+      const senderName = payload.fromName || "Unknown Contact";
+      const senderId = payload.fromId || "";
+      if (!senderId) {
+        return;
+      }
+      addCommsMessage(senderId, { sender: senderName, text: payload.message, incoming: true });
+      if (!commsOpen || commsTargetId !== senderId) {
+        setWeaponStatus(`Incoming transmission from ${senderName}.`);
       }
     }
   });
@@ -2579,6 +2754,27 @@ window.addEventListener("keydown", (event) => {
   if (mapOpen) {
     return;
   }
+  if (event.key === "y" || event.key === "Y") {
+    event.preventDefault();
+    if (event.repeat) {
+      return;
+    }
+    if (commsOpen) {
+      setCommsOpen(false);
+      return;
+    }
+    if (!targetLockId) {
+      setWeaponStatus("No target locked for comms.");
+      return;
+    }
+    const target = getTargetCandidates().find((other) => other.id === targetLockId);
+    if (!target) {
+      setWeaponStatus("Target no longer in range.");
+      return;
+    }
+    setCommsOpen(true, target);
+    return;
+  }
   if (event.key === "b" || event.key === "B") {
     event.preventDefault();
     if (!event.repeat) {
@@ -2676,6 +2872,20 @@ mapCanvas.addEventListener("mouseleave", handleMapPanEnd);
 closeMapBtn.addEventListener("click", () => setMapOpen(false));
 if (closeMissionLogBtn) {
   closeMissionLogBtn.addEventListener("click", () => setMissionLogOpen(false));
+}
+if (closeCommsBtn) {
+  closeCommsBtn.addEventListener("click", () => setCommsOpen(false));
+}
+if (commsSendBtn) {
+  commsSendBtn.addEventListener("click", () => sendCommsMessage());
+}
+if (commsInputEl) {
+  commsInputEl.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sendCommsMessage();
+    }
+  });
 }
 clearRouteBtn.addEventListener("click", () => {
   routePlan = [];

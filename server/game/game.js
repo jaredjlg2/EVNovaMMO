@@ -154,6 +154,18 @@ const removeEscortFromPlayer = (player, escortId) => {
   player.escorts = (player.escorts || []).filter((escort) => escort.id !== escortId);
 };
 
+const releaseEscort = (player, escortId) => {
+  const escorts = player.escorts || [];
+  const escort = escorts.find((entry) => entry.id === escortId);
+  if (!escort) {
+    appendLog(player, "No escort found to release.");
+    return;
+  }
+  removeAiShip(escortId);
+  removeEscortFromPlayer(player, escortId);
+  appendLog(player, `Released escort: ${escort.name}.`);
+};
+
 const applyEscortDailyRate = (player, reason) => {
   const hiredEscorts = (player.escorts || []).filter((escort) => escort.hired);
   if (hiredEscorts.length === 0) {
@@ -1236,5 +1248,6 @@ module.exports = {
   getBoardingData,
   stealBoardingLoot,
   captureShip,
+  releaseEscort,
   removeEscortFromPlayer
 };
