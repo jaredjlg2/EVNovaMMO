@@ -14,7 +14,9 @@ const missionDetailEl = document.getElementById("missionDetail");
 const dockedPanelEl = document.getElementById("dockedPanel");
 const dockedInfoEl = document.getElementById("dockedInfo");
 const dockedMenuEl = document.getElementById("dockedMenu");
-const dockedBackBtn = document.getElementById("dockedBackBtn");
+const dockedModalEl = document.getElementById("dockedModal");
+const dockedModalTitleEl = document.getElementById("dockedModalTitle");
+const dockedModalCloseBtn = document.getElementById("dockedModalClose");
 const dockedMenuMissionBtn = document.getElementById("dockedMenuMissions");
 const dockedMenuTradingBtn = document.getElementById("dockedMenuTrading");
 const dockedMenuOutfitterBtn = document.getElementById("dockedMenuOutfitter");
@@ -2637,15 +2639,22 @@ const hideBoardingOverlay = () => {
 
 const setDockedSection = (section) => {
   activeDockedSection = section;
-  if (dockedMenuEl) {
-    dockedMenuEl.classList.toggle("hidden", Boolean(section));
+  if (dockedModalEl) {
+    dockedModalEl.classList.toggle("hidden", !section);
   }
-  if (dockedBackBtn) {
-    dockedBackBtn.classList.toggle("hidden", !section);
+  if (dockedModalTitleEl) {
+    const activeButton = dockedMenuButtons.find((button) => button?.dataset.section === section);
+    dockedModalTitleEl.textContent = activeButton?.textContent?.trim() || "Docked Service";
   }
   dockedSectionEls.forEach((el) => {
     const isActive = el.dataset.section === section;
     el.classList.toggle("hidden", !isActive);
+  });
+  dockedMenuButtons.forEach((button) => {
+    if (!button) {
+      return;
+    }
+    button.classList.toggle("active", button.dataset.section === section);
   });
   if (section === "bar") {
     sendAction({ type: "requestBar" });
@@ -2944,8 +2953,8 @@ dockedMenuButtons.forEach((button) => {
   });
 });
 
-if (dockedBackBtn) {
-  dockedBackBtn.addEventListener("click", () => {
+if (dockedModalCloseBtn) {
+  dockedModalCloseBtn.addEventListener("click", () => {
     setDockedSection(null);
   });
 }
@@ -3014,28 +3023,10 @@ if (boardingEscortBtn) {
 }
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
+  if (event.key === "Escape" && activeDockedSection) {
     event.preventDefault();
-    if (commsOpen) {
-      setCommsOpen(false);
-      return;
-    }
-    if (boardingOverlayEl && !boardingOverlayEl.classList.contains("hidden")) {
-      hideBoardingOverlay();
-      return;
-    }
-    if (missionLogOpen) {
-      setMissionLogOpen(false);
-      return;
-    }
-    if (mapOpen) {
-      setMapOpen(false);
-      return;
-    }
-    if (activeDockedSection) {
-      setDockedSection(null);
-      return;
-    }
+    setDockedSection(null);
+    return;
   }
   if (event.key === "m" || event.key === "M") {
     event.preventDefault();
