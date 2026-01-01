@@ -2,6 +2,7 @@ const { systems, planets, ships, factions, goods } = require("./data");
 
 const aiShips = new Map();
 const shipById = new Map(ships.map((ship) => [ship.id, ship]));
+const systemById = new Map(systems.map((system) => [system.id, system]));
 
 const planetPositions = new Map();
 const buildPlanetPositions = () => {
@@ -311,15 +312,46 @@ const beginExit = (ship, now) => {
   ship.ai.stateUntil = now + randomRange(8000, 14000);
 };
 
+const addWeight = (weights, factionId, amount) => {
+  if (!factionId || !amount) {
+    return;
+  }
+  weights[factionId] = (weights[factionId] ?? 0) + amount;
+};
+
 const getSystemFactionWeights = (system) => {
   const weights = {};
-  if (system.factionId) {
-    weights[system.factionId] = system.status === "core" ? 6 : 4;
-  }
+  const status = system.status ?? "frontier";
+  const baseWeight = status === "core" ? 7 : status === "border" ? 5 : 4;
+  addWeight(weights, system.factionId, baseWeight);
   (system.disputedWith || []).forEach((factionId) => {
-    weights[factionId] = (weights[factionId] ?? 0) + 3;
+    addWeight(weights, factionId, 4);
   });
-  weights.free_horizons_guild = system.status === "border" ? 3 : 4;
+  const neighborFactions = new Set();
+  (system.links || []).forEach((linkId) => {
+    const neighborFactionId = systemById.get(linkId)?.factionId;
+    if (neighborFactionId) {
+      neighborFactions.add(neighborFactionId);
+    }
+  });
+  neighborFactions.forEach((factionId) => {
+    addWeight(weights, factionId, status === "core" ? 1.5 : 2.5);
+  });
+  if (!system.factionId) {
+    factions.forEach((faction) => {
+      addWeight(weights, faction.id, 0.6);
+    });
+  }
+  addWeight(
+    weights,
+    "black_flag_syndicate",
+    status === "frontier" ? 4 : status === "border" ? 2.5 : 1.5
+  );
+  addWeight(
+    weights,
+    "free_horizons_guild",
+    status === "core" ? 1.5 : status === "border" ? 2.5 : 3
+  );
   return weights;
 };
 
@@ -604,14 +636,7 @@ const isHostile = (system, ship, other) => {
   if (!ship.factionId || !other.factionId) {
     return false;
   }
-  if (ship.factionId === "free_horizons_guild" || other.factionId === "free_horizons_guild") {
-    return false;
-  }
-  if (ship.factionId === other.factionId) {
-    return false;
-  }
-  const contested = new Set([system.factionId, ...(system.disputedWith || [])]);
-  return contested.has(ship.factionId) && contested.has(other.factionId);
+  return ship.factionId !== other.factionId;
 };
 
 const findHostileTarget = (system, ship, candidates) => {
@@ -798,7 +823,7 @@ const tickAiShips = (deltaSeconds, players = []) => {
 
   shipsBySystem.forEach((shipsInSystem, systemId) => {
     const system = systems.find((entry) => entry.id === systemId);
-    if (!system || !system.disputedWith || system.disputedWith.length === 0) {
+    if (!system) {
       return;
     }
     shipsInSystem.forEach((ship) => {
