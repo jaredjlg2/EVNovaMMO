@@ -1,6 +1,7 @@
 const path = require("path");
 const express = require("express");
 const { WebSocketServer } = require("ws");
+const logger = require("./logger");
 const {
   addPlayer,
   removePlayer,
@@ -57,7 +58,7 @@ app.get("/api/status", (req, res) => {
 });
 
 const server = app.listen(port, () => {
-  console.log(`EVNova MMO server running on ${port}`);
+  logger.info("EVNova MMO server started", { port });
 });
 
 const wss = new WebSocketServer({ server });
@@ -73,6 +74,17 @@ const broadcast = (payload) => {
   wss.clients.forEach((client) => {
     if (client.readyState === 1) {
       client.send(message);
+    }
+  });
+};
+
+// Send a message only to players currently in the given star system.
+const broadcastToSystem = (systemId, payload) => {
+  const message = JSON.stringify(payload);
+  connections.forEach((socket, pid) => {
+    const p = getPlayer(pid);
+    if (p && p.systemId === systemId && socket.readyState === 1) {
+      socket.send(message);
     }
   });
 };
@@ -115,7 +127,7 @@ const handleDestroyedEntities = (destroyedList) => {
           persistPlayer(owner);
         }
       }
-      broadcast({ type: "destroyed", ...destroyed });
+      broadcastToSystem(destroyed.systemId, { type: "destroyed", ...destroyed });
       return;
     }
     const destroyedPlayer = getPlayer(destroyed.id);
@@ -141,7 +153,7 @@ const handleDestroyedEntities = (destroyedList) => {
     }
     removePlayer(destroyed.id);
     connections.delete(destroyed.id);
-    broadcast({ type: "destroyed", ...destroyed });
+    broadcastToSystem(destroyed.systemId, { type: "destroyed", ...destroyed });
   });
 };
 
@@ -163,7 +175,7 @@ setInterval(() => {
   const tickReport = tickWorld(deltaSeconds);
   if (tickReport?.aiShots?.length) {
     tickReport.aiShots.forEach((shot) => {
-      broadcast({ type: "fire", ...shot });
+      broadcastToSystem(shot.systemId, { type: "fire", ...shot });
     });
   }
   if (tickReport?.destroyedPlayers?.length) {
@@ -276,6 +288,24 @@ const handleAction = (player, action, socket) => {
       shouldBroadcast = false;
       break;
     }
+    case "systemChat": {
+      const chatMsg = `${action.message || ""}`.trim();
+      if (!chatMsg) {
+        shouldPersist = false;
+        shouldBroadcast = false;
+        return;
+      }
+      broadcastToSystem(player.systemId, {
+        type: "systemChat",
+        fromId: player.id,
+        fromName: player.name,
+        systemId: player.systemId,
+        message: chatMsg
+      });
+      shouldPersist = false;
+      shouldBroadcast = false;
+      break;
+    }
     case "boardShip": {
       const report = getBoardingData(player, action.targetId);
       if (!report.ok) {
@@ -292,7 +322,7 @@ const handleAction = (player, action, socket) => {
     case "stealBoardingLoot": {
       const outcome = stealBoardingLoot(player, action.targetId, action.lootType);
       if (outcome.destroyed) {
-        broadcast({ type: "destroyed", ...outcome.destroyed });
+        broadcastToSystem(outcome.destroyed.systemId, { type: "destroyed", ...outcome.destroyed });
       }
       if (outcome.data) {
         sendTo(socket, {
@@ -361,7 +391,7 @@ const handleAction = (player, action, socket) => {
     (action.type === "fire" || action.type === "fireSecondary") &&
     hitReport.weaponsFired.length > 0
   ) {
-    broadcast({
+    broadcastToSystem(player.systemId, {
       type: "fire",
       shooterId: player.id,
       systemId: player.systemId,
@@ -422,6 +452,7 @@ wss.on("connection", (socket) => {
         const player = addPlayer({ id: playerId, name });
         connections.set(playerId, socket);
         persistPlayer(player);
+        logger.info("Player connected", { playerId, name });
         sendTo(socket, {
           type: "init",
           player: getPlayerState(player),
@@ -443,7 +474,7 @@ wss.on("connection", (socket) => {
       }
       handleAction(activePlayer, action, socket);
     } catch (error) {
-      console.error("Invalid message", error);
+      logger.error("Invalid message", { err: error.message });
     }
   });
 
@@ -459,6 +490,7 @@ wss.on("connection", (socket) => {
       }
       removePlayer(playerId);
       connections.delete(playerId);
+      logger.info("Player disconnected", { playerId });
     }
     broadcastPresence(true);
   });

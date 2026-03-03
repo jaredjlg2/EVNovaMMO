@@ -12,6 +12,7 @@ const {
   factions,
   storyArcs
 } = require("./data");
+const logger = require("../logger");
 
 const systemById = new Map(systems.map((system) => [system.id, system]));
 const planetById = new Map(planets.map((planet) => [planet.id, planet]));
@@ -36,7 +37,7 @@ const validateGalaxyLinks = () => {
     });
   });
   if (warnings.length > 0) {
-    console.warn("[Galaxy Validation]", warnings.join(" "));
+    logger.warn("Galaxy validation issues detected", { warnings });
   }
 };
 
