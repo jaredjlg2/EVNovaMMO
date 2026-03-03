@@ -54,9 +54,36 @@
           <p id="dockPrompt" class="hud-emphasis"></p>
           <p id="weaponStatus" class="hud-emphasis"></p>
           <p id="secondaryStatus" class="hud-emphasis"></p>
+          <p id="cruiseStatus" class="hud-emphasis hud-cruise"></p>
+          <div id="energyHud" class="energy-hud hidden">
+            <div class="energy-row">
+              <span class="energy-label wep-label">WEP</span>
+              <div class="energy-track"><div id="wepBar" class="energy-fill wep-fill"></div></div>
+              <span id="wepPct" class="energy-pct">33%</span>
+            </div>
+            <div class="energy-row">
+              <span class="energy-label eng-label">ENG</span>
+              <div class="energy-track"><div id="engBar" class="energy-fill eng-fill"></div></div>
+              <span id="engPct" class="energy-pct">34%</span>
+            </div>
+            <div class="energy-row">
+              <span class="energy-label sys-label">SYS</span>
+              <div class="energy-track"><div id="sysBar" class="energy-fill sys-fill"></div></div>
+              <span id="sysPct" class="energy-pct">33%</span>
+            </div>
+            <div class="energy-row heat-row">
+              <span class="energy-label heat-label">HEAT</span>
+              <div class="energy-track"><div id="heatBar" class="energy-fill heat-fill"></div></div>
+              <span id="heatPct" class="energy-pct">0%</span>
+            </div>
+            <div class="energy-row cap-row">
+              <span class="energy-label">CAP</span>
+              <span id="capStatus" class="energy-pct cap-status">W:100 E:100 S:100</span>
+            </div>
+          </div>
           <p class="hud-hint">
             Controls: ↑ boost · A/D turn · Space fire · Shift secondary · Tab target · R lock · L dock · M map · I log ·
-            Y comms · T chat
+            Y comms · T chat · N cruise · H vent heat · 4/5/6 WEP/ENG/SYS
           </p>
         </section>
         <section class="hud-section hidden" id="dockedPanel">
@@ -232,6 +259,19 @@
         <div class="comms-input">
           <input id="systemChatInput" type="text" placeholder="Broadcast to system…" autocomplete="off" maxlength="200" />
           <button id="systemChatSendBtn" type="button">Send</button>
+        </div>
+      </div>
+    </div>
+    <div id="interdictionOverlay" class="overlay hidden interdiction-overlay">
+      <div class="interdiction-card">
+        <h2>⚠ INTERDICTION DETECTED</h2>
+        <p id="interdictionMessage" class="hud-hint">An interdiction field is pulling you out of cruise.</p>
+        <div class="interdiction-bar-wrap">
+          <div id="interdictionBar" class="interdiction-bar"></div>
+        </div>
+        <div class="interdiction-actions">
+          <button id="interdictionSubmitBtn" type="button">Submit (fine paid)</button>
+          <button id="interdictionEvadeBtn" type="button">Evade!</button>
         </div>
       </div>
     </div>

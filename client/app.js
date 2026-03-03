@@ -33,6 +33,17 @@ const flightStatusEl = document.getElementById("flightStatus");
 const dockPromptEl = document.getElementById("dockPrompt");
 const weaponStatusEl = document.getElementById("weaponStatus");
 const secondaryStatusEl = document.getElementById("secondaryStatus");
+const cruiseStatusEl = document.getElementById("cruiseStatus");
+const energyHudEl = document.getElementById("energyHud");
+const wepBarEl = document.getElementById("wepBar");
+const engBarEl = document.getElementById("engBar");
+const sysBarEl = document.getElementById("sysBar");
+const heatBarEl = document.getElementById("heatBar");
+const wepPctEl = document.getElementById("wepPct");
+const engPctEl = document.getElementById("engPct");
+const sysPctEl = document.getElementById("sysPct");
+const heatPctEl = document.getElementById("heatPct");
+const capStatusEl = document.getElementById("capStatus");
 const mapOverlayEl = document.getElementById("mapOverlay");
 const mapCanvas = document.getElementById("mapCanvas");
 const mapRouteEl = document.getElementById("mapRoute");
@@ -61,6 +72,11 @@ const boardingStealCreditsBtn = document.getElementById("boardingStealCreditsBtn
 const boardingStealCargoBtn = document.getElementById("boardingStealCargoBtn");
 const boardingTakeoverBtn = document.getElementById("boardingTakeoverBtn");
 const boardingEscortBtn = document.getElementById("boardingEscortBtn");
+const interdictionOverlayEl = document.getElementById("interdictionOverlay");
+const interdictionMessageEl = document.getElementById("interdictionMessage");
+const interdictionBarEl = document.getElementById("interdictionBar");
+const interdictionSubmitBtn = document.getElementById("interdictionSubmitBtn");
+const interdictionEvadeBtn = document.getElementById("interdictionEvadeBtn");
 
 const loginOverlayEl = document.getElementById("loginOverlay");
 const loginFormEl = document.getElementById("loginForm");
@@ -117,6 +133,10 @@ let commsTargetName = "";
 const commsThreads = new Map();
 let systemChatOpen = false;
 const systemChatMessages = [];
+let interdictionActive = false;
+let interdictionTimer = 0;
+let interdictionWindowSeconds = 8;
+let interdictionAnimFrame = null;
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
 const dockingRange = 70;
@@ -408,6 +428,103 @@ const updateSecondaryStatus = () => {
     status += ` · ${ammoName}: ${ammoCount}`;
   }
   secondaryStatusEl.textContent = status;
+};
+
+const clampPct = (v) => Math.max(0, Math.min(100, Math.round(v)));
+
+const updateEnergyHud = () => {
+  if (!energyHudEl) return;
+  if (!player || !isLoggedIn || player.planetId) {
+    energyHudEl.classList.add("hidden");
+    return;
+  }
+  energyHudEl.classList.remove("hidden");
+  const en = player.energy;
+  if (!en) return;
+  const dist = en.powerDist || { wep: 33, eng: 34, sys: 33 };
+  const weaponPct = clampPct((en.weaponCap / 100) * 100);
+  const enginePct = clampPct((en.engineCap / 100) * 100);
+  const shieldPct = clampPct((en.shieldCap / 100) * 100);
+  const heatPct = clampPct(en.heat);
+  if (wepBarEl) wepBarEl.style.width = `${weaponPct}%`;
+  if (engBarEl) engBarEl.style.width = `${enginePct}%`;
+  if (sysBarEl) sysBarEl.style.width = `${shieldPct}%`;
+  if (heatBarEl) {
+    heatBarEl.style.width = `${heatPct}%`;
+    heatBarEl.classList.toggle("danger", heatPct >= 85);
+  }
+  if (wepPctEl) wepPctEl.textContent = `${dist.wep}%`;
+  if (engPctEl) engPctEl.textContent = `${dist.eng}%`;
+  if (sysPctEl) sysPctEl.textContent = `${dist.sys}%`;
+  if (heatPctEl) heatPctEl.textContent = `${heatPct}%`;
+  if (capStatusEl) {
+    capStatusEl.textContent = `W:${Math.round(en.weaponCap)} E:${Math.round(en.engineCap)} S:${Math.round(en.shieldCap)}`;
+    capStatusEl.style.color = heatPct >= 85 ? "#ff7a3d" : heatPct >= 60 ? "#ffcc44" : "#8db0d8";
+  }
+};
+
+const updateCruiseStatus = () => {
+  if (!cruiseStatusEl) return;
+  if (!player || !isLoggedIn || player.planetId) {
+    cruiseStatusEl.textContent = "";
+    cruiseStatusEl.className = "hud-emphasis hud-cruise";
+    return;
+  }
+  const cruise = player.cruise;
+  if (!cruise || cruise.spoolPhase === "idle") {
+    cruiseStatusEl.textContent = "";
+    cruiseStatusEl.className = "hud-emphasis hud-cruise";
+    return;
+  }
+  if (cruise.spoolPhase === "spoolingUp") {
+    const pct = clampPct(((3 - cruise.spoolTimer) / 3) * 100);
+    cruiseStatusEl.textContent = `Cruise: Spooling up… ${pct}%`;
+    cruiseStatusEl.className = "hud-emphasis hud-cruise";
+    return;
+  }
+  if (cruise.spoolPhase === "active") {
+    cruiseStatusEl.textContent = "◆ CRUISE ACTIVE — weapons offline";
+    cruiseStatusEl.className = "hud-emphasis hud-cruise active";
+    return;
+  }
+  if (cruise.spoolPhase === "spoolingDown") {
+    cruiseStatusEl.textContent = "Cruise: Disengaging…";
+    cruiseStatusEl.className = "hud-emphasis hud-cruise";
+    return;
+  }
+};
+
+const showInterdictionOverlay = (message, windowSeconds) => {
+  if (!interdictionOverlayEl) return;
+  interdictionActive = true;
+  interdictionWindowSeconds = windowSeconds || 8;
+  interdictionTimer = interdictionWindowSeconds;
+  if (interdictionMessageEl) interdictionMessageEl.textContent = message;
+  if (interdictionBarEl) interdictionBarEl.style.width = "100%";
+  interdictionOverlayEl.classList.remove("hidden");
+  const startTime = performance.now();
+  const tick = (now) => {
+    if (!interdictionActive) return;
+    const elapsed = (now - startTime) / 1000;
+    const remaining = Math.max(0, interdictionWindowSeconds - elapsed);
+    const pct = (remaining / interdictionWindowSeconds) * 100;
+    if (interdictionBarEl) interdictionBarEl.style.width = `${pct}%`;
+    if (remaining > 0) {
+      interdictionAnimFrame = requestAnimationFrame(tick);
+    }
+  };
+  interdictionAnimFrame = requestAnimationFrame(tick);
+};
+
+const hideInterdictionOverlay = () => {
+  interdictionActive = false;
+  if (interdictionAnimFrame) {
+    cancelAnimationFrame(interdictionAnimFrame);
+    interdictionAnimFrame = null;
+  }
+  if (interdictionOverlayEl) {
+    interdictionOverlayEl.classList.add("hidden");
+  }
 };
 
 const cycleSecondaryWeapon = () => {
@@ -1027,6 +1144,11 @@ const renderMapDetails = () => {
   const disputed = system.disputedWith?.length
     ? system.disputedWith.map((tag) => formatSystemLabel(tag)).join(", ")
     : "None";
+  const tierRiskLabel = system.status === "frontier"
+    ? "⚠ High risk, high reward"
+    : system.status === "core"
+      ? "✔ Low risk, stable margins"
+      : "⚡ Moderate risk/reward";
   mapDetailsEl.innerHTML = `
     <div class="map-detail-card">
       <h4>${system.name}</h4>
@@ -1039,6 +1161,7 @@ const renderMapDetails = () => {
       <p>Planets: ${planets.length} · Routes: ${system.links?.length ?? 0}</p>
       <p>Disputed: ${disputed}</p>
       <p>Tags: ${tagLabel}</p>
+      <p class="hud-hint">${tierRiskLabel}</p>
     </div>
   `;
 };
@@ -2335,6 +2458,8 @@ const renderFlight = (now) => {
   updateTargetLockStatus();
   updateTargetInfo();
   renderMiniMap();
+  updateEnergyHud();
+  updateCruiseStatus();
 
   requestAnimationFrame(renderFlight);
 };
@@ -2532,7 +2657,7 @@ const renderMarket = (market) => {
     card.className = "list-item";
     card.innerHTML = `
       <h4>${good.name}</h4>
-      <p>Market: ${good.level} · Price: ${formatCredits(good.price)}</p>
+      <p>Market: ${good.level} · Price: ${formatCredits(good.price)}${good.tier ? ` · Tier: ${good.tier}` : ""}</p>
       ${tags.length ? `<p class="hud-hint">${tags.join(" · ")}</p>` : ""}
       <p>In hold: ${owned}</p>
     `;
@@ -2765,6 +2890,7 @@ const renderDockedInfo = () => {
     <span>Services: ${services.join(" · ")}</span>
     <span>Authority: ${faction?.name ?? "Independent"} · Rep: ${reputationValue}</span>
     <span>Legal status: ${getLegalStatusLabel(legalStatus)} (${legalStatus})</span>
+    ${player.wantedLevel > 0 ? `<span style="color:#ff9b7a;">Bounty: ${player.wantedLevel.toLocaleString()} cr · Press X to pay</span>` : ""}
   `;
 };
 
@@ -2992,6 +3118,8 @@ const refreshUi = () => {
   renderMissionLog();
   updateSecondaryStatus();
   updateMapRoute();
+  updateEnergyHud();
+  updateCruiseStatus();
   if (mapOpen) {
     renderMapDetails();
     renderMap();
@@ -3215,6 +3343,28 @@ const connect = () => {
     if (payload.type === "systemChat") {
       appendSystemChatMessage(payload.fromId, payload.fromName || "Unknown", payload.message);
     }
+    if (payload.type === "interdiction") {
+      showInterdictionOverlay(payload.message, payload.windowSeconds || 8);
+    }
+    if (payload.type === "interdictionResult") {
+      hideInterdictionOverlay();
+      setWeaponStatus(payload.message || "Interdiction resolved.");
+    }
+    if (payload.type === "cruiseStatus") {
+      if (player && payload.spoolPhase !== undefined) {
+        if (!player.cruise) player.cruise = {};
+        player.cruise.spoolPhase = payload.spoolPhase;
+        player.cruise.spoolTimer = payload.spoolTimer || 0;
+      }
+      updateCruiseStatus();
+      if (payload.message) setWeaponStatus(payload.message);
+    }
+    if (payload.type === "cargoDemand") {
+      setWeaponStatus(`⚠ ${payload.message || "Cargo demanded!"}`);
+    }
+    if (payload.type === "wreckSpawned") {
+      setWeaponStatus("Wreck detected nearby. Press G to scoop salvage.");
+    }
   });
 };
 
@@ -3304,6 +3454,20 @@ if (boardingEscortBtn) {
       return;
     }
     sendAction({ type: "captureShip", targetId: boardingData.id, decision: "escort" });
+  });
+}
+
+if (interdictionSubmitBtn) {
+  interdictionSubmitBtn.addEventListener("click", () => {
+    sendAction({ type: "respondInterdiction", response: "submit" });
+    hideInterdictionOverlay();
+  });
+}
+
+if (interdictionEvadeBtn) {
+  interdictionEvadeBtn.addEventListener("click", () => {
+    sendAction({ type: "respondInterdiction", response: "evade" });
+    hideInterdictionOverlay();
   });
 }
 
@@ -3414,6 +3578,82 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     if (!event.repeat) {
       sendAction({ type: "escortCommand", command: "hold" });
+    }
+    return;
+  }
+  // ─── Pillar 1: Energy keybinds ──────────────────────────────────────────
+  if (event.key === "h" || event.key === "H") {
+    event.preventDefault();
+    if (!event.repeat) {
+      sendAction({ type: "ventHeat" });
+      setWeaponStatus("Heat vent activated.");
+    }
+    return;
+  }
+  if (event.key === "4") {
+    event.preventDefault();
+    if (!event.repeat) {
+      sendAction({ type: "setDistribution", wep: 70, eng: 15, sys: 15 });
+      setWeaponStatus("Power: WEP focus (70/15/15).");
+    }
+    return;
+  }
+  if (event.key === "5") {
+    event.preventDefault();
+    if (!event.repeat) {
+      sendAction({ type: "setDistribution", wep: 15, eng: 70, sys: 15 });
+      setWeaponStatus("Power: ENG focus (15/70/15).");
+    }
+    return;
+  }
+  if (event.key === "6") {
+    event.preventDefault();
+    if (!event.repeat) {
+      sendAction({ type: "setDistribution", wep: 15, eng: 15, sys: 70 });
+      setWeaponStatus("Power: SYS focus (15/15/70).");
+    }
+    return;
+  }
+  // ─── Pillar 2: Cruise keybind ────────────────────────────────────────────
+  if (event.key === "n" || event.key === "N") {
+    event.preventDefault();
+    if (!event.repeat) {
+      if (interdictionActive) {
+        sendAction({ type: "respondInterdiction", response: "evade" });
+        hideInterdictionOverlay();
+      } else {
+        sendAction({ type: "toggleCruise" });
+      }
+    }
+    return;
+  }
+  // ─── Pillar 4: Scoop & demand ────────────────────────────────────────────
+  if (event.key === "g" || event.key === "G") {
+    event.preventDefault();
+    sendAction({ type: "requestWrecks" });
+    return;
+  }
+  if (event.key === "p" || event.key === "P") {
+    event.preventDefault();
+    if (!event.repeat && targetLockId) {
+      sendAction({ type: "demandCargo", targetId: targetLockId });
+      setWeaponStatus("Piracy demand transmitted.");
+    } else if (!targetLockId) {
+      setWeaponStatus("No target locked for piracy demand.");
+    }
+    return;
+  }
+  if (event.key === "x" || event.key === "X") {
+    event.preventDefault();
+    if (!event.repeat && player?.planetId && player?.wantedLevel > 0) {
+      const system = getCurrentSystem();
+      const factionId = system?.factionId;
+      if (factionId) {
+        sendAction({ type: "payBounty", factionId });
+        setWeaponStatus("Paying off bounty…");
+      } else {
+        setWeaponStatus("No authority present to pay bounty here.");
+      }
     }
     return;
   }

@@ -247,6 +247,14 @@ const getMarketForPlanet = (planetId) => {
   }
   const market = markets[planetId] || {};
   const rotationSlot = Math.floor(Date.now() / (marketRotationMinutes * 60 * 1000));
+
+  // Pillar 5: Risk-gradient tier multipliers
+  const system = systemById.get(planet.systemId);
+  const tier = system?.status ?? "border";
+  const BALANCE = require("./balance");
+  const tierSellMult = BALANCE.market.sellMultiplier[tier] ?? 1;
+  const tierBuyMult = BALANCE.market.buyMultiplier[tier] ?? 1;
+
   return goods.flatMap((good) => {
     if (good.isContraband && !planet.blackMarket) {
       return [];
@@ -274,7 +282,9 @@ const getMarketForPlanet = (planetId) => {
         routeHint = `Import route from ${planetById.get(route.fromPlanetId)?.name || "neighbor"}`;
       }
     });
-    const price = Math.round(good.basePrice * baseMultiplier * variance * routeMultiplier);
+    const basePrice = Math.round(good.basePrice * baseMultiplier * variance * routeMultiplier);
+    // Sell price is what buyers pay (higher in frontier = better for traders)
+    const price = Math.round(basePrice * tierSellMult);
     return [
       {
         id: good.id,
@@ -282,6 +292,8 @@ const getMarketForPlanet = (planetId) => {
         basePrice: good.basePrice,
         level,
         price,
+        tierBuyMult,
+        tier,
         volume: Math.round(10 + rng() * 20),
         isContraband: Boolean(good.isContraband),
         routeHint,

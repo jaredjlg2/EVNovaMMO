@@ -21,6 +21,42 @@ const {
   getAvailableMissions,
   getMarketForPlanet
 } = require("./world");
+const {
+  initEnergy,
+  tickEnergy,
+  drainWeaponCap,
+  ventHeat,
+  setPowerDistribution,
+  getHeatMissProbability
+} = require("./energy");
+const {
+  initCruise,
+  toggleCruise,
+  interruptCruise,
+  isCruiseActive,
+  tickCruise,
+  checkInterdiction,
+  getInterdiction,
+  resolveInterdiction,
+  clearInterdiction
+} = require("./cruise");
+const {
+  initCrime,
+  addCrime,
+  getTotalBounty,
+  getWantedLabel,
+  getSecurityResponseLevel,
+  getSecuritySpawnChance,
+  clearFactionBounty
+} = require("./crime");
+const {
+  spawnWreck,
+  getWrecksInSystem,
+  tickWrecks,
+  tickScoopProgress,
+  canDemandFromVictim,
+  recordPiracyDemand
+} = require("./salvage");
 
 const players = new Map();
 const weaponById = new Map(initialWorld.weapons.map((weapon) => [weapon.id, weapon]));
@@ -249,7 +285,13 @@ const persistPlayer = (player) => {
     legalStatus: player.legalStatus,
     combatRating: player.combatRating,
     dominatedPlanets: player.dominatedPlanets,
-    lastTributeAt: player.lastTributeAt
+    lastTributeAt: player.lastTributeAt,
+    story: player.story,
+    energy: player.energy,
+    cruise: player.cruise,
+    bountyByFaction: player.bountyByFaction,
+    wantedLevel: player.wantedLevel,
+    lastCrimeTs: player.lastCrimeTs
   });
 };
 
@@ -848,7 +890,11 @@ const getPlayerState = (player) => ({
   legalStatus: player.legalStatus,
   combatRating: player.combatRating,
   dominatedPlanets: player.dominatedPlanets,
-  story: player.story
+  story: player.story,
+  energy: player.energy,
+  cruise: player.cruise,
+  bountyByFaction: player.bountyByFaction,
+  wantedLevel: player.wantedLevel
 });
 
 const getWorldState = () => initialWorld;
@@ -941,10 +987,28 @@ const tickWorld = (deltaSeconds) => {
   const hitPlayers = [];
   const destroyedPlayers = [];
   const aiShots = [];
+  const interdictionEvents = [];
+  const expiredWrecks = tickWrecks(deltaSeconds);
 
   players.forEach((current) => {
     applyTributeIncome(current, now);
     applyColonyIncome(current, now);
+
+    // Pillar 1: Energy & Heat tick
+    initEnergy(current);
+    tickEnergy(current, deltaSeconds);
+
+    // Pillar 2: Cruise tick
+    initCruise(current);
+    tickCruise(current, deltaSeconds);
+
+    // Check for interdiction while cruising
+    const interdiction = checkInterdiction(current);
+    if (interdiction) {
+      interdictionEvents.push({ playerId: current.id, tier: interdiction.tier });
+      // Slow spool to give the player a reaction window
+    }
+
     if (current.shield < current.ship.shield) {
       const shieldGain = current.ship.shield * shieldRegenRate * deltaSeconds;
       current.shield = Math.min(current.ship.shield, current.shield + shieldGain);
@@ -1088,7 +1152,7 @@ const tickWorld = (deltaSeconds) => {
     }
   });
 
-  return { hitPlayers, destroyedPlayers, aiShots };
+  return { hitPlayers, destroyedPlayers, aiShots, interdictionEvents, expiredWrecks };
 };
 
 const normalizeAngle = (angle) => {
@@ -1537,10 +1601,33 @@ const fireWeapons = (player, payload, weaponIds, { allowFallback = true } = {}) 
   const hits = [];
   const destroyed = [];
   const resolvedWeaponIds = resolveWeaponIds(weaponIds, { allowFallback });
-  const damage = getWeaponDamage(resolvedWeaponIds);
-  if (damage <= 0) {
+  const baseDamage = getWeaponDamage(resolvedWeaponIds);
+  if (baseDamage <= 0) {
     return { hits, destroyed, weaponsFired: [] };
   }
+
+  // Pillar 1: Check weapon capacitor
+  initEnergy(player);
+  const capOk = drainWeaponCap(player);
+  if (!capOk) {
+    appendLog(player, "Weapon capacitor depleted. Reroute power to WEP.");
+    return { hits, destroyed, weaponsFired: [] };
+  }
+
+  // Pillar 1: Heat miss penalty
+  const missProbability = getHeatMissProbability(player);
+  const damage = missProbability > 0 && Math.random() < missProbability ? 0 : baseDamage;
+  if (damage === 0) {
+    appendLog(player, "Overheating — shot went wide!");
+    return { hits, destroyed, weaponsFired: resolvedWeaponIds };
+  }
+
+  // Pillar 2: Weapons are disabled in cruise mode
+  if (isCruiseActive(player)) {
+    appendLog(player, "Disengage cruise before firing.");
+    return { hits, destroyed, weaponsFired: [] };
+  }
+
   const originX = player.x;
   const originY = player.y;
   const angle = player.angle;
@@ -1608,13 +1695,15 @@ const fireWeapons = (player, payload, weaponIds, { allowFallback = true } = {}) 
     appendLog(player, `You hit ${target.name} for ${damage} damage.`);
     hits.push(target.id);
     if (isDestroyed) {
+      const wreck = spawnWreck(target);
       destroyed.push({
         id: target.id,
         name: target.name,
         systemId: target.systemId,
         x: target.x,
         y: target.y,
-        isAi: true
+        isAi: true,
+        wreckId: wreck.id
       });
       appendLog(player, `${target.name} was destroyed.`);
       awardBounty(player, target);
@@ -1722,6 +1811,146 @@ const fireSecondaryWeapon = (player, payload) => {
   };
 };
 
+// ─── PILLAR 1: Energy actions ─────────────────────────────────────────────
+
+const ventHeatAction = (player) => {
+  const result = ventHeat(player);
+  if (result.ok) {
+    appendLog(player, result.message);
+  }
+  return result;
+};
+
+const setDistributionAction = (player, wep, eng, sys) => {
+  const result = setPowerDistribution(player, wep, eng, sys);
+  if (result.ok) {
+    appendLog(player, `Power distribution: WEP ${wep}% / ENG ${eng}% / SYS ${sys}%.`);
+  }
+  return result;
+};
+
+// ─── PILLAR 2: Cruise actions ──────────────────────────────────────────────
+
+const toggleCruiseAction = (player) => {
+  const result = toggleCruise(player);
+  if (result.message) {
+    appendLog(player, result.message);
+  }
+  return result;
+};
+
+const respondInterdictionAction = (player, action) => {
+  const result = resolveInterdiction(player, action);
+  if (result.message) {
+    appendLog(player, result.message);
+  }
+  return result;
+};
+
+// ─── PILLAR 3: Crime actions ───────────────────────────────────────────────
+
+const payBountyAction = (player, factionId) => {
+  if (!player.planetId) {
+    appendLog(player, "Dock at a station to pay off bounties.");
+    return { ok: false };
+  }
+  const amount = clearFactionBounty(player, factionId);
+  if (amount === 0) {
+    appendLog(player, "No bounty with that faction.");
+    return { ok: false };
+  }
+  if (amount === -1) {
+    appendLog(player, "Insufficient credits to pay off bounty.");
+    return { ok: false };
+  }
+  appendLog(player, `Paid ${amount} credits to clear bounty with faction ${factionId}.`);
+  return { ok: true, amount };
+};
+
+// ─── PILLAR 4: Salvage & Piracy actions ────────────────────────────────────
+
+const getWrecksForPlayer = (player) => getWrecksInSystem(player.systemId);
+
+/**
+ * Begin scooping a wreck. Called continuously while G is held.
+ */
+const scoopWreckAction = (player, wreckId, deltaSeconds) => {
+  if (player.planetId) {
+    return { ok: false, message: "Cannot scoop while docked." };
+  }
+  const result = tickScoopProgress(player, wreckId, deltaSeconds);
+  if (result.completed && result.loot) {
+    result.loot.forEach((entry) => {
+      upsertCargo(player, entry.goodId, entry.quantity);
+    });
+    const names = result.loot.map((e) => `${e.goodId} x${e.quantity}`).join(", ");
+    appendLog(player, `Salvage complete: ${names || "empty wreck"}.`);
+  }
+  return result;
+};
+
+/**
+ * Piracy: demand cargo from a target player.
+ */
+const demandCargoAction = (player, targetId) => {
+  if (!targetId) {
+    return { ok: false, message: "No target specified." };
+  }
+  if (!canDemandFromVictim(player.id, targetId)) {
+    return { ok: false, message: "That pilot is onto your tactics. Wait before demanding again." };
+  }
+  const target = getPlayer(targetId);
+  if (!target || target.systemId !== player.systemId || target.planetId) {
+    return { ok: false, message: "Target not in system." };
+  }
+
+  recordPiracyDemand(player.id, targetId);
+  addCrime(player, "bountyForPiracyDemand", getSystemFactionId(player.systemId));
+  adjustLegalStatus(player, 10, "Piracy demand issued");
+
+  appendLog(player, `Demanded cargo from ${target.name}.`);
+  appendLog(target, `${player.name} is demanding your cargo!`);
+
+  return {
+    ok: true,
+    message: `Piracy demand sent to ${target.name}. They must comply or fight.`,
+    targetId
+  };
+};
+
+// ─── Debug / Admin commands ────────────────────────────────────────────────
+
+const debugAddHeat = (player, amount) => {
+  initEnergy(player);
+  player.energy.heat = Math.min(100, player.energy.heat + Number(amount || 50));
+  appendLog(player, `[DEBUG] Heat set to ${Math.round(player.energy.heat)}.`);
+};
+
+const debugSetWanted = (player, level) => {
+  initCrime(player);
+  player.wantedLevel = Number(level || 5000);
+  const factionId = getSystemFactionId(player.systemId);
+  if (factionId) {
+    player.bountyByFaction[factionId] = player.wantedLevel;
+  }
+  appendLog(player, `[DEBUG] Wanted level set to ${player.wantedLevel}.`);
+};
+
+const debugInterdict = (player) => {
+  clearInterdiction(player.id);
+  initCruise(player);
+  player.cruise.spoolPhase = "active";
+  player.cruise.spoolTimer = 0;
+  appendLog(player, "[DEBUG] Cruise engaged. Interdiction incoming.");
+  return { ok: true };
+};
+
+const debugSpawnPirate = (player) => {
+  // Spawning pirates requires an exported function; use available AI infrastructure
+  appendLog(player, "[DEBUG] Use /debugSpawnPirate to trigger an AI pirate encounter. AI traffic handles pirate spawning automatically.");
+  return { ok: false };
+};
+
 module.exports = {
   addPlayer,
   removePlayer,
@@ -1762,5 +1991,24 @@ module.exports = {
   captureShip,
   gambleAtBar,
   releaseEscort,
-  removeEscortFromPlayer
+  removeEscortFromPlayer,
+  // Pillar 1
+  ventHeatAction,
+  setDistributionAction,
+  // Pillar 2
+  toggleCruiseAction,
+  respondInterdictionAction,
+  getInterdiction,
+  // Pillar 3
+  payBountyAction,
+  getWantedLabel,
+  // Pillar 4
+  getWrecksForPlayer,
+  scoopWreckAction,
+  demandCargoAction,
+  // Debug
+  debugAddHeat,
+  debugSetWanted,
+  debugInterdict,
+  debugSpawnPirate
 };
