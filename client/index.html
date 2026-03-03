@@ -56,7 +56,7 @@
           <p id="secondaryStatus" class="hud-emphasis"></p>
           <p class="hud-hint">
             Controls: ↑ boost · A/D turn · Space fire · Shift secondary · Tab target · R lock · L dock · M map · I log ·
-            Y comms
+            Y comms · T chat
           </p>
         </section>
         <section class="hud-section hidden" id="dockedPanel">
@@ -216,6 +216,22 @@
           <button id="boardingStealCargoBtn" type="button">Steal Cargo</button>
           <button id="boardingTakeoverBtn" type="button">Capture & Take Over</button>
           <button id="boardingEscortBtn" type="button">Capture & Escort</button>
+        </div>
+      </div>
+    </div>
+    <div id="systemChatOverlay" class="overlay hidden system-chat-overlay">
+      <div class="system-chat-card">
+        <div class="system-chat-header">
+          <div>
+            <h2>System Comm Channel</h2>
+            <p id="systemChatSystemName" class="hud-hint">Local channel</p>
+          </div>
+          <button id="closeSystemChatBtn" type="button">Close (T)</button>
+        </div>
+        <div id="systemChatLog" class="list system-chat-log"></div>
+        <div class="comms-input">
+          <input id="systemChatInput" type="text" placeholder="Broadcast to system…" autocomplete="off" maxlength="200" />
+          <button id="systemChatSendBtn" type="button">Send</button>
         </div>
       </div>
     </div>

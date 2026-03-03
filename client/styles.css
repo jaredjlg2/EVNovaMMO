@@ -791,3 +791,61 @@ button:disabled {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.system-chat-overlay {
+  z-index: 8;
+}
+
+.system-chat-card {
+  width: min(540px, 92vw);
+  max-height: 70vh;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(18, 28, 52, 0.98), rgba(8, 12, 22, 0.98));
+  border: 1px solid rgba(60, 180, 120, 0.4);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 26px 80px rgba(4, 8, 20, 0.7);
+}
+
+.system-chat-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.system-chat-header h2 {
+  margin: 0 0 6px;
+}
+
+.system-chat-log {
+  max-height: 40vh;
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.system-chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.system-chat-message span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.system-chat-message p {
+  margin: 0;
+  color: #a0f0c8;
+}
+
+.system-chat-message.self p {
+  color: #e4ecff;
+}

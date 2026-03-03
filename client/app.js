@@ -68,6 +68,13 @@ const pilotNameInputEl = document.getElementById("pilotName");
 const loginErrorEl = document.getElementById("loginError");
 const loginHintEl = document.getElementById("loginHint");
 
+const systemChatOverlayEl = document.getElementById("systemChatOverlay");
+const systemChatLogEl = document.getElementById("systemChatLog");
+const systemChatInputEl = document.getElementById("systemChatInput");
+const systemChatSendBtn = document.getElementById("systemChatSendBtn");
+const closeSystemChatBtn = document.getElementById("closeSystemChatBtn");
+const systemChatSystemNameEl = document.getElementById("systemChatSystemName");
+
 const undockBtn = document.getElementById("undockBtn");
 const completeBtn = document.getElementById("completeBtn");
 const dockedSectionEls = Array.from(document.querySelectorAll(".docked-section"));
@@ -108,6 +115,8 @@ let commsTargetId = null;
 let commsTargetIsAi = false;
 let commsTargetName = "";
 const commsThreads = new Map();
+let systemChatOpen = false;
+const systemChatMessages = [];
 const storedPilotKey = "evnova_pilots";
 const maxStoredPilots = 5;
 const dockingRange = 70;
@@ -829,6 +838,68 @@ const setCommsOpen = (nextState, target = null) => {
   if (commsInputEl) {
     commsInputEl.focus();
   }
+};
+
+const renderSystemChat = () => {
+  if (!systemChatLogEl) {
+    return;
+  }
+  systemChatLogEl.innerHTML = "";
+  systemChatMessages.forEach(({ fromId, fromName, message }) => {
+    const isSelf = player && fromId === player.id;
+    const div = document.createElement("div");
+    div.className = `system-chat-message${isSelf ? " self" : ""}`;
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = fromName;
+    const msgP = document.createElement("p");
+    msgP.textContent = message;
+    div.appendChild(nameSpan);
+    div.appendChild(msgP);
+    systemChatLogEl.appendChild(div);
+  });
+  systemChatLogEl.scrollTop = systemChatLogEl.scrollHeight;
+};
+
+const appendSystemChatMessage = (fromId, fromName, message) => {
+  systemChatMessages.push({ fromId, fromName, message });
+  if (systemChatMessages.length > 100) {
+    systemChatMessages.shift();
+  }
+  if (systemChatOpen) {
+    renderSystemChat();
+  } else {
+    setWeaponStatus(`[System] ${fromName}: ${message}`);
+  }
+};
+
+const setSystemChatOpen = (nextState) => {
+  if (!systemChatOverlayEl) {
+    return;
+  }
+  const nextOpen = typeof nextState === "boolean" ? nextState : !systemChatOpen;
+  systemChatOpen = nextOpen;
+  systemChatOverlayEl.classList.toggle("hidden", !systemChatOpen);
+  if (systemChatOpen) {
+    if (systemChatSystemNameEl && player) {
+      systemChatSystemNameEl.textContent = `System: ${player.systemId}`;
+    }
+    renderSystemChat();
+    if (systemChatInputEl) {
+      systemChatInputEl.focus();
+    }
+  }
+};
+
+const sendSystemChatMessage = () => {
+  if (!systemChatInputEl) {
+    return;
+  }
+  const message = systemChatInputEl.value.trim();
+  if (!message) {
+    return;
+  }
+  sendAction({ type: "systemChat", message });
+  systemChatInputEl.value = "";
 };
 
 const findRoutePath = (startId, targetId) => {
@@ -3141,6 +3212,9 @@ const connect = () => {
         setWeaponStatus(`Incoming transmission from ${senderName}.`);
       }
     }
+    if (payload.type === "systemChat") {
+      appendSystemChatMessage(payload.fromId, payload.fromName || "Unknown", payload.message);
+    }
   });
 };
 
@@ -3300,6 +3374,13 @@ window.addEventListener("keydown", (event) => {
     setCommsOpen(true, target);
     return;
   }
+  if (event.key === "t" || event.key === "T") {
+    event.preventDefault();
+    if (!event.repeat) {
+      setSystemChatOpen(!systemChatOpen);
+    }
+    return;
+  }
   if (event.key === "b" || event.key === "B") {
     event.preventDefault();
     if (!event.repeat) {
@@ -3409,6 +3490,20 @@ if (commsInputEl) {
     if (event.key === "Enter") {
       event.preventDefault();
       sendCommsMessage();
+    }
+  });
+}
+if (closeSystemChatBtn) {
+  closeSystemChatBtn.addEventListener("click", () => setSystemChatOpen(false));
+}
+if (systemChatSendBtn) {
+  systemChatSendBtn.addEventListener("click", () => sendSystemChatMessage());
+}
+if (systemChatInputEl) {
+  systemChatInputEl.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sendSystemChatMessage();
     }
   });
 }

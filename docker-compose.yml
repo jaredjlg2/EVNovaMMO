@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  game:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persist pilot saves on the host between container restarts.
+      - ./server/data:/app/server/data
+    environment:
+      PORT: "3000"
+      LOG_LEVEL: "info"
+    restart: unless-stopped
