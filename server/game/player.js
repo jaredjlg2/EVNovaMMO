@@ -1,4 +1,6 @@
 const { ships, factions, storyArcs } = require("./data");
+const { defaultEnergy } = require("./energy");
+const { defaultCruise } = require("./cruise");
 
 const starterShip = ships[0];
 
@@ -121,7 +123,12 @@ const createPlayer = ({ id, name, savedState = null }) => {
     combatRating: 0,
     dominatedPlanets: [],
     lastTributeAt: Date.now(),
-    story: buildBaseStoryState()
+    story: buildBaseStoryState(),
+    energy: defaultEnergy(),
+    cruise: defaultCruise(),
+    bountyByFaction: {},
+    wantedLevel: 0,
+    lastCrimeTs: 0
   };
 
   if (!savedState) {
@@ -152,7 +159,12 @@ const createPlayer = ({ id, name, savedState = null }) => {
     legalStatus: savedState.legalStatus ?? basePlayer.legalStatus,
     combatRating: savedState.combatRating ?? basePlayer.combatRating,
     dominatedPlanets: savedState.dominatedPlanets ?? basePlayer.dominatedPlanets,
-    lastTributeAt: savedState.lastTributeAt ?? basePlayer.lastTributeAt
+    lastTributeAt: savedState.lastTributeAt ?? basePlayer.lastTributeAt,
+    energy: savedState.energy ? { ...defaultEnergy(), ...savedState.energy } : basePlayer.energy,
+    cruise: savedState.cruise ? { ...defaultCruise(), ...savedState.cruise } : basePlayer.cruise,
+    bountyByFaction: savedState.bountyByFaction ?? basePlayer.bountyByFaction,
+    wantedLevel: savedState.wantedLevel ?? basePlayer.wantedLevel,
+    lastCrimeTs: savedState.lastCrimeTs ?? basePlayer.lastCrimeTs
   };
 };
 

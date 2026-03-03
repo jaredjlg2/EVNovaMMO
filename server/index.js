@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const { WebSocketServer } = require("ws");
 const logger = require("./logger");
+const BALANCE = require("./game/balance");
 const {
   addPlayer,
   removePlayer,
@@ -39,7 +40,26 @@ const {
   captureShip,
   removeEscortFromPlayer,
   releaseEscort,
-  gambleAtBar
+  gambleAtBar,
+  // Pillar 1
+  ventHeatAction,
+  setDistributionAction,
+  // Pillar 2
+  toggleCruiseAction,
+  respondInterdictionAction,
+  getInterdiction,
+  // Pillar 3
+  payBountyAction,
+  getWantedLabel,
+  // Pillar 4
+  getWrecksForPlayer,
+  scoopWreckAction,
+  demandCargoAction,
+  // Debug
+  debugAddHeat,
+  debugSetWanted,
+  debugInterdict,
+  debugSpawnPirate
 } = require("./game/game");
 const { removeAiShip } = require("./game/ai");
 
@@ -180,6 +200,18 @@ setInterval(() => {
   }
   if (tickReport?.destroyedPlayers?.length) {
     handleDestroyedEntities(tickReport.destroyedPlayers);
+    // Broadcast any wrecks spawned from destroyed AI ships
+    tickReport.destroyedPlayers.forEach((d) => {
+      if (d.isAi && d.wreckId) {
+        broadcastToSystem(d.systemId, {
+          type: "wreckSpawned",
+          wreckId: d.wreckId,
+          x: d.x,
+          y: d.y,
+          systemId: d.systemId
+        });
+      }
+    });
   }
   if (tickReport?.hitPlayers?.length) {
     tickReport.hitPlayers.forEach((hitId) => {
@@ -188,6 +220,41 @@ setInterval(() => {
       if (hitPlayer && hitSocket) {
         persistPlayer(hitPlayer);
         sendTo(hitSocket, { type: "state", player: getPlayerState(hitPlayer) });
+      }
+    });
+  }
+  // Pillar 2: Notify players of interdiction events
+  if (tickReport?.interdictionEvents?.length) {
+    const interdictionWindowSeconds = BALANCE.cruise.interdictionWindowSeconds;
+    tickReport.interdictionEvents.forEach(({ playerId, tier }) => {
+      const p = getPlayer(playerId);
+      const s = connections.get(playerId);
+      if (p && s) {
+        sendTo(s, {
+          type: "interdiction",
+          tier,
+          windowSeconds: interdictionWindowSeconds,
+          message: `Interdiction field detected! Submit or evade within ${interdictionWindowSeconds} seconds.`
+        });
+        // Auto-resolve after window (server-side timeout)
+        setTimeout(() => {
+          const current = getPlayer(playerId);
+          if (!current) return;
+          const event = getInterdiction(playerId);
+          if (event) {
+            respondInterdictionAction(current, "submit");
+            persistPlayer(current);
+            const sock = connections.get(playerId);
+            if (sock) {
+              sendTo(sock, { type: "state", player: getPlayerState(current) });
+              sendTo(sock, {
+                type: "interdictionResult",
+                result: "timeout",
+                message: "Interdiction timeout. You were pulled out of cruise."
+              });
+            }
+          }
+        }, interdictionWindowSeconds * 1000 + 500);
       }
     });
   }
@@ -368,12 +435,105 @@ const handleAction = (player, action, socket) => {
       break;
     case "fire":
       hitReport = fireWeapons(player, action, player.weapons, { allowFallback: true });
-      shouldPersist = hitReport.hits.length > 0;
+      shouldPersist = hitReport.hits.length > 0 || hitReport.weaponsFired?.length > 0;
       break;
     case "fireSecondary":
       hitReport = fireSecondaryWeapon(player, action);
       shouldPersist = hitReport.fired || hitReport.hits.length > 0;
       break;
+    // ─── PILLAR 1: Energy ───────────────────────────────────────────────
+    case "ventHeat": {
+      ventHeatAction(player);
+      break;
+    }
+    case "setDistribution": {
+      setDistributionAction(
+        player,
+        Number(action.wep ?? 33),
+        Number(action.eng ?? 34),
+        Number(action.sys ?? 33)
+      );
+      break;
+    }
+    // ─── PILLAR 2: Cruise ───────────────────────────────────────────────
+    case "toggleCruise": {
+      const cruiseResult = toggleCruiseAction(player);
+      sendTo(socket, { type: "cruiseStatus", ...player.cruise, message: cruiseResult.message });
+      break;
+    }
+    case "respondInterdiction": {
+      const interdictResult = respondInterdictionAction(player, action.response || "submit");
+      sendTo(socket, {
+        type: "interdictionResult",
+        ...interdictResult
+      });
+      break;
+    }
+    // ─── PILLAR 3: Bounty ───────────────────────────────────────────────
+    case "payBounty": {
+      payBountyAction(player, action.factionId);
+      break;
+    }
+    // ─── PILLAR 4: Salvage ──────────────────────────────────────────────
+    case "requestWrecks": {
+      sendTo(socket, {
+        type: "wrecks",
+        wrecks: getWrecksForPlayer(player)
+      });
+      shouldPersist = false;
+      shouldBroadcast = false;
+      return;
+    }
+    case "scoopWreck": {
+      const scoopResult = scoopWreckAction(player, action.wreckId, 0.1);
+      sendTo(socket, { type: "scoopProgress", ...scoopResult });
+      if (scoopResult.completed) {
+        broadcastToSystem(player.systemId, {
+          type: "wreckRemoved",
+          wreckId: action.wreckId
+        });
+      }
+      break;
+    }
+    case "demandCargo": {
+      const demandResult = demandCargoAction(player, action.targetId);
+      sendTo(socket, { type: "demandResult", ...demandResult });
+      if (demandResult.ok) {
+        const targetSock = connections.get(action.targetId);
+        if (targetSock) {
+          sendTo(targetSock, {
+            type: "cargoDemand",
+            fromId: player.id,
+            fromName: player.name,
+            message: `${player.name} is demanding your cargo! Comply (drop cargo) or fight.`
+          });
+        }
+      }
+      break;
+    }
+    // ─── Debug/Admin commands ────────────────────────────────────────────
+    case "debugAddHeat": {
+      debugAddHeat(player, action.amount);
+      break;
+    }
+    case "debugSetWanted": {
+      debugSetWanted(player, action.level);
+      break;
+    }
+    case "debugInterdict": {
+      debugInterdict(player);
+      sendTo(socket, {
+        type: "interdiction",
+        tier: player.systemId,
+        windowSeconds: 8,
+        message: "[DEBUG] Interdiction triggered. Submit or evade."
+      });
+      break;
+    }
+    case "debugSpawnPirate": {
+      debugSpawnPirate(player);
+      break;
+    }
     default:
       break;
   }
