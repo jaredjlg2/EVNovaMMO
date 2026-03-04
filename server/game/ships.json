@@ -20,12 +20,30 @@
     "engineSlots": 1,
     "signature": 48,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 0,
-    "traits": ["Directorate legal access", "Bonus damage vs scanned criminals"],
-    "description": "Starter-licensed civil shuttle with Directorate-approved fittings."
+    "traits": [
+      "Directorate legal access",
+      "Bonus damage vs scanned criminals"
+    ],
+    "description": "Starter-licensed civil shuttle with Directorate-approved fittings.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "trade_hub",
+      "frontier"
+    ]
   },
   {
     "id": "sd_repulse",
@@ -48,12 +66,29 @@
     "engineSlots": 1,
     "signature": 52,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 14000,
-    "traits": ["Directorate legal access", "Bonus damage vs scanned criminals"],
-    "description": "Patrol dogfighter with reinforced plating and steady output."
+    "traits": [
+      "Directorate legal access",
+      "Bonus damage vs scanned criminals"
+    ],
+    "description": "Patrol dogfighter with reinforced plating and steady output.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 2,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "industrial"
+    ]
   },
   {
     "id": "sd_redoubt",
@@ -76,12 +111,30 @@
     "engineSlots": 1,
     "signature": 60,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 32000,
-    "traits": ["Customs inspection suite", "Bonus damage vs scanned criminals"],
-    "description": "Escort corvette tuned for customs interdiction and duty patrols."
+    "traits": [
+      "Customs inspection suite",
+      "Bonus damage vs scanned criminals"
+    ],
+    "description": "Escort corvette tuned for customs interdiction and duty patrols.",
+    "archetype": "interceptor",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "trade_hub"
+    ]
   },
   {
     "id": "sd_sentinel",
@@ -104,12 +157,29 @@
     "engineSlots": 1,
     "signature": 68,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 52000,
-    "traits": ["Fleet coordination uplink", "Bonus damage vs scanned criminals"],
-    "description": "Core combat frigate with redundant armor belts and legal-grade fire control."
+    "traits": [
+      "Fleet coordination uplink",
+      "Bonus damage vs scanned criminals"
+    ],
+    "description": "Core combat frigate with redundant armor belts and legal-grade fire control.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
   },
   {
     "id": "sd_turretine",
@@ -132,12 +202,29 @@
     "engineSlots": 1,
     "signature": 75,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 88000,
-    "traits": ["Multi-turret enforcement platform", "Bonus damage vs scanned criminals"],
-    "description": "Slow but heavily armored destroyer engineered for area denial."
+    "traits": [
+      "Multi-turret enforcement platform",
+      "Bonus damage vs scanned criminals"
+    ],
+    "description": "Slow but heavily armored destroyer engineered for area denial.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
   },
   {
     "id": "sd_citadel",
@@ -160,12 +247,28 @@
     "engineSlots": 2,
     "signature": 82,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 140000,
-    "traits": ["Fleet command suite", "Bonus damage vs scanned criminals"],
-    "description": "Fleet command cruiser with disciplined fire arcs and fortified bulkheads."
+    "traits": [
+      "Fleet command suite",
+      "Bonus damage vs scanned criminals"
+    ],
+    "description": "Fleet command cruiser with disciplined fire arcs and fortified bulkheads.",
+    "archetype": "cruiser",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 4,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "sd_bastion",
@@ -188,12 +291,29 @@
     "engineSlots": 2,
     "signature": 88,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "torpedo", "drone"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo",
+        "drone"
+      ]
     },
     "price": 240000,
-    "traits": ["Fighter bay support", "Bonus damage vs scanned criminals"],
-    "description": "Arc flagship carrier that anchors Directorate task forces."
+    "traits": [
+      "Fighter bay support",
+      "Bonus damage vs scanned criminals"
+    ],
+    "description": "Arc flagship carrier that anchors Directorate task forces.",
+    "archetype": "carrier",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 5,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "kesh_trailwaker",
@@ -216,12 +336,28 @@
     "engineSlots": 1,
     "signature": 56,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 9000,
-    "traits": ["Reinforced ramming prow"],
-    "description": "Clan courier built with raw hull strength over speed."
+    "traits": [
+      "Reinforced ramming prow"
+    ],
+    "description": "Clan courier built with raw hull strength over speed.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "industrial",
+      "frontier"
+    ]
   },
   {
     "id": "kesh_bloodwing",
@@ -244,12 +380,28 @@
     "engineSlots": 1,
     "signature": 60,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 18000,
-    "traits": ["Duel champion starter", "Ramming bonus"],
-    "description": "Honor-duel fighter with dense plating and brutal recoil stabilizers."
+    "traits": [
+      "Duel champion starter",
+      "Ramming bonus"
+    ],
+    "description": "Honor-duel fighter with dense plating and brutal recoil stabilizers.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "industrial"
+    ]
   },
   {
     "id": "kesh_hearthguard",
@@ -272,12 +424,29 @@
     "engineSlots": 1,
     "signature": 66,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 36000,
-    "traits": ["Clan escort honor guard", "Ramming bonus"],
-    "description": "Escort corvette with iron ribs and boarding hooks."
+    "traits": [
+      "Clan escort honor guard",
+      "Ramming bonus"
+    ],
+    "description": "Escort corvette with iron ribs and boarding hooks.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "industrial"
+    ]
   },
   {
     "id": "kesh_warlance",
@@ -300,12 +469,29 @@
     "engineSlots": 1,
     "signature": 72,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 68000,
-    "traits": ["Boarding-focused", "Ramming bonus"],
-    "description": "Boarding frigate with modular breach modules."
+    "traits": [
+      "Boarding-focused",
+      "Ramming bonus"
+    ],
+    "description": "Boarding frigate with modular breach modules.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "industrial"
+    ]
   },
   {
     "id": "kesh_hammermaw",
@@ -328,12 +514,28 @@
     "engineSlots": 1,
     "signature": 78,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 102000,
-    "traits": ["Ramming bonus", "Siege battering prow"],
-    "description": "Heavy destroyer built for close-in ramming and brutal volleys."
+    "traits": [
+      "Ramming bonus",
+      "Siege battering prow"
+    ],
+    "description": "Heavy destroyer built for close-in ramming and brutal volleys.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
   },
   {
     "id": "kesh_stormforge",
@@ -356,12 +558,27 @@
     "engineSlots": 2,
     "signature": 84,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 150000,
-    "traits": ["Heavy siege", "Ramming bonus"],
-    "description": "Clan siege cruiser with armored spine and ballistic dominance."
+    "traits": [
+      "Heavy siege",
+      "Ramming bonus"
+    ],
+    "description": "Clan siege cruiser with armored spine and ballistic dominance.",
+    "archetype": "cruiser",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 4,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "kesh_dynast_khan",
@@ -384,12 +601,27 @@
     "engineSlots": 2,
     "signature": 90,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 260000,
-    "traits": ["Final story reward", "Ramming bonus"],
-    "description": "Legendary clan flagship engineered for decisive ramming strikes."
+    "traits": [
+      "Final story reward",
+      "Ramming bonus"
+    ],
+    "description": "Legendary clan flagship engineered for decisive ramming strikes.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 5,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "echo_seedling",
@@ -412,12 +644,29 @@
     "engineSlots": 1,
     "signature": 36,
     "hardpointTypes": {
-      "primary": ["psychic"],
-      "secondary": ["disruptor"]
+      "primary": [
+        "psychic"
+      ],
+      "secondary": [
+        "disruptor"
+      ]
     },
     "price": 16000,
-    "traits": ["Rapid shield regen", "Psychic systems only"],
-    "description": "Starter mind-vessel grown for agile defense and shielding."
+    "traits": [
+      "Rapid shield regen",
+      "Psychic systems only"
+    ],
+    "description": "Starter mind-vessel grown for agile defense and shielding.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "research_outpost",
+      "frontier"
+    ]
   },
   {
     "id": "echo_mirage",
@@ -440,12 +689,28 @@
     "engineSlots": 1,
     "signature": 34,
     "hardpointTypes": {
-      "primary": ["psychic"],
-      "secondary": ["disruptor"]
+      "primary": [
+        "psychic"
+      ],
+      "secondary": [
+        "disruptor"
+      ]
     },
     "price": 26000,
-    "traits": ["Disruptor pulses", "Psychic systems only"],
-    "description": "Psychic fighter tuned to disable targets instead of destroy them."
+    "traits": [
+      "Disruptor pulses",
+      "Psychic systems only"
+    ],
+    "description": "Psychic fighter tuned to disable targets instead of destroy them.",
+    "archetype": "interceptor",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 3,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "research_outpost"
+    ]
   },
   {
     "id": "echo_flowstate",
@@ -468,12 +733,28 @@
     "engineSlots": 1,
     "signature": 32,
     "hardpointTypes": {
-      "primary": ["psychic"],
-      "secondary": ["disruptor", "control"]
+      "primary": [
+        "psychic"
+      ],
+      "secondary": [
+        "disruptor",
+        "control"
+      ]
     },
     "price": 52000,
-    "traits": ["Disable over kill", "Psychic systems only"],
-    "description": "Bio-corvette that suppresses enemy systems for capture."
+    "traits": [
+      "Disable over kill",
+      "Psychic systems only"
+    ],
+    "description": "Bio-corvette that suppresses enemy systems for capture.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
   },
   {
     "id": "echo_wellspring",
@@ -496,12 +777,28 @@
     "engineSlots": 1,
     "signature": 30,
     "hardpointTypes": {
-      "primary": ["psychic"],
-      "secondary": ["disruptor", "control"]
+      "primary": [
+        "psychic"
+      ],
+      "secondary": [
+        "disruptor",
+        "control"
+      ]
     },
     "price": 76000,
-    "traits": ["Combat utility", "Psychic systems only"],
-    "description": "Shield-heavy frigate that projects disable fields and recovery spores."
+    "traits": [
+      "Combat utility",
+      "Psychic systems only"
+    ],
+    "description": "Shield-heavy frigate that projects disable fields and recovery spores.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
   },
   {
     "id": "echo_ascendant",
@@ -524,12 +821,27 @@
     "engineSlots": 2,
     "signature": 28,
     "hardpointTypes": {
-      "primary": ["psychic"],
-      "secondary": ["disruptor", "control"]
+      "primary": [
+        "psychic"
+      ],
+      "secondary": [
+        "disruptor",
+        "control"
+      ]
     },
     "price": 140000,
-    "traits": ["Psychic AoE", "Psychic systems only"],
-    "description": "Psychic cruiser that blooms with area-wide disable waves."
+    "traits": [
+      "Psychic AoE",
+      "Psychic systems only"
+    ],
+    "description": "Psychic cruiser that blooms with area-wide disable waves.",
+    "archetype": "cruiser",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "echo_singularity_choir",
@@ -552,12 +864,27 @@
     "engineSlots": 2,
     "signature": 24,
     "hardpointTypes": {
-      "primary": ["psychic"],
-      "secondary": ["disruptor", "control"]
+      "primary": [
+        "psychic"
+      ],
+      "secondary": [
+        "disruptor",
+        "control"
+      ]
     },
     "price": 240000,
-    "traits": ["Transformative endgame ship", "Psychic systems only"],
-    "description": "A living chorus vessel that reshapes battlefield flow through psychic dominance."
+    "traits": [
+      "Transformative endgame ship",
+      "Psychic systems only"
+    ],
+    "description": "A living chorus vessel that reshapes battlefield flow through psychic dominance.",
+    "archetype": "carrier",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 5,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "lu_lantern",
@@ -580,12 +907,29 @@
     "engineSlots": 1,
     "signature": 22,
     "hardpointTypes": {
-      "primary": ["energy"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 15000,
-    "traits": ["Exotic fuel", "Low heat signature"],
-    "description": "Intro courier with micro-warp burst engines."
+    "traits": [
+      "Exotic fuel",
+      "Low heat signature"
+    ],
+    "description": "Intro courier with micro-warp burst engines.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "research_outpost",
+      "frontier"
+    ]
   },
   {
     "id": "lu_aetherwing",
@@ -608,12 +952,28 @@
     "engineSlots": 1,
     "signature": 20,
     "hardpointTypes": {
-      "primary": ["energy"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 28000,
-    "traits": ["Micro-warp dodges", "Exotic fuel"],
-    "description": "Hypertech fighter with extreme mobility and low thermal profile."
+    "traits": [
+      "Micro-warp dodges",
+      "Exotic fuel"
+    ],
+    "description": "Hypertech fighter with extreme mobility and low thermal profile.",
+    "archetype": "interceptor",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 3,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "research_outpost"
+    ]
   },
   {
     "id": "lu_fluxline",
@@ -636,12 +996,27 @@
     "engineSlots": 1,
     "signature": 18,
     "hardpointTypes": {
-      "primary": ["energy"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 52000,
-    "traits": ["Low signature", "Exotic fuel"],
-    "description": "Low-signature corvette tuned for stealthy delivery runs."
+    "traits": [
+      "Low signature",
+      "Exotic fuel"
+    ],
+    "description": "Low-signature corvette tuned for stealthy delivery runs.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
   },
   {
     "id": "lu_heliostat",
@@ -664,12 +1039,28 @@
     "engineSlots": 1,
     "signature": 20,
     "hardpointTypes": {
-      "primary": ["energy"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 92000,
-    "traits": ["Support vessel", "Exotic fuel"],
-    "description": "Support frigate that bends momentum with exotic thrust vectors."
+    "traits": [
+      "Support vessel",
+      "Exotic fuel"
+    ],
+    "description": "Support frigate that bends momentum with exotic thrust vectors.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
   },
   {
     "id": "lu_luminary",
@@ -692,12 +1083,27 @@
     "engineSlots": 2,
     "signature": 22,
     "hardpointTypes": {
-      "primary": ["energy"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 150000,
-    "traits": ["Teleport drive", "Exotic fuel"],
-    "description": "Cruiser with experimental blink-drive array and fragile armor."
+    "traits": [
+      "Teleport drive",
+      "Exotic fuel"
+    ],
+    "description": "Cruiser with experimental blink-drive array and fragile armor.",
+    "archetype": "cruiser",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "lu_eventide_beacon",
@@ -720,12 +1126,27 @@
     "engineSlots": 2,
     "signature": 24,
     "hardpointTypes": {
-      "primary": ["energy"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 240000,
-    "traits": ["Hypergate control ship", "Exotic fuel"],
-    "description": "Hypergate control capital ship with extreme mobility and instability risk."
+    "traits": [
+      "Hypergate control ship",
+      "Exotic fuel"
+    ],
+    "description": "Hypergate control capital ship with extreme mobility and instability risk.",
+    "archetype": "carrier",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 5,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "fh_patchliner",
@@ -748,12 +1169,29 @@
     "engineSlots": 1,
     "signature": 46,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 8000,
-    "traits": ["Versatile fit", "Easy upgrades"],
-    "description": "Starter shuttle optimized for rapid refit and multi-role missions."
+    "traits": [
+      "Versatile fit",
+      "Easy upgrades"
+    ],
+    "description": "Starter shuttle optimized for rapid refit and multi-role missions.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "frontier",
+      "core_world"
+    ]
   },
   {
     "id": "fh_crosswind",
@@ -776,12 +1214,28 @@
     "engineSlots": 1,
     "signature": 50,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 19000,
-    "traits": ["Flexible loadout"],
-    "description": "Flexible fighter with balanced performance and modular racks."
+    "traits": [
+      "Flexible loadout"
+    ],
+    "description": "Flexible fighter with balanced performance and modular racks.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "core_world",
+      "frontier"
+    ]
   },
   {
     "id": "fh_wayfinder",
@@ -804,12 +1258,29 @@
     "engineSlots": 1,
     "signature": 54,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 42000,
-    "traits": ["Light trader"],
-    "description": "Multi-role corvette that blends trade capacity with escort firepower."
+    "traits": [
+      "Light trader"
+    ],
+    "description": "Multi-role corvette that blends trade capacity with escort firepower.",
+    "archetype": "light_trader",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "core_world",
+      "agricultural"
+    ]
   },
   {
     "id": "fh_holdmaster",
@@ -832,12 +1303,28 @@
     "engineSlots": 1,
     "signature": 62,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 68000,
-    "traits": ["Cargo hauler"],
-    "description": "Free Horizons freighter with affordable upgrade slots."
+    "traits": [
+      "Cargo hauler"
+    ],
+    "description": "Free Horizons freighter with affordable upgrade slots.",
+    "archetype": "freighter",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "industrial",
+      "agricultural"
+    ]
   },
   {
     "id": "fh_breakwater",
@@ -860,12 +1347,28 @@
     "engineSlots": 1,
     "signature": 68,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 98000,
-    "traits": ["Player favorite"],
-    "description": "Gunship that remains a versatile favorite for mixed builds."
+    "traits": [
+      "Player favorite"
+    ],
+    "description": "Gunship that remains a versatile favorite for mixed builds.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "core_world"
+    ]
   },
   {
     "id": "fh_frontier_crest",
@@ -888,12 +1391,29 @@
     "engineSlots": 2,
     "signature": 72,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "torpedo", "drone"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo",
+        "drone"
+      ]
     },
     "price": 150000,
-    "traits": ["Modular carrier"],
-    "description": "Modular carrier chassis ready for any role."
+    "traits": [
+      "Modular carrier"
+    ],
+    "description": "Modular carrier chassis ready for any role.",
+    "archetype": "carrier",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 4,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital",
+      "trade_hub"
+    ]
   },
   {
     "id": "bf_ratchet",
@@ -916,12 +1436,27 @@
     "engineSlots": 1,
     "signature": 70,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 7000,
-    "traits": ["Disposable hull", "Boarding bonus"],
-    "description": "Disposable pirate shuttle fitted with scavenged weapons."
+    "traits": [
+      "Disposable hull",
+      "Boarding bonus"
+    ],
+    "description": "Disposable pirate shuttle fitted with scavenged weapons.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "pirate_haven",
+      "frontier"
+    ]
   },
   {
     "id": "bf_spite",
@@ -944,12 +1479,27 @@
     "engineSlots": 1,
     "signature": 74,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 16000,
-    "traits": ["Swarm attacks", "Boarding bonus"],
-    "description": "Swarm fighter optimized for burst damage and aggressive boarding."
+    "traits": [
+      "Swarm attacks",
+      "Boarding bonus"
+    ],
+    "description": "Swarm fighter optimized for burst damage and aggressive boarding.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "pirate_haven",
+      "frontier"
+    ]
   },
   {
     "id": "bf_ransacker",
@@ -972,12 +1522,28 @@
     "engineSlots": 1,
     "signature": 78,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 42000,
-    "traits": ["Boarding kits", "Loot gains"],
-    "description": "Pirate corvette fitted with boarding pods and looting cranes."
+    "traits": [
+      "Boarding kits",
+      "Loot gains"
+    ],
+    "description": "Pirate corvette fitted with boarding pods and looting cranes.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 2,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "pirate_haven",
+      "frontier"
+    ]
   },
   {
     "id": "bf_harbinger",
@@ -1000,12 +1566,27 @@
     "engineSlots": 1,
     "signature": 82,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 88000,
-    "traits": ["Fear mechanic", "Boarding bonus"],
-    "description": "Intimidating frigate that disrupts morale and disables targets."
+    "traits": [
+      "Fear mechanic",
+      "Boarding bonus"
+    ],
+    "description": "Intimidating frigate that disrupts morale and disables targets.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "pirate_haven"
+    ]
   },
   {
     "id": "bf_mawbreaker",
@@ -1028,12 +1609,27 @@
     "engineSlots": 2,
     "signature": 86,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 140000,
-    "traits": ["Disables targets", "Boarding bonus"],
-    "description": "Cruiser built to cripple ships and strip them for parts."
+    "traits": [
+      "Disables targets",
+      "Boarding bonus"
+    ],
+    "description": "Cruiser built to cripple ships and strip them for parts.",
+    "archetype": "cruiser",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "pirate_haven"
+    ]
   },
   {
     "id": "bf_crown_of_teeth",
@@ -1056,12 +1652,27 @@
     "engineSlots": 2,
     "signature": 90,
     "hardpointTypes": {
-      "primary": ["ballistic"],
-      "secondary": ["missile", "torpedo"]
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
     },
     "price": 220000,
-    "traits": ["Pirate king flagship", "Boarding bonus"],
-    "description": "Flagship of the Black Flag lords, bristling with stolen cannons."
+    "traits": [
+      "Pirate king flagship",
+      "Boarding bonus"
+    ],
+    "description": "Flagship of the Black Flag lords, bristling with stolen cannons.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 4,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "pirate_haven"
+    ]
   },
   {
     "id": "st_sporelight",
@@ -1084,12 +1695,28 @@
     "engineSlots": 1,
     "signature": 58,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 12000,
-    "traits": ["Colony seed courier"],
-    "description": "Seedship courier designed for early colonization runs."
+    "traits": [
+      "Colony seed courier"
+    ],
+    "description": "Seedship courier designed for early colonization runs.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "agricultural",
+      "frontier",
+      "trade_hub"
+    ]
   },
   {
     "id": "st_habitat_arc",
@@ -1112,12 +1739,28 @@
     "engineSlots": 1,
     "signature": 64,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 52000,
-    "traits": ["Colonist hauler"],
-    "description": "Transport outfitted for colony crews and cryo habitats."
+    "traits": [
+      "Colonist hauler"
+    ],
+    "description": "Transport outfitted for colony crews and cryo habitats.",
+    "archetype": "light_trader",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "agricultural",
+      "trade_hub",
+      "core_world"
+    ]
   },
   {
     "id": "st_eden_hauler",
@@ -1140,12 +1783,28 @@
     "engineSlots": 1,
     "signature": 70,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 82000,
-    "traits": ["Atmospheric modules"],
-    "description": "Heavy freighter with atmospheric deployment modules."
+    "traits": [
+      "Atmospheric modules"
+    ],
+    "description": "Heavy freighter with atmospheric deployment modules.",
+    "archetype": "freighter",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "agricultural",
+      "industrial",
+      "trade_hub"
+    ]
   },
   {
     "id": "st_greenforge",
@@ -1168,12 +1827,28 @@
     "engineSlots": 2,
     "signature": 78,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "drone"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "drone"
+      ]
     },
     "price": 160000,
-    "traits": ["Colony drop pods"],
-    "description": "Terraforming rig that deploys colony assets and infrastructure."
+    "traits": [
+      "Colony drop pods"
+    ],
+    "description": "Terraforming rig that deploys colony assets and infrastructure.",
+    "archetype": "heavy_freighter",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 3,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "agricultural",
+      "capital"
+    ]
   },
   {
     "id": "st_genesis_crown",
@@ -1196,12 +1871,28 @@
     "engineSlots": 2,
     "signature": 84,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile", "drone"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "drone"
+      ]
     },
     "price": 240000,
-    "traits": ["Planet starter flagship"],
-    "description": "Massive colony capital designed to seed new worlds."
+    "traits": [
+      "Planet starter flagship"
+    ],
+    "description": "Massive colony capital designed to seed new worlds.",
+    "archetype": "carrier",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 4,
+    "minPopulation": 5,
+    "preferredSystemTypes": [
+      "capital",
+      "agricultural"
+    ]
   },
   {
     "id": "oc_cinderling",
@@ -1224,12 +1915,28 @@
     "engineSlots": 1,
     "signature": 76,
     "hardpointTypes": {
-      "primary": ["void"],
-      "secondary": ["ritual"]
+      "primary": [
+        "void"
+      ],
+      "secondary": [
+        "ritual"
+      ]
     },
     "price": 15000,
-    "traits": ["Unstable systems", "Corruption meter"],
-    "description": "Starter craft channeling volatile void energy."
+    "traits": [
+      "Unstable systems",
+      "Corruption meter"
+    ],
+    "description": "Starter craft channeling volatile void energy.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "research_outpost",
+      "frontier",
+      "pirate_haven"
+    ]
   },
   {
     "id": "oc_glyphbite",
@@ -1252,12 +1959,27 @@
     "engineSlots": 1,
     "signature": 80,
     "hardpointTypes": {
-      "primary": ["void"],
-      "secondary": ["ritual"]
+      "primary": [
+        "void"
+      ],
+      "secondary": [
+        "ritual"
+      ]
     },
     "price": 28000,
-    "traits": ["Corruption stacking", "Unstable systems"],
-    "description": "Corruption-stacking fighter with violent void surges."
+    "traits": [
+      "Corruption stacking",
+      "Unstable systems"
+    ],
+    "description": "Corruption-stacking fighter with violent void surges.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 3,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "research_outpost",
+      "frontier"
+    ]
   },
   {
     "id": "oc_umbral_cell",
@@ -1280,12 +2002,27 @@
     "engineSlots": 1,
     "signature": 82,
     "hardpointTypes": {
-      "primary": ["void"],
-      "secondary": ["ritual"]
+      "primary": [
+        "void"
+      ],
+      "secondary": [
+        "ritual"
+      ]
     },
     "price": 52000,
-    "traits": ["Buffs on kill", "Unstable systems"],
-    "description": "Void-corvette that feeds on kill energy to empower allies."
+    "traits": [
+      "Buffs on kill",
+      "Unstable systems"
+    ],
+    "description": "Void-corvette that feeds on kill energy to empower allies.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 4,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "research_outpost",
+      "frontier"
+    ]
   },
   {
     "id": "oc_hollow_verse",
@@ -1308,12 +2045,27 @@
     "engineSlots": 1,
     "signature": 84,
     "hardpointTypes": {
-      "primary": ["void"],
-      "secondary": ["ritual", "rift"]
+      "primary": [
+        "void"
+      ],
+      "secondary": [
+        "ritual",
+        "rift"
+      ]
     },
     "price": 90000,
-    "traits": ["Rift cannons", "Unstable systems"],
-    "description": "Frigate that fires rift cannons with risk of backlash."
+    "traits": [
+      "Rift cannons",
+      "Unstable systems"
+    ],
+    "description": "Frigate that fires rift cannons with risk of backlash.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "research_outpost"
+    ]
   },
   {
     "id": "oc_eclipse_choir",
@@ -1336,12 +2088,28 @@
     "engineSlots": 2,
     "signature": 86,
     "hardpointTypes": {
-      "primary": ["void"],
-      "secondary": ["ritual", "rift"]
+      "primary": [
+        "void"
+      ],
+      "secondary": [
+        "ritual",
+        "rift"
+      ]
     },
     "price": 150000,
-    "traits": ["Radius debuffs", "Unstable systems"],
-    "description": "Cruiser that projects corruption fields to weaken foes."
+    "traits": [
+      "Radius debuffs",
+      "Unstable systems"
+    ],
+    "description": "Cruiser that projects corruption fields to weaken foes.",
+    "archetype": "cruiser",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital",
+      "research_outpost"
+    ]
   },
   {
     "id": "oc_naos_gate",
@@ -1364,12 +2132,27 @@
     "engineSlots": 2,
     "signature": 90,
     "hardpointTypes": {
-      "primary": ["void"],
-      "secondary": ["ritual", "rift"]
+      "primary": [
+        "void"
+      ],
+      "secondary": [
+        "ritual",
+        "rift"
+      ]
     },
     "price": 240000,
-    "traits": ["Galaxy-state threat", "Unstable systems"],
-    "description": "Forbidden flagship that bends reality at great personal cost."
+    "traits": [
+      "Galaxy-state threat",
+      "Unstable systems"
+    ],
+    "description": "Forbidden flagship that bends reality at great personal cost.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 5,
+    "preferredSystemTypes": [
+      "capital"
+    ]
   },
   {
     "id": "neutral_frontier_skiff",
@@ -1392,12 +2175,28 @@
     "engineSlots": 1,
     "signature": 50,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 6000,
-    "traits": ["Neutral availability"],
-    "description": "Common neutral shuttle found in independent shipyards."
+    "traits": [
+      "Neutral availability"
+    ],
+    "description": "Common neutral shuttle found in independent shipyards.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "frontier",
+      "trade_hub",
+      "pirate_haven"
+    ]
   },
   {
     "id": "neutral_common_hauler",
@@ -1420,11 +2219,1876 @@
     "engineSlots": 1,
     "signature": 58,
     "hardpointTypes": {
-      "primary": ["energy", "ballistic"],
-      "secondary": ["missile"]
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
     },
     "price": 32000,
-    "traits": ["Neutral availability"],
-    "description": "Unaligned cargo hauler used by small merchants."
+    "traits": [
+      "Neutral availability"
+    ],
+    "description": "Unaligned cargo hauler used by small merchants.",
+    "archetype": "light_trader",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 1,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "core_world",
+      "frontier",
+      "agricultural"
+    ]
+  },
+  {
+    "id": "sd_swift_lance",
+    "name": "SD Swift Lance",
+    "factionId": "solar_directorate",
+    "class": "Interceptor",
+    "tier": "II",
+    "hull": 180,
+    "shield": 115,
+    "armor": 26,
+    "speed": 126,
+    "acceleration": 100,
+    "maneuverability": 80,
+    "cargo": 6,
+    "crew": 2,
+    "fuel": 130,
+    "hardpoints": 3,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 2,
+    "engineSlots": 1,
+    "signature": 38,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 22000,
+    "traits": [
+      "Fast intercept",
+      "Directorate legal access"
+    ],
+    "description": "Quick interceptor used by SD border patrols to chase down smugglers and pirates.",
+    "archetype": "interceptor",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "trade_hub"
+    ]
+  },
+  {
+    "id": "sd_enforcer",
+    "name": "SD Enforcer",
+    "factionId": "solar_directorate",
+    "class": "Gunship",
+    "tier": "III",
+    "hull": 410,
+    "shield": 195,
+    "armor": 55,
+    "speed": 87,
+    "acceleration": 70,
+    "maneuverability": 50,
+    "cargo": 22,
+    "crew": 8,
+    "fuel": 150,
+    "hardpoints": 6,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 62,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 62000,
+    "traits": [
+      "Suppression fire",
+      "Directorate legal access",
+      "Contraband scanner"
+    ],
+    "description": "Mid-range enforcement gunship deployed to patrol core trade routes.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
+  },
+  {
+    "id": "sd_warship",
+    "name": "SD Warship",
+    "factionId": "solar_directorate",
+    "class": "Destroyer",
+    "tier": "IV",
+    "hull": 530,
+    "shield": 250,
+    "armor": 68,
+    "speed": 79,
+    "acceleration": 62,
+    "maneuverability": 42,
+    "cargo": 30,
+    "crew": 18,
+    "fuel": 170,
+    "hardpoints": 7,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 70,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 105000,
+    "traits": [
+      "Heavy firepower",
+      "Armored hull",
+      "Directorate legal access"
+    ],
+    "description": "Front-line destroyer assigned to high-threat zones and fleet engagements.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
+  },
+  {
+    "id": "sd_dreadnought",
+    "name": "SD Dreadnought",
+    "factionId": "solar_directorate",
+    "class": "Battleship",
+    "tier": "V",
+    "hull": 710,
+    "shield": 315,
+    "armor": 82,
+    "speed": 71,
+    "acceleration": 52,
+    "maneuverability": 32,
+    "cargo": 40,
+    "crew": 40,
+    "fuel": 200,
+    "hardpoints": 9,
+    "secondaryHardpoints": 4,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 80,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 165000,
+    "traits": [
+      "Capital-class firepower",
+      "Fleet command",
+      "Directorate legal access"
+    ],
+    "description": "The Directorate's premier battleship, deployed only at major strategic flashpoints.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 4,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital"
+    ]
+  },
+  {
+    "id": "kesh_ravager",
+    "name": "Kesh Ravager",
+    "factionId": "ironclad_clans",
+    "class": "Gunship",
+    "tier": "II",
+    "hull": 345,
+    "shield": 85,
+    "armor": 60,
+    "speed": 80,
+    "acceleration": 65,
+    "maneuverability": 44,
+    "cargo": 14,
+    "crew": 5,
+    "fuel": 130,
+    "hardpoints": 4,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 2,
+    "engineSlots": 1,
+    "signature": 55,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic",
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 42000,
+    "traits": [
+      "Boarding bonus",
+      "Heavy armor plating"
+    ],
+    "description": "A compact armored brawler preferred by young Kesh warriors seeking their first prize.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 1,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "industrial"
+    ]
+  },
+  {
+    "id": "kesh_siegewall",
+    "name": "Kesh Siegewall",
+    "factionId": "ironclad_clans",
+    "class": "Corvette",
+    "tier": "III",
+    "hull": 510,
+    "shield": 115,
+    "armor": 76,
+    "speed": 74,
+    "acceleration": 56,
+    "maneuverability": 36,
+    "cargo": 24,
+    "crew": 10,
+    "fuel": 150,
+    "hardpoints": 5,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 2,
+    "engineSlots": 2,
+    "signature": 64,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic",
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 76000,
+    "traits": [
+      "Siege breaker",
+      "Enhanced armor",
+      "Boarding bonus"
+    ],
+    "description": "A medium-class war corvette built to absorb punishment and hold territory.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "industrial"
+    ]
+  },
+  {
+    "id": "kesh_ironbeast",
+    "name": "Kesh Ironbeast",
+    "factionId": "ironclad_clans",
+    "class": "Destroyer",
+    "tier": "IV",
+    "hull": 710,
+    "shield": 145,
+    "armor": 96,
+    "speed": 66,
+    "acceleration": 48,
+    "maneuverability": 28,
+    "cargo": 30,
+    "crew": 20,
+    "fuel": 170,
+    "hardpoints": 7,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 74,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 115000,
+    "traits": [
+      "Armored fortress",
+      "Boarding clamps",
+      "Damage resistance"
+    ],
+    "description": "The Ironbeast is a slow, near-indestructible destroyer favored in siege operations.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 2,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
+  },
+  {
+    "id": "kesh_war_throne",
+    "name": "Kesh War Throne",
+    "factionId": "ironclad_clans",
+    "class": "Battleship",
+    "tier": "V",
+    "hull": 910,
+    "shield": 190,
+    "armor": 115,
+    "speed": 60,
+    "acceleration": 40,
+    "maneuverability": 22,
+    "cargo": 44,
+    "crew": 50,
+    "fuel": 210,
+    "hardpoints": 10,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 84,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 170000,
+    "traits": [
+      "War flagship",
+      "Clan honor aura",
+      "Heavy suppression"
+    ],
+    "description": "The pinnacle of Kesh engineering \u2014 a rolling fortress that dominates every battlefield.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 3,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital"
+    ]
+  },
+  {
+    "id": "echo_veilskimmer",
+    "name": "Echo Veilskimmer",
+    "factionId": "echotrail_communion",
+    "class": "Interceptor",
+    "tier": "I-II",
+    "hull": 95,
+    "shield": 155,
+    "armor": 14,
+    "speed": 124,
+    "acceleration": 105,
+    "maneuverability": 90,
+    "cargo": 5,
+    "crew": 1,
+    "fuel": 120,
+    "hardpoints": 2,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 1,
+    "engineSlots": 1,
+    "signature": 28,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 20000,
+    "traits": [
+      "Psychic link",
+      "Stealth veil",
+      "Fast intercept"
+    ],
+    "description": "A scout variant grown from Echo bio-material, used to probe enemy formations.",
+    "archetype": "interceptor",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 2,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "research_outpost"
+    ]
+  },
+  {
+    "id": "echo_resonance",
+    "name": "Echo Resonance",
+    "factionId": "echotrail_communion",
+    "class": "Corvette",
+    "tier": "II-III",
+    "hull": 140,
+    "shield": 230,
+    "armor": 19,
+    "speed": 114,
+    "acceleration": 88,
+    "maneuverability": 68,
+    "cargo": 10,
+    "crew": 3,
+    "fuel": 140,
+    "hardpoints": 4,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 2,
+    "engineSlots": 1,
+    "signature": 36,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 46000,
+    "traits": [
+      "Psionic jamming",
+      "Shield harmony",
+      "Disruptor field"
+    ],
+    "description": "A medium combat corvette that disrupts enemy targeting through resonance fields.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 3,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "research_outpost"
+    ]
+  },
+  {
+    "id": "echo_deepfield",
+    "name": "Echo Deepfield",
+    "factionId": "echotrail_communion",
+    "class": "Corvette",
+    "tier": "III",
+    "hull": 175,
+    "shield": 280,
+    "armor": 24,
+    "speed": 108,
+    "acceleration": 78,
+    "maneuverability": 58,
+    "cargo": 16,
+    "crew": 5,
+    "fuel": 150,
+    "hardpoints": 5,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 42,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 60000,
+    "traits": [
+      "Deep-range scanner",
+      "Psionic shield boost",
+      "Void stealth"
+    ],
+    "description": "Heavy support corvette used for long-range reconnaissance and shield warfare.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
+  },
+  {
+    "id": "echo_voidweaver",
+    "name": "Echo Voidweaver",
+    "factionId": "echotrail_communion",
+    "class": "Frigate",
+    "tier": "IV",
+    "hull": 230,
+    "shield": 350,
+    "armor": 30,
+    "speed": 100,
+    "acceleration": 68,
+    "maneuverability": 48,
+    "cargo": 22,
+    "crew": 9,
+    "fuel": 165,
+    "hardpoints": 6,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 50,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 94000,
+    "traits": [
+      "Void resonance",
+      "Psychic suppression field",
+      "Shield overload burst"
+    ],
+    "description": "A heavy frigate weaving void energies into impenetrable defensive screens.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
+  },
+  {
+    "id": "echo_sentinelcore",
+    "name": "Echo Sentinelcore",
+    "factionId": "echotrail_communion",
+    "class": "Carrier",
+    "tier": "IV",
+    "hull": 270,
+    "shield": 390,
+    "armor": 32,
+    "speed": 94,
+    "acceleration": 60,
+    "maneuverability": 40,
+    "cargo": 28,
+    "crew": 15,
+    "fuel": 180,
+    "hardpoints": 5,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 56,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 104000,
+    "traits": [
+      "Drone command",
+      "Shield cascade network",
+      "Psychic link amplifier"
+    ],
+    "description": "A mobile command ship that links the shields and minds of nearby Echo vessels.",
+    "archetype": "carrier",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 5,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital"
+    ]
+  },
+  {
+    "id": "lu_quickstrike",
+    "name": "Lu Quickstrike",
+    "factionId": "luminari_compact",
+    "class": "Interceptor",
+    "tier": "I-II",
+    "hull": 105,
+    "shield": 100,
+    "armor": 17,
+    "speed": 148,
+    "acceleration": 120,
+    "maneuverability": 95,
+    "cargo": 4,
+    "crew": 1,
+    "fuel": 115,
+    "hardpoints": 2,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 1,
+    "engineSlots": 1,
+    "signature": 24,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 18000,
+    "traits": [
+      "Exotic drive",
+      "Ultra-low signature",
+      "Speed burst"
+    ],
+    "description": "A Luminari scout interceptor designed for rapid strikes and instant disengagement.",
+    "archetype": "interceptor",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 2,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "research_outpost"
+    ]
+  },
+  {
+    "id": "lu_solarstrike",
+    "name": "Lu Solarstrike",
+    "factionId": "luminari_compact",
+    "class": "Gunship",
+    "tier": "III",
+    "hull": 195,
+    "shield": 165,
+    "armor": 24,
+    "speed": 136,
+    "acceleration": 98,
+    "maneuverability": 70,
+    "cargo": 12,
+    "crew": 4,
+    "fuel": 150,
+    "hardpoints": 5,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 36,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 64000,
+    "traits": [
+      "Exotic drive",
+      "Precision targeting",
+      "Flux shield"
+    ],
+    "description": "A fast attack gunship integrating Luminari exotic drives with precision weapons.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world",
+      "research_outpost"
+    ]
+  },
+  {
+    "id": "lu_prismrunner",
+    "name": "Lu Prismrunner",
+    "factionId": "luminari_compact",
+    "class": "Corvette",
+    "tier": "III",
+    "hull": 185,
+    "shield": 155,
+    "armor": 22,
+    "speed": 140,
+    "acceleration": 105,
+    "maneuverability": 76,
+    "cargo": 10,
+    "crew": 3,
+    "fuel": 140,
+    "hardpoints": 4,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 2,
+    "engineSlots": 2,
+    "signature": 30,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 58000,
+    "traits": [
+      "Light-refraction hull",
+      "Speed burst",
+      "Low sensor profile"
+    ],
+    "description": "A stealth corvette that bends sensor light to become nearly invisible at range.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
+  },
+  {
+    "id": "lu_heliofyre",
+    "name": "Lu Heliofyre",
+    "factionId": "luminari_compact",
+    "class": "Destroyer",
+    "tier": "IV",
+    "hull": 250,
+    "shield": 205,
+    "armor": 28,
+    "speed": 128,
+    "acceleration": 88,
+    "maneuverability": 56,
+    "cargo": 20,
+    "crew": 9,
+    "fuel": 170,
+    "hardpoints": 7,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 44,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 98000,
+    "traits": [
+      "Exotic drive system",
+      "Energy conduit overcharge",
+      "Rapid reposition"
+    ],
+    "description": "A heavy destroyer that combines exotic drives with devastating energy weapons.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "capital",
+      "core_world"
+    ]
+  },
+  {
+    "id": "lu_meridian",
+    "name": "Lu Meridian",
+    "factionId": "luminari_compact",
+    "class": "Battleship",
+    "tier": "V",
+    "hull": 320,
+    "shield": 260,
+    "armor": 34,
+    "speed": 120,
+    "acceleration": 72,
+    "maneuverability": 44,
+    "cargo": 30,
+    "crew": 28,
+    "fuel": 200,
+    "hardpoints": 10,
+    "secondaryHardpoints": 4,
+    "utilitySlots": 4,
+    "engineSlots": 3,
+    "signature": 52,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 165000,
+    "traits": [
+      "Exotic battlecruiser",
+      "Flux storm cannon",
+      "Phase cloak field"
+    ],
+    "description": "The Meridian-class is a fast battleship that combines capital firepower with elite mobility.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 5,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital"
+    ]
+  },
+  {
+    "id": "fh_courier",
+    "name": "FH Courier",
+    "factionId": "free_horizons_guild",
+    "class": "Courier",
+    "tier": "II",
+    "hull": 210,
+    "shield": 100,
+    "armor": 24,
+    "speed": 120,
+    "acceleration": 95,
+    "maneuverability": 72,
+    "cargo": 22,
+    "crew": 2,
+    "fuel": 160,
+    "hardpoints": 2,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 2,
+    "engineSlots": 1,
+    "signature": 34,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 24000,
+    "traits": [
+      "Fast delivery",
+      "Extended fuel tank",
+      "Guild licensed"
+    ],
+    "description": "A swift courier variant for fast delivery runs across the frontier.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 1,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "frontier",
+      "core_world"
+    ]
+  },
+  {
+    "id": "fh_tradehawk",
+    "name": "FH Tradehawk",
+    "factionId": "free_horizons_guild",
+    "class": "Light Freighter",
+    "tier": "II-III",
+    "hull": 270,
+    "shield": 150,
+    "armor": 30,
+    "speed": 106,
+    "acceleration": 80,
+    "maneuverability": 58,
+    "cargo": 38,
+    "crew": 4,
+    "fuel": 170,
+    "hardpoints": 3,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 48,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic",
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 48000,
+    "traits": [
+      "Cargo rush",
+      "Guild licensed",
+      "Modular bay"
+    ],
+    "description": "A popular light freighter that balances cargo capacity with decent combat ability.",
+    "archetype": "light_trader",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "agricultural",
+      "core_world"
+    ]
+  },
+  {
+    "id": "fh_ironhull",
+    "name": "FH Ironhull",
+    "factionId": "free_horizons_guild",
+    "class": "Heavy Freighter",
+    "tier": "IV",
+    "hull": 440,
+    "shield": 220,
+    "armor": 44,
+    "speed": 90,
+    "acceleration": 68,
+    "maneuverability": 40,
+    "cargo": 70,
+    "crew": 8,
+    "fuel": 190,
+    "hardpoints": 4,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 60,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic",
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 102000,
+    "traits": [
+      "Heavy cargo",
+      "Guild licensed",
+      "Defensive plating"
+    ],
+    "description": "A heavy-duty freighter with oversized holds and reinforced hull for bulk cargo runs.",
+    "archetype": "heavy_freighter",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 2,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "industrial",
+      "agricultural"
+    ]
+  },
+  {
+    "id": "fh_warbird",
+    "name": "FH Warbird",
+    "factionId": "free_horizons_guild",
+    "class": "Gunship",
+    "tier": "IV",
+    "hull": 430,
+    "shield": 215,
+    "armor": 42,
+    "speed": 94,
+    "acceleration": 72,
+    "maneuverability": 50,
+    "cargo": 28,
+    "crew": 10,
+    "fuel": 175,
+    "hardpoints": 6,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 56,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic",
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 108000,
+    "traits": [
+      "Modular weapons",
+      "Guild licensed",
+      "Escort role"
+    ],
+    "description": "A converted freighter chassis refit into a heavy escort and combat platform.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "core_world"
+    ]
+  },
+  {
+    "id": "fh_vanguard",
+    "name": "FH Vanguard",
+    "factionId": "free_horizons_guild",
+    "class": "Battleship",
+    "tier": "V",
+    "hull": 560,
+    "shield": 270,
+    "armor": 50,
+    "speed": 84,
+    "acceleration": 62,
+    "maneuverability": 40,
+    "cargo": 52,
+    "crew": 35,
+    "fuel": 220,
+    "hardpoints": 8,
+    "secondaryHardpoints": 4,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 68,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic",
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 162000,
+    "traits": [
+      "Fleet flagship",
+      "Guild licensed",
+      "Combined arms"
+    ],
+    "description": "The Guild's premier battleship, fielded when diplomacy fails and firepower speaks.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 5,
+    "minTechLevel": 4,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital",
+      "trade_hub"
+    ]
+  },
+  {
+    "id": "bf_shadowblade",
+    "name": "BF Shadowblade",
+    "factionId": "black_flag_syndicate",
+    "class": "Interceptor",
+    "tier": "II",
+    "hull": 155,
+    "shield": 72,
+    "armor": 24,
+    "speed": 118,
+    "acceleration": 100,
+    "maneuverability": 85,
+    "cargo": 8,
+    "crew": 2,
+    "fuel": 120,
+    "hardpoints": 3,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 2,
+    "engineSlots": 1,
+    "signature": 30,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 20000,
+    "traits": [
+      "Stealth approach",
+      "Boarding prep",
+      "Fast strike"
+    ],
+    "description": "A lightweight pirate interceptor built for ambushes and hit-and-run attacks.",
+    "archetype": "interceptor",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 2,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "pirate_haven",
+      "frontier"
+    ]
+  },
+  {
+    "id": "bf_cutlass",
+    "name": "BF Cutlass",
+    "factionId": "black_flag_syndicate",
+    "class": "Gunship",
+    "tier": "III",
+    "hull": 250,
+    "shield": 115,
+    "armor": 30,
+    "speed": 100,
+    "acceleration": 82,
+    "maneuverability": 62,
+    "cargo": 22,
+    "crew": 5,
+    "fuel": 140,
+    "hardpoints": 5,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 2,
+    "engineSlots": 1,
+    "signature": 44,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 48000,
+    "traits": [
+      "Raider loadout",
+      "Black market access",
+      "Hull breach charges"
+    ],
+    "description": "A scrappy gunship cobbled together from stolen parts \u2014 cheap, fast, and deadly.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 2,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "pirate_haven",
+      "frontier"
+    ]
+  },
+  {
+    "id": "bf_marauder",
+    "name": "BF Marauder",
+    "factionId": "black_flag_syndicate",
+    "class": "Corvette",
+    "tier": "III-IV",
+    "hull": 300,
+    "shield": 130,
+    "armor": 34,
+    "speed": 96,
+    "acceleration": 76,
+    "maneuverability": 54,
+    "cargo": 26,
+    "crew": 7,
+    "fuel": 150,
+    "hardpoints": 6,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 48,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 66000,
+    "traits": [
+      "Heavy raider",
+      "Black market access",
+      "Hull breach charges"
+    ],
+    "description": "A larger raider platform that excels at overwhelming merchant convoys.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "pirate_haven",
+      "frontier"
+    ]
+  },
+  {
+    "id": "bf_plunderer",
+    "name": "BF Plunderer",
+    "factionId": "black_flag_syndicate",
+    "class": "Destroyer",
+    "tier": "IV",
+    "hull": 375,
+    "shield": 155,
+    "armor": 38,
+    "speed": 88,
+    "acceleration": 68,
+    "maneuverability": 44,
+    "cargo": 30,
+    "crew": 12,
+    "fuel": 160,
+    "hardpoints": 7,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 54,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 92000,
+    "traits": [
+      "Fleet raider",
+      "Cargo lockdown",
+      "Black market access"
+    ],
+    "description": "A heavy pirate destroyer designed to disable and loot larger prey.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "pirate_haven"
+    ]
+  },
+  {
+    "id": "bf_ironveil",
+    "name": "BF Ironveil",
+    "factionId": "black_flag_syndicate",
+    "class": "Carrier",
+    "tier": "IV",
+    "hull": 420,
+    "shield": 175,
+    "armor": 42,
+    "speed": 82,
+    "acceleration": 62,
+    "maneuverability": 36,
+    "cargo": 40,
+    "crew": 20,
+    "fuel": 170,
+    "hardpoints": 6,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 60,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 100000,
+    "traits": [
+      "Drone launch bay",
+      "Black market access",
+      "Contraband hold"
+    ],
+    "description": "A pirate carrier that deploys swarms of drones to overwhelm enemy defenses.",
+    "archetype": "carrier",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "pirate_haven"
+    ]
+  },
+  {
+    "id": "st_seedpod",
+    "name": "ST Seedpod",
+    "factionId": "starseed_foundation",
+    "class": "Scout",
+    "tier": "I-II",
+    "hull": 145,
+    "shield": 85,
+    "armor": 22,
+    "speed": 108,
+    "acceleration": 88,
+    "maneuverability": 70,
+    "cargo": 20,
+    "crew": 2,
+    "fuel": 150,
+    "hardpoints": 2,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 2,
+    "engineSlots": 1,
+    "signature": 38,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 16000,
+    "traits": [
+      "Terraforming scanner",
+      "Extended fuel cell",
+      "Colony certified"
+    ],
+    "description": "A small fast scout used to assess new planets for terraforming potential.",
+    "archetype": "scout_courier",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "agricultural",
+      "frontier",
+      "trade_hub"
+    ]
+  },
+  {
+    "id": "st_pioneer",
+    "name": "ST Pioneer",
+    "factionId": "starseed_foundation",
+    "class": "Trader",
+    "tier": "II",
+    "hull": 250,
+    "shield": 115,
+    "armor": 28,
+    "speed": 94,
+    "acceleration": 72,
+    "maneuverability": 54,
+    "cargo": 45,
+    "crew": 4,
+    "fuel": 160,
+    "hardpoints": 2,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 46,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 30000,
+    "traits": [
+      "Agricultural supply",
+      "Colony certified",
+      "Modular cargo bays"
+    ],
+    "description": "A medium trader hauling agricultural supplies and colonization equipment.",
+    "archetype": "light_trader",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 1,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "agricultural",
+      "trade_hub",
+      "frontier"
+    ]
+  },
+  {
+    "id": "st_pilgrim",
+    "name": "ST Pilgrim",
+    "factionId": "starseed_foundation",
+    "class": "Freighter",
+    "tier": "III",
+    "hull": 350,
+    "shield": 155,
+    "armor": 34,
+    "speed": 88,
+    "acceleration": 64,
+    "maneuverability": 42,
+    "cargo": 80,
+    "crew": 6,
+    "fuel": 175,
+    "hardpoints": 3,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 54,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 58000,
+    "traits": [
+      "Colonization freight",
+      "Life support upgrade",
+      "Colony certified"
+    ],
+    "description": "A medium freighter designed to carry colonists and their supplies to new worlds.",
+    "archetype": "freighter",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "agricultural",
+      "trade_hub",
+      "industrial"
+    ]
+  },
+  {
+    "id": "st_mining_rig",
+    "name": "ST Mining Rig",
+    "factionId": "starseed_foundation",
+    "class": "Mining Ship",
+    "tier": "III",
+    "hull": 380,
+    "shield": 140,
+    "armor": 38,
+    "speed": 82,
+    "acceleration": 58,
+    "maneuverability": 34,
+    "cargo": 90,
+    "crew": 8,
+    "fuel": 170,
+    "hardpoints": 3,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 58,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 64000,
+    "traits": [
+      "Mining lasers",
+      "Ore processing",
+      "Colony certified"
+    ],
+    "description": "A specialized mining platform used to extract raw materials for new colonies.",
+    "archetype": "freighter",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "agricultural",
+      "mining",
+      "frontier"
+    ]
+  },
+  {
+    "id": "st_colony_ship",
+    "name": "ST Colony Ship",
+    "factionId": "starseed_foundation",
+    "class": "Transport",
+    "tier": "IV",
+    "hull": 480,
+    "shield": 190,
+    "armor": 42,
+    "speed": 80,
+    "acceleration": 56,
+    "maneuverability": 30,
+    "cargo": 140,
+    "crew": 20,
+    "fuel": 200,
+    "hardpoints": 3,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 66,
+    "hardpointTypes": {
+      "primary": [
+        "energy",
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 108000,
+    "traits": [
+      "Mass colonization",
+      "Life support systems",
+      "Colony certified"
+    ],
+    "description": "A massive transport that carries thousands of colonists to new frontier worlds.",
+    "archetype": "heavy_freighter",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 3,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "agricultural",
+      "trade_hub"
+    ]
+  },
+  {
+    "id": "st_deep_hauler",
+    "name": "ST Deep Hauler",
+    "factionId": "starseed_foundation",
+    "class": "Heavy Freighter",
+    "tier": "IV",
+    "hull": 500,
+    "shield": 200,
+    "armor": 46,
+    "speed": 78,
+    "acceleration": 52,
+    "maneuverability": 28,
+    "cargo": 160,
+    "crew": 14,
+    "fuel": 195,
+    "hardpoints": 4,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 5,
+    "engineSlots": 2,
+    "signature": 70,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 116000,
+    "traits": [
+      "Ultra-high cargo",
+      "Deep route certified",
+      "Colony certified"
+    ],
+    "description": "The workhorse of Starseed logistics \u2014 a heavy hauler for long-distance colonial supply runs.",
+    "archetype": "heavy_freighter",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 2,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "agricultural",
+      "industrial",
+      "trade_hub"
+    ]
+  },
+  {
+    "id": "oc_voidrunner",
+    "name": "OC Voidrunner",
+    "factionId": "obsidian_covenant",
+    "class": "Interceptor",
+    "tier": "I-II",
+    "hull": 115,
+    "shield": 85,
+    "armor": 22,
+    "speed": 114,
+    "acceleration": 95,
+    "maneuverability": 80,
+    "cargo": 6,
+    "crew": 1,
+    "fuel": 120,
+    "hardpoints": 2,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 1,
+    "engineSlots": 1,
+    "signature": 28,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 18000,
+    "traits": [
+      "Void taint",
+      "Corruption charges",
+      "Dark approach"
+    ],
+    "description": "A quick interceptor saturated with void energies that weakens enemy electronics.",
+    "archetype": "interceptor",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 2,
+    "minPopulation": 1,
+    "preferredSystemTypes": [
+      "research_outpost",
+      "frontier",
+      "pirate_haven"
+    ]
+  },
+  {
+    "id": "oc_shadow_lance",
+    "name": "OC Shadow Lance",
+    "factionId": "obsidian_covenant",
+    "class": "Corvette",
+    "tier": "II-III",
+    "hull": 275,
+    "shield": 160,
+    "armor": 35,
+    "speed": 100,
+    "acceleration": 78,
+    "maneuverability": 60,
+    "cargo": 12,
+    "crew": 4,
+    "fuel": 140,
+    "hardpoints": 4,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 2,
+    "engineSlots": 1,
+    "signature": 40,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 46000,
+    "traits": [
+      "Void lances",
+      "Corruption field",
+      "Dark resonance"
+    ],
+    "description": "A mid-weight corvette armed with void-infused lances that corrupt enemy hulls.",
+    "archetype": "fighter",
+    "requiredShipyardLevel": 2,
+    "minTechLevel": 3,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "research_outpost",
+      "frontier"
+    ]
+  },
+  {
+    "id": "oc_darkrift",
+    "name": "OC Darkrift",
+    "factionId": "obsidian_covenant",
+    "class": "Gunship",
+    "tier": "III",
+    "hull": 275,
+    "shield": 160,
+    "armor": 34,
+    "speed": 98,
+    "acceleration": 72,
+    "maneuverability": 52,
+    "cargo": 18,
+    "crew": 5,
+    "fuel": 150,
+    "hardpoints": 5,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 44,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 58000,
+    "traits": [
+      "Void rift generator",
+      "Shield disruptor",
+      "Dark resonance"
+    ],
+    "description": "A void-tech gunship that opens micro-rifts to bypass conventional armor.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 4,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "research_outpost",
+      "frontier"
+    ]
+  },
+  {
+    "id": "oc_entropy_engine",
+    "name": "OC Entropy Engine",
+    "factionId": "obsidian_covenant",
+    "class": "Destroyer",
+    "tier": "IV",
+    "hull": 375,
+    "shield": 210,
+    "armor": 40,
+    "speed": 90,
+    "acceleration": 64,
+    "maneuverability": 42,
+    "cargo": 26,
+    "crew": 10,
+    "fuel": 165,
+    "hardpoints": 6,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 3,
+    "engineSlots": 2,
+    "signature": 52,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 96000,
+    "traits": [
+      "Entropy cascade",
+      "Corruption field",
+      "Void shielding"
+    ],
+    "description": "A void destroyer that projects entropy fields to rapidly degrade enemy ships.",
+    "archetype": "gunship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 4,
+    "minPopulation": 3,
+    "preferredSystemTypes": [
+      "research_outpost",
+      "capital"
+    ]
+  },
+  {
+    "id": "oc_void_throne",
+    "name": "OC Void Throne",
+    "factionId": "obsidian_covenant",
+    "class": "Battleship",
+    "tier": "IV",
+    "hull": 430,
+    "shield": 245,
+    "armor": 46,
+    "speed": 84,
+    "acceleration": 56,
+    "maneuverability": 34,
+    "cargo": 28,
+    "crew": 18,
+    "fuel": 175,
+    "hardpoints": 8,
+    "secondaryHardpoints": 3,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 58,
+    "hardpointTypes": {
+      "primary": [
+        "energy"
+      ],
+      "secondary": [
+        "missile",
+        "torpedo"
+      ]
+    },
+    "price": 110000,
+    "traits": [
+      "Void throne cannon",
+      "Corruption aura",
+      "Void fortress"
+    ],
+    "description": "A heavily armored void battleship that anchors void energy fields across the battlefield.",
+    "archetype": "battleship",
+    "requiredShipyardLevel": 4,
+    "minTechLevel": 5,
+    "minPopulation": 4,
+    "preferredSystemTypes": [
+      "capital",
+      "research_outpost"
+    ]
+  },
+  {
+    "id": "neutral_scavenger",
+    "name": "Frontier Scavenger",
+    "factionId": "neutral",
+    "class": "Salvager",
+    "tier": "I-II",
+    "hull": 200,
+    "shield": 80,
+    "armor": 30,
+    "speed": 96,
+    "acceleration": 72,
+    "maneuverability": 55,
+    "cargo": 30,
+    "crew": 3,
+    "fuel": 165,
+    "hardpoints": 3,
+    "secondaryHardpoints": 1,
+    "utilitySlots": 3,
+    "engineSlots": 1,
+    "signature": 44,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic",
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 18000,
+    "traits": [
+      "Salvage clamps",
+      "Black market access",
+      "Deep frontier certified"
+    ],
+    "description": "A sturdy salvager built from scavenged parts, popular in lawless frontier systems.",
+    "archetype": "light_trader",
+    "requiredShipyardLevel": 1,
+    "minTechLevel": 1,
+    "minPopulation": 0,
+    "preferredSystemTypes": [
+      "frontier",
+      "pirate_haven",
+      "mining"
+    ]
+  },
+  {
+    "id": "neutral_heavy_transport",
+    "name": "Heavy Transport",
+    "factionId": "neutral",
+    "class": "Heavy Freighter",
+    "tier": "IV",
+    "hull": 460,
+    "shield": 195,
+    "armor": 42,
+    "speed": 82,
+    "acceleration": 58,
+    "maneuverability": 32,
+    "cargo": 100,
+    "crew": 10,
+    "fuel": 185,
+    "hardpoints": 4,
+    "secondaryHardpoints": 2,
+    "utilitySlots": 4,
+    "engineSlots": 2,
+    "signature": 64,
+    "hardpointTypes": {
+      "primary": [
+        "ballistic",
+        "energy"
+      ],
+      "secondary": [
+        "missile"
+      ]
+    },
+    "price": 98000,
+    "traits": [
+      "Multi-faction certified",
+      "High cargo",
+      "Neutral transport"
+    ],
+    "description": "A neutral heavy transport available to captains of any faction with enough credits.",
+    "archetype": "heavy_freighter",
+    "requiredShipyardLevel": 3,
+    "minTechLevel": 2,
+    "minPopulation": 2,
+    "preferredSystemTypes": [
+      "trade_hub",
+      "industrial",
+      "agricultural"
+    ]
   }
 ]
