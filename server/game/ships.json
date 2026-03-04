@@ -309,7 +309,7 @@
     "description": "Arc flagship carrier that anchors Directorate task forces.",
     "archetype": "carrier",
     "requiredShipyardLevel": 5,
-    "minTechLevel": 5,
+    "minTechLevel": 4,
     "minPopulation": 5,
     "preferredSystemTypes": [
       "capital"
@@ -617,7 +617,7 @@
     "description": "Legendary clan flagship engineered for decisive ramming strikes.",
     "archetype": "battleship",
     "requiredShipyardLevel": 5,
-    "minTechLevel": 5,
+    "minTechLevel": 4,
     "minPopulation": 5,
     "preferredSystemTypes": [
       "capital"

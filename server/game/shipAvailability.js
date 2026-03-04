@@ -236,6 +236,19 @@ const getAllowedFactions = (system, metadata) => {
   return allowed;
 };
 
+// ─── SHIPYARD SIZE CAPS ──────────────────────────────────────────────────────
+
+/**
+ * Maximum number of ships a shipyard may offer, indexed by shipyard tier.
+ *
+ * Tier 1 — small frontier outpost  : 3–5  ships
+ * Tier 2 — small colony            : 5–7  ships
+ * Tier 3 — developed system        : 7–10 ships
+ * Tier 4 — major trade hub         : 10–12 ships
+ * Tier 5 — faction capital         : 12–18 ships
+ */
+const MAX_SHIPS_BY_TIER = [0, 5, 7, 10, 12, 18];
+
 // ─── SHIP AVAILABILITY ALGORITHM ────────────────────────────────────────────
 
 /**
@@ -251,6 +264,11 @@ const getAllowedFactions = (system, metadata) => {
  *     unless it is a neutral ship or the system is a pirate haven / trade hub.
  *  5. Unique/regional ships (preferredSystemTypes) get a bonus: they are
  *     available one shipyard-tier lower than normal in their preferred location.
+ *  6. The total list is capped at MAX_SHIPS_BY_TIER[shipyardTier] to prevent
+ *     player overwhelm. When capping, ships are selected in priority order:
+ *       a. Primary faction ships (capitalOf faction, or controlling factionId)
+ *       b. Neutral ships
+ *       c. Secondary/disputed faction ships
  *
  * @param {object} system - Star system object from systems.json
  * @returns {{ metadata: object, available: object[] }}
@@ -265,7 +283,7 @@ const getShipsForSystem = (system) => {
 
   const allowedFactions = getAllowedFactions(system, metadata);
 
-  const available = ships.filter((ship) => {
+  const eligible = ships.filter((ship) => {
     // Faction gate
     if (!allowedFactions.has(ship.factionId)) {
       return false;
@@ -296,6 +314,26 @@ const getShipsForSystem = (system) => {
 
     return true;
   });
+
+  // ── Apply shipyard size cap (Rule 6) ────────────────────────────────────
+  // Prioritise: primary-faction ships → neutral ships → secondary/disputed ships.
+  // This keeps the list curated and prevents any system from offering every ship.
+  const cap = MAX_SHIPS_BY_TIER[shipyardTier] ?? 18;
+  const primaryFaction = system.capitalOf || system.factionId || null;
+
+  const primary = primaryFaction
+    ? eligible.filter((s) => s.factionId === primaryFaction)
+    : [];
+  const neutral  = eligible.filter((s) => s.factionId === "neutral");
+  const secondary = eligible.filter(
+    (s) => s.factionId !== primaryFaction && s.factionId !== "neutral"
+  );
+
+  const available = [];
+  for (const s of [...primary, ...neutral, ...secondary]) {
+    if (available.length >= cap) break;
+    available.push(s);
+  }
 
   return { metadata, available };
 };
