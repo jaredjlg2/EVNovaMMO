@@ -407,3 +407,54 @@ test("systems: all 8 faction capitals have capitalOf field", () => {
     );
   }
 });
+
+// ─── SHIPYARD SIZE CAP ────────────────────────────────────────────────────────
+
+test("shipyard cap: no system offers more than 18 ships", () => {
+  const { getShipsForSystem } = require("../server/game/world");
+  const { systems } = require("../server/game/data");
+  for (const sys of systems) {
+    const result = getShipsForSystem(sys.id);
+    if (!result) continue;
+    assert.ok(
+      result.available.length <= 18,
+      `System ${sys.id} offers ${result.available.length} ships (max 18)`
+    );
+  }
+});
+
+test("shipyard cap: all ships appear in at least one system", () => {
+  const { getShipsForSystem } = require("../server/game/world");
+  const { systems, ships: allShips } = require("../server/game/data");
+  const seen = new Set();
+  for (const sys of systems) {
+    const result = getShipsForSystem(sys.id);
+    if (!result) continue;
+    for (const ship of result.available) seen.add(ship.id);
+  }
+  const missing = allShips.filter((s) => !seen.has(s.id));
+  assert.equal(
+    missing.length,
+    0,
+    `Ships not available anywhere: ${missing.map((s) => s.id).join(", ")}`
+  );
+});
+
+test("shipyard cap: faction capitals offer 12–18 ships", () => {
+  const { getShipsForSystem } = require("../server/game/world");
+  const { systems } = require("../server/game/data");
+  const capitalSystems = systems.filter((s) => s.capitalOf);
+  assert.ok(capitalSystems.length > 0, "There should be at least one capital system");
+  for (const sys of capitalSystems) {
+    const result = getShipsForSystem(sys.id);
+    assert.ok(result, `${sys.id} should return a result`);
+    assert.ok(
+      result.available.length >= 12,
+      `Capital ${sys.id} offers only ${result.available.length} ships (min 12)`
+    );
+    assert.ok(
+      result.available.length <= 18,
+      `Capital ${sys.id} offers ${result.available.length} ships (max 18)`
+    );
+  }
+});
