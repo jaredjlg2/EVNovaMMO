@@ -19,7 +19,8 @@
     "securityLevel": 3,
     "zoneType": "CORE",
     "tags": [],
-    "storyHooks": []
+    "storyHooks": [],
+    "capitalOf": "solar_directorate"
   },
   {
     "id": "deneb",
@@ -97,7 +98,8 @@
     "tags": [
       "TRADE_HUB"
     ],
-    "storyHooks": []
+    "storyHooks": [],
+    "capitalOf": "free_horizons_guild"
   },
   {
     "id": "helios",
@@ -303,7 +305,8 @@
       "CONFLICT_ZONE",
       "PSYCHIC_ANOMALY"
     ],
-    "storyHooks": []
+    "storyHooks": [],
+    "capitalOf": "echotrail_communion"
   },
   {
     "id": "vega",
@@ -359,7 +362,8 @@
     "storyHooks": [],
     "disputedWith": [
       "solar_directorate"
-    ]
+    ],
+    "capitalOf": "ironclad_clans"
   },
   {
     "id": "lyra",
@@ -619,7 +623,8 @@
     "storyHooks": [],
     "disputedWith": [
       "obsidian_covenant"
-    ]
+    ],
+    "capitalOf": "obsidian_covenant"
   },
   {
     "id": "sirius",
@@ -640,7 +645,8 @@
     "securityLevel": 2,
     "zoneType": "CORE",
     "tags": [],
-    "storyHooks": []
+    "storyHooks": [],
+    "capitalOf": "luminari_compact"
   },
   {
     "id": "helene",
@@ -796,7 +802,8 @@
     "tags": [
       "PIRATE_BASE"
     ],
-    "storyHooks": []
+    "storyHooks": [],
+    "capitalOf": "black_flag_syndicate"
   },
   {
     "id": "castor",
@@ -2405,7 +2412,8 @@
     "storyHooks": [],
     "factionId": "starseed_foundation",
     "status": "border",
-    "traffic": "light"
+    "traffic": "light",
+    "capitalOf": "starseed_foundation"
   },
   {
     "id": "st_02",

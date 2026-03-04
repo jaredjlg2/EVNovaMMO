@@ -13,6 +13,7 @@ const {
   storyArcs
 } = require("./data");
 const logger = require("../logger");
+const { getShipsForSystemId, deriveSystemMetadata } = require("./shipAvailability");
 
 const systemById = new Map(systems.map((system) => [system.id, system]));
 const planetById = new Map(planets.map((planet) => [planet.id, planet]));
@@ -395,5 +396,7 @@ module.exports = {
   canJump,
   getPlanetsInSystem,
   getAvailableMissions,
-  getMarketForPlanet
+  getMarketForPlanet,
+  getShipsForSystem: (systemId) => getShipsForSystemId(systemId, systemById),
+  deriveSystemMetadata
 };
