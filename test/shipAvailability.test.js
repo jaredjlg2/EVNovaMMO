@@ -168,6 +168,39 @@ test("getAllowedFactions: unclaimed system has only neutral", () => {
   assert.ok(allowed.has("neutral"));
 });
 
+test("getAllowedFactions: unclaimed CONFLICT_ZONE with disputedWith includes disputed factions", () => {
+  const sys = makeSys({
+    factionId: null,
+    capitalOf: undefined,
+    tags: ["CONFLICT_ZONE"],
+    zoneType: "CONFLICT",
+    status: "border",
+    disputedWith: ["solar_directorate", "ironclad_clans"],
+  });
+  const meta = deriveSystemMetadata(sys);
+  const allowed = getAllowedFactions(sys, meta);
+  assert.ok(allowed.has("neutral"));
+  assert.ok(allowed.has("solar_directorate"), "disputed faction solar_directorate should be allowed");
+  assert.ok(allowed.has("ironclad_clans"), "disputed faction ironclad_clans should be allowed");
+});
+
+test("getShipsForSystem: unclaimed contested systems have at least 3 ships", () => {
+  const { getShipsForSystem: worldGetShips } = require("../server/game/world");
+  const { systems } = require("../server/game/data");
+  const unclaimedContested = systems.filter(
+    (s) => !s.factionId && s.tags && s.tags.includes("CONFLICT_ZONE")
+  );
+  assert.ok(unclaimedContested.length > 0, "There should be unclaimed contested systems");
+  for (const sys of unclaimedContested) {
+    const result = worldGetShips(sys.id);
+    assert.ok(result, `${sys.id} should return a result`);
+    assert.ok(
+      result.available.length >= 3,
+      `Unclaimed contested system ${sys.id} offers only ${result.available.length} ships (min 3)`
+    );
+  }
+});
+
 // ─── getShipsForSystem ────────────────────────────────────────────────────────
 
 test("getShipsForSystem: capital system returns metadata and non-empty ship list", () => {

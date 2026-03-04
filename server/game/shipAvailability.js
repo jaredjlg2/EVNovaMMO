@@ -200,7 +200,12 @@ const getAllowedFactions = (system, metadata) => {
   const { factionId, capitalOf, tags = [] } = system;
 
   if (!factionId && !capitalOf) {
-    // Unclaimed neutral space — only neutral ships
+    // Unclaimed neutral space — allow disputing factions in active conflict zones
+    if (tags.includes("CONFLICT_ZONE") && Array.isArray(system.disputedWith)) {
+      for (const disputeFaction of system.disputedWith) {
+        allowed.add(disputeFaction);
+      }
+    }
     return allowed;
   }
 
