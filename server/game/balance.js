@@ -107,7 +107,7 @@ const BALANCE = {
     sellMultiplier: {
       core: 0.88,
       border: 1.0,
-      frontier: 1.32
+      frontier: 1.28
     },
     // Applied to buy price at each tier (frontier goods cost more to buy too)
     buyMultiplier: {
@@ -115,6 +115,21 @@ const BALANCE = {
       border: 1.0,
       frontier: 0.92
     }
+  },
+
+  // ─── PILLAR 6: Death & Repair economics ───────────────────────────────────
+  death: {
+    // Fraction of current credits lost when destroyed (8%)
+    creditLossFraction: 0.08,
+    // Minimum credit penalty per death
+    creditLossMin: 500,
+    // Maximum credit penalty per death (protects late-game players from wipe)
+    creditLossMax: 25000
+  },
+
+  repair: {
+    // Credits charged per missing hull point at a repair station
+    costPerHullPoint: 8
   }
 };
 
