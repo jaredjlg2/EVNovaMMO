@@ -464,10 +464,34 @@ const outfits = [
     price: 900
   },
   {
+    id: "heat_dissipator",
+    name: "Heat Dissipator",
+    effect: "-3 heat per shot · +4 heat decay/s",
+    price: 3500
+  },
+  {
+    id: "armor_plating",
+    name: "Armor Plating",
+    effect: "+18 armor · -8 speed",
+    price: 4200
+  },
+  {
+    id: "overdrive_injector",
+    name: "Overdrive Injector",
+    effect: "+20 speed · +2 heat per shot",
+    price: 3800
+  },
+  {
+    id: "long_range_scanner",
+    name: "Long-Range Scanner",
+    effect: "Unlocks advanced frontier missions · +signal range",
+    price: 5500
+  },
+  {
     id: "quantum_core",
     name: "Quantum Core",
     effect: "+120 shield · +80 fuel",
-    price: 1800000
+    price: 240000
   }
 ];
 
@@ -621,10 +645,10 @@ const baseMissionTemplates = [
     type: "fuel_refill",
     title: "Fuel Refill",
     cargo: "refined fuel",
-    baseReward: 2000,
-    rewardPerJump: 120,
-    minReward: 2000,
-    maxReward: 2600,
+    baseReward: 4000,
+    rewardPerJump: 800,
+    minReward: 4000,
+    maxReward: 8000,
     cargoSpace: 2,
     weight: 1.1,
     description: "Deliver {cargo} to {destination} to top off a convoy."
@@ -774,10 +798,10 @@ const baseMissionTemplates = [
     type: "mining",
     title: "Asteroid Mining Run",
     cargo: "mineral crates",
-    baseReward: 150000,
-    rewardPerJump: 0,
-    minReward: 150000,
-    maxReward: 150000,
+    baseReward: 100000,
+    rewardPerJump: 8000,
+    minReward: 100000,
+    maxReward: 160000,
     cargoSpace: 20,
     weight: 0.5,
     minCombatRating: 6,
@@ -788,10 +812,10 @@ const baseMissionTemplates = [
     type: "united_shipping_long",
     title: "United Shipping Long Haul",
     cargo: "sealed freight",
-    baseReward: 120000,
-    rewardPerJump: 90000,
-    minReward: 100000,
-    maxReward: 500000,
+    baseReward: 80000,
+    rewardPerJump: 12000,
+    minReward: 80000,
+    maxReward: 200000,
     cargoSpace: 20,
     weight: 0.3,
     minReputation: 15,
@@ -804,10 +828,10 @@ const baseMissionTemplates = [
     type: "smuggling",
     title: "Smuggling Run",
     cargo: "restricted cargo",
-    baseReward: 180000,
-    rewardPerJump: 70000,
-    minReward: 200000,
-    maxReward: 450000,
+    baseReward: 100000,
+    rewardPerJump: 18000,
+    minReward: 100000,
+    maxReward: 175000,
     cargoSpace: 12,
     weight: 0.35,
     minCombatRating: 4,
@@ -820,10 +844,10 @@ const baseMissionTemplates = [
     type: "domination",
     title: "Planetary Domination",
     cargo: "occupation supplies",
-    baseReward: 50000,
+    baseReward: 80000,
     rewardPerJump: 0,
-    minReward: 50000,
-    maxReward: 50000,
+    minReward: 80000,
+    maxReward: 80000,
     cargoSpace: 16,
     weight: 0.2,
     minCombatRating: 8,

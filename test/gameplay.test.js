@@ -342,3 +342,102 @@ test("canDemandFromVictim does not block different victim", () => {
   recordPiracyDemand("pirate3", "victim3");
   assert.equal(canDemandFromVictim("pirate3", "victim99"), true);
 });
+
+// ─── BALANCE — death & repair constants ──────────────────────────────────────
+test("BALANCE has death penalty constants", () => {
+  assert.ok(typeof BALANCE.death === "object");
+  assert.ok(typeof BALANCE.death.creditLossFraction === "number");
+  assert.ok(BALANCE.death.creditLossFraction > 0 && BALANCE.death.creditLossFraction < 1);
+  assert.ok(BALANCE.death.creditLossMin > 0);
+  assert.ok(BALANCE.death.creditLossMax > BALANCE.death.creditLossMin);
+});
+
+test("BALANCE has repair cost constant", () => {
+  assert.ok(typeof BALANCE.repair === "object");
+  assert.ok(typeof BALANCE.repair.costPerHullPoint === "number");
+  assert.ok(BALANCE.repair.costPerHullPoint > 0);
+});
+
+test("BALANCE us_long mission is not more than 3x the best standard delivery", () => {
+  // Guard against the exploit where us_long rewardPerJump was 90,000 (vs 9,000 for united_shipping).
+  // us_long rewardPerJump should be no more than 3x united_shipping's.
+  const data = require("../server/game/data");
+  const usLong = data.missionTemplates.find((t) => t.id === "us_long");
+  const unitedShipping = data.missionTemplates.find((t) => t.id === "united_shipping");
+  assert.ok(usLong, "us_long template exists");
+  assert.ok(unitedShipping, "united_shipping template exists");
+  assert.ok(
+    usLong.rewardPerJump <= unitedShipping.rewardPerJump * 3,
+    `us_long rewardPerJump (${usLong.rewardPerJump}) should not exceed 3x united_shipping (${unitedShipping.rewardPerJump * 3})`
+  );
+});
+
+test("BALANCE smuggling reward is within 2x-3x of best legal mission", () => {
+  const data = require("../server/game/data");
+  const smuggling = data.missionTemplates.find((t) => t.id === "smuggling");
+  const rescue = data.missionTemplates.find((t) => t.id === "rescue");
+  assert.ok(smuggling, "smuggling template exists");
+  assert.ok(rescue, "rescue template exists");
+  // Smuggling max should be above rescue (risk premium) but at most 2x rescue max
+  assert.ok(smuggling.maxReward > rescue.minReward, "Smuggling should pay more than rescue min");
+  assert.ok(
+    smuggling.maxReward <= rescue.maxReward * 2,
+    `Smuggling maxReward (${smuggling.maxReward}) should not exceed 2x rescue maxReward (${rescue.maxReward * 2})`
+  );
+});
+
+test("BALANCE fuel_refill mission has a meaningful payout", () => {
+  const data = require("../server/game/data");
+  const fuelRefill = data.missionTemplates.find((t) => t.id === "fuel_refill");
+  const courier = data.missionTemplates.find((t) => t.id === "courier");
+  assert.ok(fuelRefill, "fuel_refill template exists");
+  assert.ok(courier, "courier template exists");
+  // fuel_refill should be at least 40% of courier's base to be viable (not dead)
+  assert.ok(
+    fuelRefill.baseReward >= courier.baseReward * 0.4,
+    `fuel_refill baseReward (${fuelRefill.baseReward}) is too low compared to courier (${courier.baseReward * 0.4})`
+  );
+});
+
+test("BALANCE quantum_core outfit is achievable end-game price", () => {
+  const data = require("../server/game/data");
+  const quantumCore = data.outfits.find((o) => o.id === "quantum_core");
+  assert.ok(quantumCore, "quantum_core outfit exists");
+  // Should be reachable — no more than 2x a top-tier ship
+  const maxShipPrice = Math.max(...data.ships.map((s) => s.price));
+  assert.ok(
+    quantumCore.price <= maxShipPrice * 2,
+    `quantum_core price (${quantumCore.price}) is too high vs top ship (${maxShipPrice * 2})`
+  );
+});
+
+test("BALANCE fh_holdmaster cargo is reasonable for Tier III", () => {
+  const data = require("../server/game/data");
+  const holdmaster = data.ships.find((s) => s.id === "fh_holdmaster");
+  assert.ok(holdmaster, "fh_holdmaster ship exists");
+  // A Tier III freighter cargo should not exceed 60 units
+  assert.ok(
+    holdmaster.cargo <= 60,
+    `fh_holdmaster cargo (${holdmaster.cargo}) is too high for Tier III`
+  );
+});
+
+test("BALANCE neutral_common_hauler cargo is reasonable for Tier II", () => {
+  const data = require("../server/game/data");
+  const hauler = data.ships.find((s) => s.id === "neutral_common_hauler");
+  assert.ok(hauler, "neutral_common_hauler ship exists");
+  // A Tier II freighter cargo should not exceed 40 units
+  assert.ok(
+    hauler.cargo <= 40,
+    `neutral_common_hauler cargo (${hauler.cargo}) is too high for Tier II`
+  );
+});
+
+test("BALANCE market sell multiplier frontier is higher than core", () => {
+  assert.ok(BALANCE.market.sellMultiplier.frontier > BALANCE.market.sellMultiplier.core);
+  // But not excessively high (should be < 1.5x)
+  assert.ok(
+    BALANCE.market.sellMultiplier.frontier < 1.5,
+    "frontier sell multiplier should stay below 1.5 to prevent trade dominance"
+  );
+});

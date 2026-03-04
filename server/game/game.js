@@ -1,5 +1,6 @@
 const { createPlayer } = require("./player");
 const { loadPilot, savePilot } = require("./storage");
+const BALANCE = require("./balance");
 const {
   getAiShipStatus,
   tickAiShips,
@@ -299,6 +300,24 @@ const appendLog = (player, message) => {
   player.log = [message, ...player.log].slice(0, 8);
 };
 
+/**
+ * Apply a credit loss when a player's ship is destroyed.
+ * Deducts BALANCE.death.creditLossFraction of current credits,
+ * clamped between creditLossMin and creditLossMax.
+ */
+const applyDeathPenalty = (player) => {
+  const { creditLossFraction, creditLossMin, creditLossMax } = BALANCE.death;
+  const penalty = Math.min(
+    creditLossMax,
+    Math.max(creditLossMin, Math.round(player.credits * creditLossFraction))
+  );
+  const actual = Math.min(penalty, player.credits);
+  if (actual > 0) {
+    player.credits -= actual;
+    appendLog(player, `Insurance claim filed. Lost ${actual} credits (salvage levy).`);
+  }
+};
+
 const getFactionReputation = (player, factionId) =>
   player.reputation?.[factionId] ?? 0;
 
@@ -502,6 +521,33 @@ const getDockedPlanetService = (player, service) => {
     return null;
   }
   return planet;
+};
+
+/**
+ * Repair player hull to full while docked at a shipyard.
+ * Costs BALANCE.repair.costPerHullPoint per missing hull point.
+ */
+const repairHull = (player) => {
+  if (!getDockedPlanetService(player, "shipyard")) {
+    appendLog(player, "Repair facility unavailable here.");
+    return { ok: false };
+  }
+  const ship = shipById.get(player.ship.id);
+  const maxHull = ship ? ship.hull : player.ship.hull;
+  const missing = maxHull - player.hull;
+  if (missing <= 0) {
+    appendLog(player, "Hull is already at full integrity.");
+    return { ok: false };
+  }
+  const cost = Math.round(missing * BALANCE.repair.costPerHullPoint);
+  if (player.credits < cost) {
+    appendLog(player, `Insufficient credits. Hull repair costs ${cost} credits.`);
+    return { ok: false };
+  }
+  player.credits -= cost;
+  player.hull = maxHull;
+  appendLog(player, `Hull repaired to full for ${cost} credits.`);
+  return { ok: true, cost };
 };
 
 const gambleAtBar = (player) => {
@@ -1079,6 +1125,7 @@ const tickWorld = (deltaSeconds) => {
         y: closestTarget.y
       });
       appendLog(closestTarget, "Ship destroyed! Rescue crews will tow you back once you relog.");
+      applyDeathPenalty(closestTarget);
     }
   });
 
@@ -1139,6 +1186,7 @@ const tickWorld = (deltaSeconds) => {
           y: targetPlayer.y
         });
         appendLog(targetPlayer, "Ship destroyed! Rescue crews will tow you back once you relog.");
+        applyDeathPenalty(targetPlayer);
       } else if (targetAi) {
         destroyedPlayers.push({
           id: targetAi.id,
@@ -1667,6 +1715,7 @@ const fireWeapons = (player, payload, weaponIds, { allowFallback = true } = {}) 
         y: target.y
       });
       appendLog(target, "Ship destroyed! Rescue crews will tow you back once you relog.");
+      applyDeathPenalty(target);
       appendLog(player, `${target.name} was destroyed.`);
     }
     hits.push(target.id);
@@ -1758,6 +1807,7 @@ const fireTargetedWeapon = (player, payload, weaponId, options = {}) => {
     });
     if (targetPlayer) {
       appendLog(target, "Ship destroyed! Rescue crews will tow you back once you relog.");
+      applyDeathPenalty(target);
     }
     appendLog(player, `${target.name} was destroyed.`);
     if (targetAi) {
@@ -1981,6 +2031,7 @@ module.exports = {
   getMarketForPlanet,
   buyGoods,
   sellGoods,
+  repairHull,
   getCargoUsed,
   getCargoCapacity,
   getEscortHireOffers,
