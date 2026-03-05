@@ -199,16 +199,6 @@ const getAllowedFactions = (system, metadata) => {
   const { systemType } = metadata;
   const { factionId, capitalOf, tags = [] } = system;
 
-  if (!factionId && !capitalOf) {
-    // Unclaimed neutral space — allow disputing factions in active conflict zones
-    if (tags.includes("CONFLICT_ZONE") && Array.isArray(system.disputedWith)) {
-      for (const disputeFaction of system.disputedWith) {
-        allowed.add(disputeFaction);
-      }
-    }
-    return allowed;
-  }
-
   // The system's controlling faction
   if (factionId) {
     allowed.add(factionId);
@@ -232,7 +222,7 @@ const getAllowedFactions = (system, metadata) => {
   }
 
   // Contested border systems may carry ships from disputing factions
-  if (tags.includes("CONFLICT_ZONE") && system.disputedWith) {
+  if (tags.includes("CONFLICT_ZONE") && Array.isArray(system.disputedWith)) {
     for (const disputeFaction of system.disputedWith) {
       allowed.add(disputeFaction);
     }
@@ -241,78 +231,184 @@ const getAllowedFactions = (system, metadata) => {
   return allowed;
 };
 
-// ─── SHIPYARD SIZE CAPS ──────────────────────────────────────────────────────
+// ─── SEEDED RANDOM ──────────────────────────────────────────────────────────
+
+const hashString = (value) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+};
+
+const seededRandom = (seed) => {
+  let t = seed + 0x6d2b79f5;
+  return () => {
+    t += 0x6d2b79f5;
+    let result = Math.imul(t ^ (t >>> 15), 1 | t);
+    result ^= result + Math.imul(result ^ (result >>> 7), 61 | result);
+    return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+// ─── SHIP TIER NUMERIC MAPPING ──────────────────────────────────────────────
 
 /**
- * Maximum number of ships a shipyard may offer, indexed by shipyard tier.
- *
- * Tier 1 — small frontier outpost  : 3–5  ships
- * Tier 2 — small colony            : 5–7  ships
- * Tier 3 — developed system        : 7–10 ships
- * Tier 4 — major trade hub         : 10–12 ships
- * Tier 5 — faction capital         : 12–18 ships
+ * Map each ship tier string to a numeric range [min, max].
+ * Used to determine whether a ship's tier falls within a shipyard's allowed
+ * tier window.
  */
-const MAX_SHIPS_BY_TIER = [0, 5, 7, 10, 12, 18];
+const TIER_TO_NUMERIC = {
+  "I":      [1, 1],
+  "I-II":   [1, 2],
+  "II":     [2, 2],
+  "II-III": [2, 3],
+  "III":    [3, 3],
+  "III-IV": [3, 4],
+  "IV":     [4, 4],
+  "V":      [5, 5],
+  "V+":     [5, 5],
+};
+
+// ─── SHIPYARD TIER → ALLOWED SHIP TIER RANGE ───────────────────────────────
+
+/**
+ * Which ship tiers a shipyard of a given level may stock.
+ *
+ *  Level 1 → Tier 1–2   (starter + light)
+ *  Level 2 → Tier 1–3   (up to medium)
+ *  Level 3 → Tier 1–4   (up to heavy)
+ *  Level 4 → Tier 2–4   (light through heavy, no starters)
+ *  Level 5 → Tier 2–5   (light through capital, no starters)
+ */
+const SHIPYARD_ALLOWED_TIERS = {
+  1: [1, 2],
+  2: [1, 3],
+  3: [1, 4],
+  4: [2, 4],
+  5: [2, 5],
+};
+
+// ─── SHIPYARD SIZE RANGES ───────────────────────────────────────────────────
+
+/**
+ * Min / max number of ships a shipyard may offer, indexed by shipyard tier.
+ *
+ *  Tier 1 — frontier system       : 3–6  ships
+ *  Tier 2 — small colony          : 5–7  ships
+ *  Tier 3 — developed world       : 7–10 ships
+ *  Tier 4 — major trade hub       : 10–12 ships
+ *  Tier 5 — faction capital       : 12–18 ships
+ *
+ * Absolute maximum across all tiers: 18.
+ */
+const SHIPYARD_SIZE_RANGE = {
+  1: [3, 6],
+  2: [5, 7],
+  3: [7, 10],
+  4: [10, 12],
+  5: [12, 18],
+};
+
+const ABSOLUTE_MAX_SHIPS = 18;
+
+// ─── INDUSTRY PREFERENCE ────────────────────────────────────────────────────
+
+/**
+ * System type → preferred ship archetypes.
+ * Ships with a matching archetype receive a weight boost during selection.
+ * null means no particular preference (all archetypes equally weighted).
+ */
+const INDUSTRY_PREFERRED_ARCHETYPES = {
+  contested:         ["fighter", "interceptor", "gunship", "cruiser", "carrier", "battleship"],
+  industrial:        ["freighter", "heavy_freighter", "light_trader"],
+  research_outpost:  ["scout_courier", "interceptor"],
+  trade_hub:         ["light_trader", "scout_courier", "freighter"],
+  pirate_haven:      ["fighter", "interceptor", "gunship"],
+  agricultural:      ["light_trader", "freighter", "heavy_freighter"],
+  frontier:          ["scout_courier", "light_trader", "fighter"],
+  capital:           null,
+  core_world:        null,
+};
+
+// ─── RARITY WEIGHTS ─────────────────────────────────────────────────────────
+
+/**
+ * Base selection weight by ship tier.
+ * Lower-tier (common) ships have higher weight → appear in more systems.
+ * Higher-tier (rare) ships have lower weight → appear in fewer systems.
+ */
+const RARITY_WEIGHT = {
+  "I":      3.0,
+  "I-II":   2.5,
+  "II":     2.5,
+  "II-III": 2.0,
+  "III":    2.0,
+  "III-IV": 1.5,
+  "IV":     1.5,
+  "V":      1.0,
+  "V+":     0.5,
+};
 
 // ─── SHIP AVAILABILITY ALGORITHM ────────────────────────────────────────────
 
 /**
  * Returns the list of ships available for purchase in the given system.
  *
- * Rules (in order):
+ * Algorithm:
  *  1. System must have a shipyard (shipyardTier >= 1) to sell any ships.
- *  2. Tier I (Starter) ships are available in every system with a shipyard,
- *     but only for the controlling faction (or neutral).
- *  3. Higher-tier ships require: shipyardTier >= requiredShipyardLevel,
- *     techLevel >= minTechLevel, populationLevel >= minPopulation.
- *  4. A ship may only be purchased at a system aligned with its faction,
- *     unless it is a neutral ship or the system is a pirate haven / trade hub.
- *  5. Unique/regional ships (preferredSystemTypes) get a bonus: they are
- *     available one shipyard-tier lower than normal in their preferred location.
- *  6. The total list is capped at MAX_SHIPS_BY_TIER[shipyardTier] to prevent
- *     player overwhelm. When capping, ships are selected in priority order:
- *       a. Primary faction ships (capitalOf faction, or controlling factionId)
- *       b. Neutral ships
- *       c. Secondary/disputed faction ships
+ *  2. Hard-filter ships by: faction territory, tier range, tech level,
+ *     and population requirements.
+ *  3. Determine a target inventory size from SHIPYARD_SIZE_RANGE.
+ *  4. If eligible ships fit within the target, return them all.
+ *  5. Otherwise, allocate slots by faction distribution
+ *     (60–70% primary, 20–30% neutral, 0–10% foreign) and fill each
+ *     bucket via weighted random selection influenced by:
+ *       – industry preference (system type → archetype boost)
+ *       – regional preference (ship.preferredSystemTypes)
+ *       – rarity weight (ship tier)
+ *  6. The total list is hard-capped at 18 ships.
  *
  * @param {object} system - Star system object from systems.json
  * @returns {{ metadata: object, available: object[] }}
  */
 const getShipsForSystem = (system) => {
   const metadata = deriveSystemMetadata(system);
-  const { shipyardTier, techLevel, populationLevel } = metadata;
+  const { shipyardTier, techLevel, populationLevel, systemType } = metadata;
 
   if (shipyardTier === 0) {
     return { metadata, available: [] };
   }
 
   const allowedFactions = getAllowedFactions(system, metadata);
+  const isCapital = systemType === "capital";
 
+  // Faction capitals stock all tiers (including starters for new recruits).
+  // Other shipyards follow the strict tier window.
+  const [minAllowedTier, maxAllowedTier] = isCapital
+    ? [1, 5]
+    : SHIPYARD_ALLOWED_TIERS[shipyardTier];
+
+  // ── Step 1: Hard-filter eligible ships ──────────────────────────────────
   const eligible = ships.filter((ship) => {
     // Faction gate
     if (!allowedFactions.has(ship.factionId)) {
       return false;
     }
 
-    // Tier I ships are always available where there is any shipyard
-    if (ship.tier === "I") {
-      return true;
-    }
-
-    // Determine effective required shipyard level, applying regional preference bonus
-    const inPreferredSystem =
-      Array.isArray(ship.preferredSystemTypes) &&
-      ship.preferredSystemTypes.includes(metadata.systemType);
-    const effectiveShipyardRequired = inPreferredSystem
-      ? Math.max(1, (ship.requiredShipyardLevel ?? 1) - 1)
-      : (ship.requiredShipyardLevel ?? 1);
-
-    if (shipyardTier < effectiveShipyardRequired) {
+    // Tier gate — ship's numeric tier range must overlap with the shipyard's
+    const [shipMinTier, shipMaxTier] = TIER_TO_NUMERIC[ship.tier] || [1, 5];
+    if (shipMinTier > maxAllowedTier || shipMaxTier < minAllowedTier) {
       return false;
     }
+
+    // Tech level gate
     if (techLevel < (ship.minTechLevel ?? 1)) {
       return false;
     }
+
+    // Population gate
     if (populationLevel < (ship.minPopulation ?? 0)) {
       return false;
     }
@@ -320,27 +416,131 @@ const getShipsForSystem = (system) => {
     return true;
   });
 
-  // ── Apply shipyard size cap (Rule 6) ────────────────────────────────────
-  // Prioritise: primary-faction ships → neutral ships → secondary/disputed ships.
-  // This keeps the list curated and prevents any system from offering every ship.
-  const cap = MAX_SHIPS_BY_TIER[shipyardTier] ?? 18;
+  // ── Step 2: Determine target inventory size ─────────────────────────────
+  const [minShips, maxShips] = SHIPYARD_SIZE_RANGE[shipyardTier];
+  const rng = seededRandom(hashString(system.id));
+  const targetCount = Math.min(
+    eligible.length,
+    minShips + Math.floor(rng() * (maxShips - minShips + 1))
+  );
+
+  // If every eligible ship fits, return them all — no need for selection.
+  if (eligible.length <= targetCount) {
+    return { metadata, available: eligible };
+  }
+
+  // ── Step 3: Split eligible ships by faction bucket ──────────────────────
   const primaryFaction = system.capitalOf || system.factionId || null;
 
-  const primary = primaryFaction
+  const primaryPool  = primaryFaction
     ? eligible.filter((s) => s.factionId === primaryFaction)
     : [];
-  const neutral  = eligible.filter((s) => s.factionId === "neutral");
-  const secondary = eligible.filter(
+  const neutralPool  = eligible.filter((s) => s.factionId === "neutral");
+  const foreignPool  = eligible.filter(
     (s) => s.factionId !== primaryFaction && s.factionId !== "neutral"
   );
 
-  const available = [];
-  for (const s of [...primary, ...neutral, ...secondary]) {
-    if (available.length >= cap) break;
-    available.push(s);
+  // ── Step 4: Allocate slots by faction distribution ──────────────────────
+  // At faction capitals, guarantee ALL primary faction ships first, then
+  // fill the remaining slots with neutral/foreign ships.
+  // At other systems, target ratios: 60–70% primary, 20–30% neutral, 0–10% foreign
+  let primaryTarget, neutralTarget, foreignTarget;
+
+  if (isCapital) {
+    // Capitals guarantee every eligible faction ship
+    primaryTarget = primaryPool.length;
+    const remainingSlots = Math.max(0, targetCount - primaryTarget);
+    const neutralSlots = Math.min(neutralPool.length, Math.ceil(remainingSlots * 0.7));
+    const foreignSlots = Math.min(foreignPool.length, remainingSlots - neutralSlots);
+    neutralTarget = neutralSlots;
+    foreignTarget = Math.max(0, foreignSlots);
+  } else {
+    const primaryRatio = 0.60 + rng() * 0.10;
+    const neutralRatio = 0.20 + rng() * 0.10;
+
+    primaryTarget = Math.round(targetCount * primaryRatio);
+    neutralTarget = Math.round(targetCount * neutralRatio);
+    foreignTarget = Math.max(0, targetCount - primaryTarget - neutralTarget);
+
+    // Cap each bucket to what's actually available
+    primaryTarget = Math.min(primaryTarget, primaryPool.length);
+    neutralTarget = Math.min(neutralTarget, neutralPool.length);
+    foreignTarget = Math.min(foreignTarget, foreignPool.length);
+
+    // Redistribute any unused slots — primary gets priority, then neutral
+    let remaining = targetCount - primaryTarget - neutralTarget - foreignTarget;
+    if (remaining > 0 && primaryPool.length > primaryTarget) {
+      const add = Math.min(remaining, primaryPool.length - primaryTarget);
+      primaryTarget += add;
+      remaining -= add;
+    }
+    if (remaining > 0 && neutralPool.length > neutralTarget) {
+      const add = Math.min(remaining, neutralPool.length - neutralTarget);
+      neutralTarget += add;
+      remaining -= add;
+    }
+    if (remaining > 0 && foreignPool.length > foreignTarget) {
+      const add = Math.min(remaining, foreignPool.length - foreignTarget);
+      foreignTarget += add;
+      remaining -= add;
+    }
   }
 
-  return { metadata, available };
+  // ── Step 5: Weighted random selection within each bucket ────────────────
+  const preferredArchetypes = INDUSTRY_PREFERRED_ARCHETYPES[systemType] || null;
+
+  const computeWeight = (ship) => {
+    let weight = RARITY_WEIGHT[ship.tier] || 1;
+
+    // Industry preference boost
+    if (preferredArchetypes && preferredArchetypes.includes(ship.archetype)) {
+      weight *= 2;
+    }
+
+    // Regional preference boost
+    if (
+      Array.isArray(ship.preferredSystemTypes) &&
+      ship.preferredSystemTypes.includes(systemType)
+    ) {
+      weight *= 2;
+    }
+
+    return weight;
+  };
+
+  const pickWeightedSample = (pool, count) => {
+    if (count <= 0 || pool.length === 0) return [];
+    if (pool.length <= count) return [...pool];
+
+    const items = pool.map((ship) => ({ ship, weight: computeWeight(ship) }));
+    const selected = [];
+
+    for (let i = 0; i < count && items.length > 0; i++) {
+      const totalWeight = items.reduce((sum, it) => sum + it.weight, 0);
+      let roll = rng() * totalWeight;
+      let chosenIdx = 0;
+      for (let j = 0; j < items.length; j++) {
+        roll -= items[j].weight;
+        if (roll <= 0) {
+          chosenIdx = j;
+          break;
+        }
+      }
+      selected.push(items[chosenIdx].ship);
+      items.splice(chosenIdx, 1);
+    }
+
+    return selected;
+  };
+
+  const available = [
+    ...pickWeightedSample(primaryPool, primaryTarget),
+    ...pickWeightedSample(neutralPool, neutralTarget),
+    ...pickWeightedSample(foreignPool, foreignTarget),
+  ];
+
+  // Final hard cap (safety net)
+  return { metadata, available: available.slice(0, ABSOLUTE_MAX_SHIPS) };
 };
 
 // ─── CONVENIENCE WRAPPER ────────────────────────────────────────────────────
