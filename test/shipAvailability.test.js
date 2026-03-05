@@ -607,14 +607,18 @@ test("rarity: common ships appear in more systems than rare ships", () => {
       freq[ship.id] = (freq[ship.id] || 0) + 1;
     }
   }
-  // Neutral tier II ship should appear more than tier V+ ships
-  const commonFreq = freq["neutral_common_hauler"] || 0;
+  // Pick a common neutral ship that is known to exist
+  const commonShip = allShips.find(
+    (s) => s.factionId === "neutral" && s.tier === "II"
+  );
+  assert.ok(commonShip, "There should be a neutral tier II ship in the data");
+  const commonFreq = freq[commonShip.id] || 0;
   const rareShips = allShips.filter((s) => s.tier === "V+");
   for (const rare of rareShips) {
     const rareFreq = freq[rare.id] || 0;
     assert.ok(
       commonFreq > rareFreq,
-      `Common ship neutral_common_hauler (${commonFreq}) should appear in more systems than rare ${rare.id} (${rareFreq})`
+      `Common ship ${commonShip.id} (${commonFreq}) should appear in more systems than rare ${rare.id} (${rareFreq})`
     );
   }
 });
@@ -632,16 +636,19 @@ test("selection: shipyard inventories are deterministic (same system always retu
 
 test("selection: different systems produce varied inventories", () => {
   const sys1 = makeSys({ id: "sys_alpha", factionId: "solar_directorate" });
-  const sys2 = makeSys({ id: "sys_beta", factionId: "solar_directorate" });
+  const sys2 = makeSys({ id: "sys_beta", factionId: "ironclad_clans" });
   const r1 = getShipsForSystem(sys1);
   const r2 = getShipsForSystem(sys2);
-  const ids1 = r1.available.map((s) => s.id).sort();
-  const ids2 = r2.available.map((s) => s.id).sort();
-  // They might occasionally be the same, but with different system IDs they should differ
-  const identical = ids1.length === ids2.length && ids1.every((id, i) => id === ids2[i]);
-  // Just verify both produce results
   assert.ok(r1.available.length > 0, "sys_alpha should have ships");
   assert.ok(r2.available.length > 0, "sys_beta should have ships");
+  const ids1 = new Set(r1.available.map((s) => s.id));
+  const ids2 = new Set(r2.available.map((s) => s.id));
+  // Different factions produce different ship pools
+  const overlap = [...ids1].filter((id) => ids2.has(id));
+  assert.ok(
+    overlap.length < ids1.size || overlap.length < ids2.size,
+    "Different-faction systems should not have identical inventories"
+  );
 });
 
 // ─── INDUSTRY PREFERENCE ──────────────────────────────────────────────────────

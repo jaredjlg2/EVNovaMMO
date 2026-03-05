@@ -233,6 +233,7 @@ const getAllowedFactions = (system, metadata) => {
 
 // ─── SEEDED RANDOM ──────────────────────────────────────────────────────────
 
+/** Simple DJB2-style string hash for seeding the PRNG. */
 const hashString = (value) => {
   let hash = 0;
   for (let i = 0; i < value.length; i += 1) {
@@ -242,6 +243,7 @@ const hashString = (value) => {
   return Math.abs(hash);
 };
 
+/** Splitmix32-based seeded PRNG. Returns a function that yields [0,1) floats. */
 const seededRandom = (seed) => {
   let t = seed + 0x6d2b79f5;
   return () => {
